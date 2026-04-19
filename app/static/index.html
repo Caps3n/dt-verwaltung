@@ -154,7 +154,6 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <button id="saml-login-btn" onclick="doSamlLogin()" style="display:none;width:100%;padding:9px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rad);font-size:13px;font-weight:600;cursor:pointer;color:var(--txt)">
       <span id="saml-btn-label">Single Sign-On</span>
     </button>
-    <div style="margin-top:10px;font-size:11px;color:var(--hint);text-align:center">Standard: admin / admin123</div>
   </div>
 </div>
 
@@ -747,6 +746,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div id="rollen-liste"><div class="empty">Lade...</div></div>
       </div>
       <div class="card">
+        <div class="stitle">Support-Kontakt (Hilfe-Seite)</div>
+        <div style="font-size:11px;color:var(--mut);margin-bottom:10px">Wird im ❓ Hilfe-Tab und im Copyright-Footer angezeigt.</div>
+        <label>Name</label><input id="support-name" placeholder="z.B. Marcel Capelan">
+        <label>E-Mail</label><input id="support-email" type="email" placeholder="z.B. support@firma.de">
+        <button class="btn-p btn-full" onclick="supportSpeichern()">💾 Speichern</button>
+      </div>
+      <div class="card">
         <div class="stitle">Datenbank</div>
         <button class="btn-s" onclick="api('/api/db/export').then(r=>r.blob()).then(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='dtv.db';a.click()})" style="width:100%;margin-bottom:8px">DB exportieren (.db)</button>
         <button onclick="exportCSV('kunden')" style="width:100%;margin-bottom:8px;font-size:12px">Kunden als CSV</button>
@@ -860,10 +866,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div style="font-size:20px">📞</div>
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">Kontakt & Support</div>
-        <div style="font-size:12px;color:var(--mut)">Marcel Capelan &nbsp;·&nbsp;
-          <a href="mailto:marcel.capelan@tuv.com" style="color:var(--i-txt);text-decoration:none">marcel.capelan@tuv.com</a>
+        <div style="font-size:12px;color:var(--mut)">
+          <span id="hilfe-contact-name">Support</span>
           &nbsp;·&nbsp;
-          <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none">capelan.de</a>
+          <a id="hilfe-contact-mail" href="mailto:" style="color:var(--i-txt);text-decoration:none"></a>
         </div>
       </div>
     </div>
@@ -1030,7 +1036,7 @@ async function apiPut(path, data)  { return apiJ(path, {method:'PUT', body:JSON.
 async function apiDel(path)        { return apiJ(path, {method:'DELETE'}); }
 
 // ══ STATE ════════════════════════════════════════════
-let kunden=[], Datenträger=[], Übergaben=[], pendingUebergaben=[];
+let kunden=[], datentraeger=[], Übergaben=[], pendingUebergaben=[];
 let rollen=[], currentUser=null;
 let logoData=null, accentColor='#0065A4', focusedTA=null;
 let pendingDtBild=null, pendingOvBild=null, pendingUDoc=null, pendingVtDoc=null;
@@ -1150,6 +1156,8 @@ async function showApp() {
   applyTabVisibility();
   renderDashboard();
   checkSamlConfig();
+  // Load support contact into footer
+  apiJ('/api/templates').then(tpl=>{if(tpl)updateSupportDisplay(tpl.support_name||'',tpl.support_email||'');});
   // Defaults
   document.getElementById('dt-datum').value=today;
   document.getElementById('r-datum').value=today;
@@ -1957,6 +1965,40 @@ async function loadAdmin(){
   // Fill rolle select
   const sel=document.getElementById('new-rolle-id');
   if(sel)sel.innerHTML=rollen.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  // Load support contact
+  const tpl=await apiJ('/api/templates');
+  if(tpl){
+    const sn=document.getElementById('support-name');const se=document.getElementById('support-email');
+    if(sn)sn.value=tpl.support_name||'';
+    if(se)se.value=tpl.support_email||'';
+  }
+}
+
+async function supportSpeichern(){
+  const name=document.getElementById('support-name')?.value?.trim()||'';
+  const email=document.getElementById('support-email')?.value?.trim()||'';
+  // Load current template data first, then patch support fields
+  const cur=await apiJ('/api/templates')||{};
+  const r=await apiPut('/api/templates',{...cur,support_name:name,support_email:email,hat_logo:undefined});
+  if(r){
+    alert('Support-Kontakt gespeichert.');
+    // Update footer + hilfe live
+    updateSupportDisplay(name,email);
+  }
+}
+
+function updateSupportDisplay(name,email){
+  // Update footer
+  const footer=document.getElementById('site-footer');
+  if(footer&&email){
+    // rebuild contact part
+    const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; Datenträger-Verwaltung v1.0${contactPart}`;
+  }
+  // Update hilfe contact card if visible
+  const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
+  const hm=document.getElementById('hilfe-contact-mail');
+  if(hm){hm.href='mailto:'+(email||'');hm.textContent=email||'';}
 }
 
 function renderUserListe(users){
@@ -2913,7 +2955,14 @@ async function startup(){
 startup();
 
 // ─── HILFE ───────────────────────────────────────────────────────────────────
-function renderHilfe(){
+async function renderHilfe(){
+  // Load support contact from server
+  const tpl=await apiJ('/api/templates');
+  if(tpl){updateSupportDisplay(tpl.support_name||'',tpl.support_email||'');}
+  renderHilfeSync();
+}
+function renderHilfe_noop(){}
+function renderHilfeSync(){
   const faqs=[
     {
       kat:'🚀 Einstieg',

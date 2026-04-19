@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """DT-Verwaltung Backend – Flask + SQLite (Docker-ready)"""
-import sqlite3, json, hashlib, secrets, os, base64
+import json, hashlib, hmac, secrets, os, base64, sqlite3
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, request, jsonify, send_from_directory, send_file, redirect
@@ -329,9 +329,14 @@ def init_db():
     except Exception:
         db.execute("DELETE FROM rollen WHERE name='Benutzer'")
         pass
-    # Default admin – password from env or fallback
-    admin_pass = os.environ.get('ADMIN_PASSWORD', 'admin123')
-    admin_hash = hashlib.sha256(admin_pass.encode()).hexdigest()
+    # Default admin – password from Docker secret file or env var (PBKDF2-hashed)
+    _pw_file = os.environ.get('ADMIN_PASSWORD_FILE', '')
+    if _pw_file and os.path.exists(_pw_file):
+        with open(_pw_file) as _f:
+            admin_pass = _f.read().strip()
+    else:
+        admin_pass = os.environ.get('ADMIN_PASSWORD', 'admin123')
+    admin_hash = hash_pw(admin_pass)
     db.execute("INSERT OR IGNORE INTO benutzer(username,name,password_hash,rollen_id) VALUES('admin','Administrator',?,1)", (admin_hash,))
     # Migration: add eingang_doc columns if missing
     for col, typ in [('eingang_doc','BLOB'),('eingang_doc_type','TEXT'),('eingang_doc_name','TEXT')]:
@@ -354,6 +359,15 @@ def init_db():
         db.execute("ALTER TABLE kunden ADD COLUMN mengenrabatt_json TEXT DEFAULT '[]'")
     except Exception:
         pass
+    # Migration: add support contact fields to template_settings
+    for col, typ, default in [
+        ('support_name', 'TEXT', "'Support'"),
+        ('support_email', 'TEXT', "''"),
+    ]:
+        try:
+            db.execute(f"ALTER TABLE template_settings ADD COLUMN {col} {typ} DEFAULT {default}")
+        except Exception:
+            pass
     db.execute("INSERT OR IGNORE INTO template_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_config(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_settings(id) VALUES(1)")
@@ -362,7 +376,25 @@ def init_db():
     print(f"[DB] Initialized at {DB_PATH}")
 
 # ─── AUTH ─────────────────────────────────────────────────────────────────────
-def hash_pw(pw): return hashlib.sha256(pw.encode()).hexdigest()
+def hash_pw(pw):
+    """Hash password with PBKDF2-HMAC-SHA256 + 32-byte random salt (600k iterations)."""
+    salt = os.urandom(32)
+    key  = hashlib.pbkdf2_hmac('sha256', pw.encode('utf-8'), salt, 600_000)
+    return 'pbkdf2:' + salt.hex() + ':' + key.hex()
+
+def verify_pw(pw, stored):
+    """Verify password. Supports new PBKDF2 format and legacy SHA-256 (auto-upgrades on login)."""
+    if stored.startswith('pbkdf2:'):
+        try:
+            _, salt_hex, key_hex = stored.split(':', 2)
+            salt = bytes.fromhex(salt_hex)
+            expected = bytes.fromhex(key_hex)
+            actual = hashlib.pbkdf2_hmac('sha256', pw.encode('utf-8'), salt, 600_000)
+            return hmac.compare_digest(actual, expected)
+        except Exception:
+            return False
+    # Legacy SHA-256
+    return hmac.compare_digest(hashlib.sha256(pw.encode()).hexdigest(), stored)
 
 def require_auth(perm=None):
     def decorator(fn):
@@ -394,14 +426,21 @@ def require_auth(perm=None):
 def login():
     clean_sessions()
     data = request.json or {}
-    db = get_db()
+    pw   = data.get('password', '')
+    db   = get_db()
     user = db.execute(
-        "SELECT b.*,r.berechtigungen,r.name as rollen_name,r.farbe FROM benutzer b JOIN rollen r ON b.rollen_id=r.id WHERE b.username=? AND b.password_hash=? AND b.aktiv=1",
-        (data.get('username', ''), hash_pw(data.get('password', '')))
+        "SELECT b.*,r.berechtigungen,r.name as rollen_name,r.farbe FROM benutzer b JOIN rollen r ON b.rollen_id=r.id WHERE b.username=? AND b.aktiv=1",
+        (data.get('username', ''),)
     ).fetchone()
-    db.close()
-    if not user:
+    if not user or not verify_pw(pw, user['password_hash']):
+        db.close()
         return jsonify({'error': 'Falscher Benutzername oder Passwort'}), 401
+    # Auto-upgrade legacy SHA-256 hash → PBKDF2 on successful login
+    if not user['password_hash'].startswith('pbkdf2:'):
+        db.execute("UPDATE benutzer SET password_hash=? WHERE id=?",
+                   (hash_pw(pw), user['id']))
+        db.commit()
+    db.close()
     expires = (datetime.now() + timedelta(hours=8)).isoformat()
     token = session_create(user['id'], expires)
     return jsonify({'token': token, 'user': {
@@ -427,10 +466,10 @@ def change_own_password():
         return jsonify({'error': 'Neues Passwort zu kurz'}), 400
     db = get_db()
     user = db.execute(
-        "SELECT * FROM benutzer WHERE id=? AND password_hash=?",
-        (request.user['id'], hash_pw(password_alt))
+        "SELECT * FROM benutzer WHERE id=?",
+        (request.user['id'],)
     ).fetchone()
-    if not user:
+    if not user or not verify_pw(password_alt, user['password_hash']):
         db.close()
         return jsonify({'error': 'Aktuelles Passwort ist falsch'}), 403
     db.execute("UPDATE benutzer SET password_hash=? WHERE id=?",
@@ -866,7 +905,7 @@ def get_uebergabe_doc(uid):
 @require_auth('read')
 def get_templates():
     db = get_db()
-    row = db.execute("SELECT rechnung_json,uebergabe_json,eingang_json,vertrag_json,akzentfarbe,logo_type FROM template_settings WHERE id=1").fetchone()
+    row = db.execute("SELECT rechnung_json,uebergabe_json,eingang_json,vertrag_json,akzentfarbe,logo_type,support_name,support_email FROM template_settings WHERE id=1").fetchone()
     db.close()
     d = dict(row)
     d['hat_logo'] = bool(row['logo_type'])
@@ -877,17 +916,19 @@ def get_templates():
 def update_templates():
     data = request.json or {}
     db = get_db()
+    sn = data.get('support_name', 'Support')
+    se = data.get('support_email', '')
     if data.get('logo'):
         db.execute(
-            "UPDATE template_settings SET rechnung_json=?,uebergabe_json=?,eingang_json=?,vertrag_json=?,akzentfarbe=?,logo=?,logo_type=? WHERE id=1",
+            "UPDATE template_settings SET rechnung_json=?,uebergabe_json=?,eingang_json=?,vertrag_json=?,akzentfarbe=?,logo=?,logo_type=?,support_name=?,support_email=? WHERE id=1",
             (data.get('rechnung_json', '{}'), data.get('uebergabe_json', '{}'), data.get('eingang_json', '{}'),
-             data.get('vertrag_json', '{}'), data.get('akzentfarbe', '#0065A4'), data.get('logo'), data.get('logo_type'))
+             data.get('vertrag_json', '{}'), data.get('akzentfarbe', '#0065A4'), data.get('logo'), data.get('logo_type'), sn, se)
         )
     else:
         db.execute(
-            "UPDATE template_settings SET rechnung_json=?,uebergabe_json=?,eingang_json=?,vertrag_json=?,akzentfarbe=? WHERE id=1",
+            "UPDATE template_settings SET rechnung_json=?,uebergabe_json=?,eingang_json=?,vertrag_json=?,akzentfarbe=?,support_name=?,support_email=? WHERE id=1",
             (data.get('rechnung_json', '{}'), data.get('uebergabe_json', '{}'), data.get('eingang_json', '{}'),
-             data.get('vertrag_json', '{}'), data.get('akzentfarbe', '#0065A4'))
+             data.get('vertrag_json', '{}'), data.get('akzentfarbe', '#0065A4'), sn, se)
         )
     db.commit()
     db.close()
