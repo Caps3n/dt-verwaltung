@@ -1,0 +1,22 @@
+services:
+  dtv:
+    build: .
+    container_name: dtv-verwaltung
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8123}:5000"
+    volumes:
+      - dtv-data:/data
+    environment:
+      - DATA_DIR=/data
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  dtv-data:
+    driver: local
