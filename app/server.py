@@ -1,10 +1,28 @@
 #!/usr/bin/env python3
-"""DT-Verwaltung Backend – Flask + SQLite (Docker-ready)"""
+"""DT-Verwaltung Backend – Flask + SQLite/SQLCipher (Docker-ready)"""
 import json, hashlib, hmac, secrets, os, base64, sqlite3
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, request, jsonify, send_from_directory, send_file, redirect
 from flask_cors import CORS
+
+# ─── ENCRYPTION SETUP ────────────────────────────────────────────────────────
+DB_KEY = os.environ.get('DB_KEY', '').strip()
+
+_ENC_MOD = None
+if DB_KEY:
+    for _mod_name in ('pysqlcipher3.dbapi2', 'sqlcipher3.dbapi2'):
+        try:
+            import importlib
+            _ENC_MOD = importlib.import_module(_mod_name)
+            print(f"[CRYPTO] SQLCipher loaded via {_mod_name}")
+            break
+        except ImportError:
+            continue
+    if _ENC_MOD is None:
+        print("[CRYPTO] WARNING: DB_KEY set but SQLCipher not available – running unencrypted!")
+else:
+    print("[CRYPTO] No DB_KEY – database unencrypted (set DB_KEY in .env to enable encryption on first start)")
 try:
     from saml_auth import (is_saml_enabled, get_saml_login_url, process_saml_response,
                             map_groups_to_rolle, generate_sp_metadata, generate_self_signed_cert)
@@ -170,8 +188,15 @@ def process_saml_response_with_client(client, saml_response_b64):
 
 # ─── DB INIT ─────────────────────────────────────────────────────────────────
 def get_db():
-    db = sqlite3.connect(DB_PATH)
-    db.row_factory = sqlite3.Row
+    if _ENC_MOD and DB_KEY:
+        db = _ENC_MOD.connect(DB_PATH)
+        db.execute(f"PRAGMA key=\"x'{DB_KEY}'\"")
+        db.execute("PRAGMA cipher_page_size=4096")
+        db.execute("PRAGMA kdf_iter=256000")
+        db.row_factory = _ENC_MOD.Row
+    else:
+        db = sqlite3.connect(DB_PATH)
+        db.row_factory = sqlite3.Row
     db.execute("PRAGMA journal_mode=WAL")
     db.execute("PRAGMA foreign_keys=ON")
     return db
@@ -309,6 +334,29 @@ def init_db():
         sp_cert TEXT DEFAULT '',
         sp_key TEXT DEFAULT ''
     );
+    CREATE TABLE IF NOT EXISTS tresore (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bezeichnung TEXT NOT NULL,
+        hersteller TEXT,
+        modell TEXT,
+        seriennummer TEXT,
+        land TEXT DEFAULT 'Deutschland',
+        stadt TEXT,
+        gebaeude TEXT,
+        etage TEXT,
+        raum TEXT,
+        kaufdatum TEXT,
+        kaufpreis REAL DEFAULT 0,
+        wartungskosten_jaehrlich REAL DEFAULT 0,
+        letzter_wartungstermin TEXT,
+        naechster_wartungstermin TEXT,
+        wartungsvertrag_doc BLOB,
+        wartungsvertrag_doc_type TEXT,
+        wartungsvertrag_doc_name TEXT,
+        notizen TEXT,
+        erstellt TEXT DEFAULT CURRENT_TIMESTAMP,
+        geaendert TEXT DEFAULT CURRENT_TIMESTAMP
+    );
     CREATE TABLE IF NOT EXISTS sessions (
         token TEXT PRIMARY KEY,
         user_id INTEGER NOT NULL,
@@ -368,6 +416,11 @@ def init_db():
             db.execute(f"ALTER TABLE template_settings ADD COLUMN {col} {typ} DEFAULT {default}")
         except Exception:
             pass
+    # Migration: add tresor_id to datentraeger if missing
+    try:
+        db.execute("ALTER TABLE datentraeger ADD COLUMN tresor_id INTEGER REFERENCES tresore(id) ON DELETE SET NULL")
+    except Exception:
+        pass
     db.execute("INSERT OR IGNORE INTO template_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_config(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_settings(id) VALUES(1)")
@@ -722,11 +775,11 @@ def get_datentraeger():
     db = get_db()
     if kunden_id:
         rows = db.execute(
-            "SELECT d.*,k.firma,k.nr as kunden_nr FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id WHERE d.kunden_id=? ORDER BY d.id", (kunden_id,)
+            "SELECT d.*,k.firma,k.nr as kunden_nr,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN tresore t ON d.tresor_id=t.id WHERE d.kunden_id=? ORDER BY d.id", (kunden_id,)
         ).fetchall()
     else:
         rows = db.execute(
-            "SELECT d.*,k.firma,k.nr as kunden_nr FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id ORDER BY d.id"
+            "SELECT d.*,k.firma,k.nr as kunden_nr,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN tresore t ON d.tresor_id=t.id ORDER BY d.id"
         ).fetchall()
     db.close()
     result = []
@@ -765,16 +818,17 @@ def create_dt():
     data = request.json or {}
     db = get_db()
     db.execute(
-        "INSERT INTO datentraeger(kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt,einlagerungs_datum,beschreibung,bild,bild_type,eingang_doc,eingang_doc_type,eingang_doc_name) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO datentraeger(kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt,einlagerungs_datum,beschreibung,bild,bild_type,eingang_doc,eingang_doc_type,eingang_doc_name,tresor_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis', 0), data.get('einheit', 'monat'),
          data.get('preis_jahr', 0), data.get('rabatt', 0), data['einlagerungs_datum'],
          data.get('beschreibung', ''), data.get('bild'), data.get('bild_type'),
-         data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'))
+         data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
+         data.get('tresor_id') or None)
     )
     db.commit()
     did = db.execute("SELECT last_insert_rowid()").fetchone()[0]
     row = db.execute(
-        "SELECT d.*,k.firma,k.nr as kunden_nr FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id WHERE d.id=?", (did,)
+        "SELECT d.*,k.firma,k.nr as kunden_nr,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN tresore t ON d.tresor_id=t.id WHERE d.id=?", (did,)
     ).fetchone()
     db.close()
     d = dict(row)
@@ -791,36 +845,39 @@ def update_dt(did):
     db = get_db()
     if data.get('bild') and data.get('eingang_doc'):
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
              data.get('beschreibung',''), data.get('bild'), data.get('bild_type'),
-             data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'), did)
+             data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
+             data.get('tresor_id') or None, did)
         )
     elif data.get('bild'):
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,tresor_id=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
-             data.get('beschreibung',''), data.get('bild'), data.get('bild_type'), did)
+             data.get('beschreibung',''), data.get('bild'), data.get('bild_type'),
+             data.get('tresor_id') or None, did)
         )
     elif data.get('eingang_doc'):
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
-             data.get('beschreibung',''), data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'), did)
+             data.get('beschreibung',''), data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
+             data.get('tresor_id') or None, did)
         )
     else:
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,tresor_id=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
-             data.get('beschreibung',''), did)
+             data.get('beschreibung',''), data.get('tresor_id') or None, did)
         )
     db.commit()
     row = db.execute(
-        "SELECT d.*,k.firma,k.nr as kunden_nr FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id WHERE d.id=?", (did,)
+        "SELECT d.*,k.firma,k.nr as kunden_nr,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN tresore t ON d.tresor_id=t.id WHERE d.id=?", (did,)
     ).fetchone()
     db.close()
     d = dict(row)
@@ -943,6 +1000,37 @@ def get_logo():
     if not row or not row['logo']:
         return jsonify({'error': 'Kein Logo'}), 404
     return jsonify({'data': row['logo'], 'type': row['logo_type']})
+
+@app.route('/api/datentraeger/export/csv', methods=['GET'])
+@require_auth('read')
+def export_datentraeger_csv():
+    import csv, io
+    db = get_db()
+    rows = db.execute(
+        "SELECT d.id,d.bezeichnung,d.serial,d.status,d.einlagerungs_datum,d.preis,d.einheit,d.preis_jahr,d.rabatt,d.beschreibung,"
+        "k.nr as kunden_nr,k.firma,"
+        "t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum "
+        "FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN tresore t ON d.tresor_id=t.id ORDER BY k.firma,d.id"
+    ).fetchall()
+    db.close()
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=';')
+    writer.writerow(['ID','Bezeichnung','Seriennummer','Status','Einlagerungsdatum','Preis/Monat','Einheit','Preis/Jahr','Rabatt%','Beschreibung',
+                     'Kundennummer','Firma',
+                     'Tresor','Land','Stadt','Gebäude','Etage','Raum'])
+    for r in rows:
+        writer.writerow([r['id'],r['bezeichnung'],r['serial'],r['status'],r['einlagerungs_datum'],
+                        r['preis'],r['einheit'],r['preis_jahr'],r['rabatt'],r['beschreibung'],
+                        r['kunden_nr'],r['firma'],
+                        r['tresor_bezeichnung'] or '',r['tresor_land'] or '',r['tresor_stadt'] or '',
+                        r['tresor_gebaeude'] or '',r['tresor_etage'] or '',r['tresor_raum'] or ''])
+    output.seek(0)
+    from flask import Response
+    return Response(
+        output.getvalue().encode('utf-8-sig'),
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=datentraeger_export.csv'}
+    )
 
 # ─── DB BACKUP ───────────────────────────────────────────────────────────────
 @app.route('/api/db/export', methods=['GET'])
@@ -1203,6 +1291,136 @@ def saml_init_cert():
     if key and cert:
         return jsonify({'ok': True, 'key': key, 'cert': cert})
     return jsonify({'error': 'Zertifikat-Erstellung fehlgeschlagen'}), 500
+
+# ─── TRESORE ─────────────────────────────────────────────────────────────────
+@app.route('/api/tresore', methods=['GET'])
+@require_auth('read')
+def get_tresore():
+    db = get_db()
+    rows = db.execute(
+        "SELECT t.*, (SELECT COUNT(*) FROM datentraeger WHERE tresor_id=t.id AND status='eingelagert') as anzahl_dt FROM tresore t ORDER BY t.bezeichnung"
+    ).fetchall()
+    db.close()
+    result = []
+    for r in rows:
+        d = dict(r)
+        d['hat_wartungsvertrag'] = bool(d.get('wartungsvertrag_doc'))
+        d.pop('wartungsvertrag_doc', None)
+        result.append(d)
+    return jsonify(result)
+
+@app.route('/api/tresore', methods=['POST'])
+@require_auth('write')
+def create_tresor():
+    data = request.json or {}
+    if not data.get('bezeichnung'):
+        return jsonify({'error': 'Bezeichnung erforderlich'}), 400
+    db = get_db()
+    db.execute(
+        "INSERT INTO tresore(bezeichnung,hersteller,modell,seriennummer,land,stadt,gebaeude,etage,raum,kaufdatum,kaufpreis,wartungskosten_jaehrlich,letzter_wartungstermin,naechster_wartungstermin,notizen) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (data['bezeichnung'], data.get('hersteller'), data.get('modell'), data.get('seriennummer'),
+         data.get('land', 'Deutschland'), data.get('stadt'), data.get('gebaeude'), data.get('etage'), data.get('raum'),
+         data.get('kaufdatum'), data.get('kaufpreis', 0), data.get('wartungskosten_jaehrlich', 0),
+         data.get('letzter_wartungstermin'), data.get('naechster_wartungstermin'), data.get('notizen'))
+    )
+    db.commit()
+    tid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+    row = db.execute("SELECT * FROM tresore WHERE id=?", (tid,)).fetchone()
+    db.close()
+    d = dict(row)
+    d['hat_wartungsvertrag'] = False
+    d.pop('wartungsvertrag_doc', None)
+    return jsonify(d), 201
+
+@app.route('/api/tresore/<int:tid>', methods=['GET'])
+@require_auth('read')
+def get_tresor(tid):
+    db = get_db()
+    row = db.execute("SELECT * FROM tresore WHERE id=?", (tid,)).fetchone()
+    db.close()
+    if not row:
+        return jsonify({'error': 'Nicht gefunden'}), 404
+    d = dict(row)
+    d['hat_wartungsvertrag'] = bool(d.get('wartungsvertrag_doc'))
+    d.pop('wartungsvertrag_doc', None)
+    return jsonify(d)
+
+@app.route('/api/tresore/<int:tid>', methods=['PUT'])
+@require_auth('write')
+def update_tresor(tid):
+    data = request.json or {}
+    db = get_db()
+    if data.get('wartungsvertrag_doc'):
+        db.execute(
+            "UPDATE tresore SET bezeichnung=?,hersteller=?,modell=?,seriennummer=?,land=?,stadt=?,gebaeude=?,etage=?,raum=?,kaufdatum=?,kaufpreis=?,wartungskosten_jaehrlich=?,letzter_wartungstermin=?,naechster_wartungstermin=?,notizen=?,wartungsvertrag_doc=?,wartungsvertrag_doc_type=?,wartungsvertrag_doc_name=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
+            (data['bezeichnung'], data.get('hersteller'), data.get('modell'), data.get('seriennummer'),
+             data.get('land', 'Deutschland'), data.get('stadt'), data.get('gebaeude'), data.get('etage'), data.get('raum'),
+             data.get('kaufdatum'), data.get('kaufpreis', 0), data.get('wartungskosten_jaehrlich', 0),
+             data.get('letzter_wartungstermin'), data.get('naechster_wartungstermin'), data.get('notizen'),
+             data.get('wartungsvertrag_doc'), data.get('wartungsvertrag_doc_type'), data.get('wartungsvertrag_doc_name'), tid)
+        )
+    else:
+        db.execute(
+            "UPDATE tresore SET bezeichnung=?,hersteller=?,modell=?,seriennummer=?,land=?,stadt=?,gebaeude=?,etage=?,raum=?,kaufdatum=?,kaufpreis=?,wartungskosten_jaehrlich=?,letzter_wartungstermin=?,naechster_wartungstermin=?,notizen=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
+            (data['bezeichnung'], data.get('hersteller'), data.get('modell'), data.get('seriennummer'),
+             data.get('land', 'Deutschland'), data.get('stadt'), data.get('gebaeude'), data.get('etage'), data.get('raum'),
+             data.get('kaufdatum'), data.get('kaufpreis', 0), data.get('wartungskosten_jaehrlich', 0),
+             data.get('letzter_wartungstermin'), data.get('naechster_wartungstermin'), data.get('notizen'), tid)
+        )
+    db.commit()
+    row = db.execute("SELECT * FROM tresore WHERE id=?", (tid,)).fetchone()
+    db.close()
+    d = dict(row)
+    d['hat_wartungsvertrag'] = bool(d.get('wartungsvertrag_doc'))
+    d.pop('wartungsvertrag_doc', None)
+    return jsonify(d)
+
+@app.route('/api/tresore/<int:tid>', methods=['DELETE'])
+@require_auth('delete')
+def delete_tresor(tid):
+    db = get_db()
+    # Unlink DTs from this tresor first
+    db.execute("UPDATE datentraeger SET tresor_id=NULL WHERE tresor_id=?", (tid,))
+    db.execute("DELETE FROM tresore WHERE id=?", (tid,))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+@app.route('/api/tresore/<int:tid>/wartungsvertrag', methods=['GET'])
+@require_auth('read')
+def get_tresor_wartungsvertrag(tid):
+    db = get_db()
+    row = db.execute("SELECT wartungsvertrag_doc,wartungsvertrag_doc_type,wartungsvertrag_doc_name FROM tresore WHERE id=?", (tid,)).fetchone()
+    db.close()
+    if not row or not row['wartungsvertrag_doc']:
+        return jsonify({'error': 'Kein Dokument'}), 404
+    return jsonify({'data': row['wartungsvertrag_doc'], 'type': row['wartungsvertrag_doc_type'], 'name': row['wartungsvertrag_doc_name'] or 'Wartungsvertrag'})
+
+@app.route('/api/tresore/wartungstermine', methods=['GET'])
+@require_auth('read')
+def get_wartungstermine():
+    """Return tresore with upcoming or overdue maintenance appointments (within 60 days)."""
+    from datetime import date, timedelta as td
+    heute = date.today()
+    grenze = (heute + td(days=60)).isoformat()
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, bezeichnung, naechster_wartungstermin, land, stadt, gebaeude, etage, raum FROM tresore WHERE naechster_wartungstermin IS NOT NULL AND naechster_wartungstermin != '' AND naechster_wartungstermin <= ? ORDER BY naechster_wartungstermin",
+        (grenze,)
+    ).fetchall()
+    db.close()
+    result = []
+    for r in rows:
+        d = dict(r)
+        try:
+            wt = date.fromisoformat(r['naechster_wartungstermin'])
+            d['ueberfaellig'] = wt < heute
+            d['tage_bis_wartung'] = (wt - heute).days
+        except Exception:
+            d['ueberfaellig'] = False
+            d['tage_bis_wartung'] = None
+        result.append(d)
+    return jsonify(result)
 
 # ─── HEALTH ──────────────────────────────────────────────────────────────────
 @app.route('/api/health', methods=['GET'])

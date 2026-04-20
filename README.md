@@ -1,7 +1,7 @@
 # 💾 DT-Verwaltung v1.0
 
 **Web-based management software for stored data carriers (storage media)**  
-Developed by [Marcel Capelan](https://capelan.de) · [marcel.capelan@tuv.com](mailto:marcel.capelan@tuv.com)
+Developed by [Marcel Capelan](https://capelan.de) · [info@capelan.de](mailto:info@capelan.de)
 
 [![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)](https://www.docker.com/)
 [![Python](https://img.shields.io/badge/Python-3.12-green?logo=python)](https://www.python.org/)
@@ -257,5 +257,5 @@ MIT License — © 2025 [Marcel Capelan](https://capelan.de)
 ## 📞 Contact & Support
 
 **Marcel Capelan**  
-📧 [marcel.capelan@tuv.com](mailto:marcel.capelan@tuv.com)  
+📧 [info@capelan.de](mailto:info@capelan.de)  
 🌐 [capelan.de](https://capelan.de)

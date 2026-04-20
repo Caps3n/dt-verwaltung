@@ -2,11 +2,13 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# System deps for pysaml2 (lxml, xmlsec1)
+# System deps: pysaml2 (lxml, xmlsec1) + SQLCipher for optional DB encryption
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2-dev \
     libxslt-dev \
     xmlsec1 \
+    sqlcipher \
+    libsqlcipher-dev \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
@@ -15,7 +17,8 @@ RUN pip install --no-cache-dir \
     "flask-cors>=4.0" \
     "gunicorn>=21.0" \
     "pysaml2>=7.0" \
-    "cryptography>=41.0"
+    "cryptography>=41.0" \
+    "pysqlcipher3>=1.2"
 
 COPY app/ .
 
