@@ -407,6 +407,11 @@ def init_db():
         db.execute("ALTER TABLE kunden ADD COLUMN mengenrabatt_json TEXT DEFAULT '[]'")
     except Exception:
         pass
+    # Migration: add anrede to kunden if missing
+    try:
+        db.execute("ALTER TABLE kunden ADD COLUMN anrede TEXT DEFAULT ''")
+    except Exception:
+        pass
     # Migration: add support contact fields to template_settings
     for col, typ, default in [
         ('support_name', 'TEXT', "'Support'"),
@@ -678,8 +683,8 @@ def create_kunde():
     db = get_db()
     try:
         db.execute(
-            "INSERT INTO kunden(nr,firma,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,mengenrabatt_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-            (data['nr'], data['firma'], data.get('ansprechpartner'), data.get('email'), data.get('tel'),
+            "INSERT INTO kunden(nr,firma,anrede,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,mengenrabatt_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (data['nr'], data['firma'], data.get('anrede',''), data.get('ansprechpartner'), data.get('email'), data.get('tel'),
              data.get('mobil'), data.get('strasse'), data.get('plz'), data.get('ort'), data.get('land', 'Deutschland'),
              data.get('sap_nr'), data.get('vertragsnr'), data.get('vertragsbeginn'), data.get('vertragsende'),
              data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'))
@@ -706,8 +711,8 @@ def update_kunde(kid):
              old['vertragsstatus'] or 'abgelaufen', old['vertragsnotiz'] or '')
         )
     db.execute(
-        "UPDATE kunden SET nr=?,firma=?,ansprechpartner=?,email=?,tel=?,mobil=?,strasse=?,plz=?,ort=?,land=?,sap_nr=?,vertragsnr=?,vertragsbeginn=?,vertragsende=?,vertragsstatus=?,vertragsnotiz=?,mengenrabatt_json=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
-        (data['nr'], data['firma'], data.get('ansprechpartner'), data.get('email'), data.get('tel'),
+        "UPDATE kunden SET nr=?,firma=?,anrede=?,ansprechpartner=?,email=?,tel=?,mobil=?,strasse=?,plz=?,ort=?,land=?,sap_nr=?,vertragsnr=?,vertragsbeginn=?,vertragsende=?,vertragsstatus=?,vertragsnotiz=?,mengenrabatt_json=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
+        (data['nr'], data['firma'], data.get('anrede',''), data.get('ansprechpartner'), data.get('email'), data.get('tel'),
          data.get('mobil'), data.get('strasse'), data.get('plz'), data.get('ort'), data.get('land', 'Deutschland'),
          data.get('sap_nr'), data.get('vertragsnr'), data.get('vertragsbeginn'), data.get('vertragsende'),
          data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'), kid)

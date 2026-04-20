@@ -26,7 +26,7 @@
 }}
 body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--txt);background:var(--surf2);min-height:100vh}
 .app{max-width:1600px;margin:0 auto;padding:12px 20px}
-.tabs{display:flex;border-bottom:1.5px solid var(--brd2);margin-bottom:1.25rem;flex-wrap:wrap;background:var(--bg);border-radius:var(--radl) var(--radl) 0 0;padding:0 12px;overflow-x:auto}
+.tabs{display:flex;border-bottom:1.5px solid var(--brd2);margin-bottom:1.25rem;flex-wrap:wrap;background:var(--bg);border-radius:var(--radl) var(--radl) 0 0;padding:0 12px}
 .tab{padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-1.5px;background:transparent;border-top:none;border-left:none;border-right:none}
 .tab:hover{color:var(--txt)}.tab.active{color:var(--txt);border-bottom:2px solid var(--txt)}
 .page{display:none}.page.active{display:block}
@@ -133,6 +133,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 .toggle-slider:before{content:"";position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.2s}
 .toggle input:checked + .toggle-slider{background:var(--i-txt)}
 .toggle input:checked + .toggle-slider:before{transform:translateX(16px)}
+.sub-tabs{display:flex;gap:0;border-bottom:1px solid var(--brd2);margin-bottom:1rem}
+.sub-tab{padding:7px 16px;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);border-bottom:2px solid transparent;background:transparent;border-top:none;border-left:none;border-right:none}
+.sub-tab.active{color:var(--txt);border-bottom-color:var(--txt)}
+.sub-panel{display:none}.sub-panel.active{display:block}
 @media(max-width:900px){
   .app{padding:8px 10px}
   .g2{grid-template-columns:1fr}
@@ -196,12 +200,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 
 <div class="tabs" id="main-tabs">
   <div class="tab active" data-tab="dashboard" onclick="showTab('dashboard',event)">📊 Übersicht</div>
-  <div class="tab" data-tab="kunden" onclick="showTab('kunden',event)">👥 Kunden</div>
-  <div class="tab" data-tab="vertraege" onclick="showTab('vertraege',event)">📄 Verträge</div>
+  <div class="tab" data-tab="kunden" onclick="showTab('kunden',event)">👥 Kunden &amp; Verträge</div>
   <div class="tab" data-tab="datentraeger" onclick="showTab('datentraeger',event)">💾 Datenträger</div>
   <div class="tab" data-tab="uebergabe" onclick="showTab('uebergabe',event)">🔄 Übergabe</div>
-  <div class="tab" data-tab="rechnung" onclick="showTab('rechnung',event)">🧾 Rechnung</div>
-  <div class="tab" data-tab="historie" onclick="showTab('historie',event)">📋 Rechnungen</div>
+  <div class="tab" data-tab="rechnung" onclick="showTab('rechnung',event)">🧾 Rechnungen</div>
   <div class="tab" data-tab="archiv" onclick="showTab('archiv',event)">🗄️ DT Archiv</div>
   <div class="tab" data-tab="tresore" onclick="showTab('tresore',event)">🔒 Tresore</div>
   <div class="tab" id="tab-templates" data-tab="templates" onclick="showTab('templates',event)">🎨 Templates</div>
@@ -309,17 +311,33 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div id="tr-liste"><div class="empty">Laden...</div></div>
     </div>
   </div>
+  <div id="tr-detail-card" class="card" style="display:none;margin-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <span class="stitle" style="margin:0" id="tr-detail-titel"></span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-w" id="tr-detail-bearb-btn" style="padding:5px 11px">✎ Bearbeiten</button>
+        <button id="tr-detail-wv-btn" style="padding:5px 11px;display:none">📄 Wartungsvertrag</button>
+        <button onclick="document.getElementById('tr-detail-card').style.display='none'" style="padding:5px 11px">✕ Schließen</button>
+      </div>
+    </div>
+    <div class="g2" id="tr-detail-body"></div>
+  </div>
 </div>
 
 <!-- KUNDEN -->
 <div id="page-kunden" class="page">
+  <div class="sub-tabs">
+    <button class="sub-tab active" id="kv-sub-kunden" onclick="showKundenSub('kunden')">👥 Firmen</button>
+    <button class="sub-tab" id="kv-sub-vertraege" onclick="showKundenSub('vertraege')">📄 Verträge</button>
+  </div>
+  <div class="sub-panel active" id="kv-panel-kunden">
   <div class="g2">
     <div class="card">
       <div id="k-ebanner" class="ebanner" style="display:none">Bearbeitungsmodus<button onclick="kundeAbbrechen()" style="padding:3px 8px;font-size:11px">Abbrechen</button></div>
       <div class="stitle" id="k-form-title">Neue Firma anlegen</div>
       <input type="hidden" id="k-edit-id">
       <div class="r2"><div><label>Firmenname *</label><input id="k-firma" placeholder="Mustermann GmbH"></div><div><label>Kundennummer *</label><input id="k-nr" placeholder="K-0042"></div></div>
-      <div class="r2"><div><label>Ansprechpartner</label><input id="k-ansprechpartner" placeholder="Max Mustermann"></div><div><label>E-Mail</label><input id="k-email"></div></div>
+      <div class="r2"><div><label>Ansprechpartner</label><div style="display:flex;gap:6px"><select id="k-anrede" style="width:110px;flex-shrink:0"><option value="">Anrede</option><option value="Herr">Herr</option><option value="Frau">Frau</option><option value="Dr.">Dr.</option><option value="Prof.">Prof.</option><option value="Divers">Divers</option></select><input id="k-ansprechpartner" placeholder="Max Mustermann" style="flex:1"></div></div><div><label>E-Mail</label><input id="k-email"></div></div>
       <div class="r2"><div><label>Telefon</label><input id="k-tel"></div><div><label>Mobil</label><input id="k-mobil"></div></div>
       <label>Strasse</label><input id="k-strasse">
       <div class="r2"><div><label>PLZ</label><input id="k-plz"></div><div><label>Ort</label><input id="k-ort"></div></div>
@@ -369,7 +387,56 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div class="metric"><div class="val" id="m-netto">0.00</div><div class="lbl">Jahresumsatz netto</div></div>
     <div class="metric"><div class="val" id="m-brutto">0.00</div><div class="lbl">Jahresumsatz brutto</div></div>
   </div>
-</div>
+  </div><!-- end kv-panel-kunden -->
+  <div class="sub-panel" id="kv-panel-vertraege">
+  <div class="g2">
+    <div class="card">
+      <div class="stitle">Vertragsvorlage</div>
+      <p style="font-size:12px;color:var(--mut);margin-bottom:12px;line-height:1.6">Wähle eine Firma und drucke eine Vertragsvorlage mit Briefkopf. Die Vorlage enthält alle Felder für einen Einlagerungsvertrag.</p>
+      <label>Firma</label>
+      <select id="vt-v-kunden_id" onchange="vtVorschauUpdate()"><option value="">Firma wählen</option></select>
+      <label>Vertragsnummer</label>
+      <input id="vt-v-nr" placeholder="VT-2026-001">
+      <label>Vertragsbeginn</label>
+      <input id="vt-v-beginn" type="date">
+      <label>Vertragsende (optional)</label>
+      <input id="vt-v-ende" type="date">
+      <label>Laufzeit / Verlängerung</label>
+      <input id="vt-v-laufzeit" placeholder="z.B. 12 Monate, automatische Verlängerung">
+      <label>Kündigungsfrist</label>
+      <input id="vt-v-kfrist" placeholder="z.B. 4 Wochen zum Monatsende">
+      <label>Besondere Vereinbarungen</label>
+      <textarea id="vt-v-notiz" rows="3" placeholder="z.B. Sonderkonditionen, Mengenrabatt..."></textarea>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button onclick="vtVorschauUpdate()" style="flex:1">Vorschau</button>
+        <button class="btn-p" onclick="vtVorlageDrucken()" style="flex:1">Vorlage drucken</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)">Vorschau</div>
+      <div id="vt-v-vorschau" style="min-height:300px;font-family:Arial,Helvetica,sans-serif;font-size:12px">
+        <div style="color:#999;padding:20px">Firma wählen...</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="stitle" style="margin:0">Alle Verträge</div>
+      <div style="display:flex;gap:8px">
+        <input type="search" id="vt-v-search" placeholder="Suche..." oninput="renderVertraegeListe()" style="width:200px">
+        <select id="vt-v-status-filter" onchange="renderVertraegeListe()" style="width:160px">
+          <option value="">Alle Status</option>
+          <option value="aktiv">Aktiv</option>
+          <option value="gekuendigt">Gekündigt</option>
+          <option value="abgelaufen">Abgelaufen</option>
+          <option value="pausiert">Pausiert</option>
+        </select>
+      </div>
+    </div>
+    <div id="vt-v-liste"><div class="empty">Laden...</div></div>
+  </div>
+  </div><!-- end kv-panel-vertraege -->
+</div><!-- end page-kunden -->
 
 <!-- DATENTRAEGER -->
 <div id="page-datentraeger" class="page">
@@ -438,6 +505,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 
 <!-- RECHNUNG -->
 <div id="page-rechnung" class="page">
+  <div class="sub-tabs">
+    <button class="sub-tab active" id="re-sub-neu" onclick="showRechnungSub('neu')">🧾 Neue Rechnung</button>
+    <button class="sub-tab" id="re-sub-historie" onclick="showRechnungSub('historie')">📋 Historie</button>
+  </div>
+  <div class="sub-panel active" id="re-panel-neu">
   <div class="g2">
     <div class="card">
       <div class="stitle">Rechnung erstellen</div>
@@ -461,71 +533,20 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     </div>
     <div class="card" style="padding:0;overflow:hidden"><div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)">Vorschau</div><div id="r-vorschau" style="min-height:220px;font-family:Arial,Helvetica,sans-serif;font-size:12px"><div style="color:#999;padding:20px">Firma wählen...</div></div></div>
   </div>
-</div>
-
-<!-- VERTRAEGE -->
-<div id="page-vertraege" class="page">
-  <div class="g2">
-    <div class="card">
-      <div class="stitle">Vertragsvorlage</div>
-      <p style="font-size:12px;color:var(--mut);margin-bottom:12px;line-height:1.6">Wähle eine Firma und drucke eine Vertragsvorlage mit Briefkopf. Die Vorlage enthält alle Felder für einen Einlagerungsvertrag.</p>
-      <label>Firma</label>
-      <select id="vt-v-kunden_id" onchange="vtVorschauUpdate()"><option value="">Firma wählen</option></select>
-      <label>Vertragsnummer</label>
-      <input id="vt-v-nr" placeholder="VT-2026-001">
-      <label>Vertragsbeginn</label>
-      <input id="vt-v-beginn" type="date">
-      <label>Vertragsende (optional)</label>
-      <input id="vt-v-ende" type="date">
-      <label>Laufzeit / Verlängerung</label>
-      <input id="vt-v-laufzeit" placeholder="z.B. 12 Monate, automatische Verlängerung">
-      <label>Kündigungsfrist</label>
-      <input id="vt-v-kfrist" placeholder="z.B. 4 Wochen zum Monatsende">
-      <label>Besondere Vereinbarungen</label>
-      <textarea id="vt-v-notiz" rows="3" placeholder="z.B. Sonderkonditionen, Mengenrabatt..."></textarea>
-      <div style="margin-top:14px;display:flex;gap:8px">
-        <button onclick="vtVorschauUpdate()" style="flex:1">Vorschau</button>
-        <button class="btn-p" onclick="vtVorlageDrucken()" style="flex:1">Vorlage drucken</button>
-      </div>
-    </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)">Vorschau</div>
-      <div id="vt-v-vorschau" style="min-height:300px;font-family:Arial,Helvetica,sans-serif;font-size:12px">
-        <div style="color:#999;padding:20px">Firma wählen...</div>
-      </div>
-    </div>
-  </div>
-  <div class="card" style="margin-top:0">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="stitle" style="margin:0">Alle Verträge</div>
-      <div style="display:flex;gap:8px">
-        <input type="search" id="vt-v-search" placeholder="Suche..." oninput="renderVertraegeListe()" style="width:200px">
-        <select id="vt-v-status-filter" onchange="renderVertraegeListe()" style="width:160px">
-          <option value="">Alle Status</option>
-          <option value="aktiv">Aktiv</option>
-          <option value="gekuendigt">Gekündigt</option>
-          <option value="abgelaufen">Abgelaufen</option>
-          <option value="pausiert">Pausiert</option>
-        </select>
-      </div>
-    </div>
-    <div id="vt-v-liste"><div class="empty">Laden...</div></div>
-  </div>
-</div>
-
-<!-- RECHNUNGSHISTORIE -->
-<div id="page-historie" class="page">
+  </div><!-- end re-panel-neu -->
+  <div class="sub-panel" id="re-panel-historie">
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div class="stitle" style="margin:0">Rechnungshistorie</div>
       <div style="display:flex;gap:8px">
         <input type="search" id="hist-search" placeholder="Suche nach Firma, Nr..." oninput="renderRechnungHistoriePage()" style="width:220px">
-        <button onclick="if(confirm('Alle gespeicherten Rechnungen löschen?')){localStorage.removeItem(\'dtv_re_hist\');renderRechnungHistoriePage()}" class="btn-d" style="padding:4px 10px;font-size:11px">Alle löschen</button>
+        <button onclick="if(confirm('Alle gespeicherten Rechnungen löschen?')){localStorage.removeItem('dtv_re_hist');renderRechnungHistoriePage()}" class="btn-d" style="padding:4px 10px;font-size:11px">Alle löschen</button>
       </div>
     </div>
     <div id="r-historie-page"><div class="empty">Noch keine gespeicherten Rechnungen</div></div>
   </div>
-</div>
+  </div><!-- end re-panel-historie -->
+</div><!-- end page-rechnung -->
 
 <!-- UEBERGABE -->
 <div id="page-uebergabe" class="page">
@@ -1287,8 +1308,8 @@ function checkAblaufwarnungen(){
 }
 
 // ══ KUNDEN ═══════════════════════════════════════════
-const kFields = ['k-firma','k-nr','k-ansprechpartner','k-email','k-tel','k-mobil','k-strasse','k-plz','k-ort','k-land','k-sap_nr','k-vertragsnr','k-vertragsbeginn','k-vertragsende','k-vertragsstatus','k-vertragsnotiz'];
-const kKeys   = ['firma','nr','ansprechpartner','email','tel','mobil','strasse','plz','ort','land','sap_nr','vertragsnr','vertragsbeginn','vertragsende','vertragsstatus','vertragsnotiz'];
+const kFields = ['k-firma','k-nr','k-anrede','k-ansprechpartner','k-email','k-tel','k-mobil','k-strasse','k-plz','k-ort','k-land','k-sap_nr','k-vertragsnr','k-vertragsbeginn','k-vertragsende','k-vertragsstatus','k-vertragsnotiz'];
+const kKeys   = ['firma','nr','anrede','ansprechpartner','email','tel','mobil','strasse','plz','ort','land','sap_nr','vertragsnr','vertragsbeginn','vertragsende','vertragsstatus','vertragsnotiz'];
 
 function kundeFormData() {
   const d={};
@@ -1372,7 +1393,7 @@ async function zeigeDetail(id) {
   const dl=(l,v)=>v?`<div class="drow"><span class="dlbl">${l}</span><span>${v}</span></div>`:'';
   const smap={aktiv:'bg',gekuendigt:'br',abgelaufen:'ba',pausiert:'ba'};
   document.getElementById('k-det-l').innerHTML=
-    dl('Nr.',k.nr)+dl('Ansprechp.',k.ansprechpartner)+dl('E-Mail',k.email)+dl('Telefon',k.tel)+dl('Mobil',k.mobil)+dl('SAP-Nr.',k.sap_nr)+
+    dl('Nr.',k.nr)+dl('Ansprechp.',(k.anrede?k.anrede+' ':'')+( k.ansprechpartner||''))+dl('E-Mail',k.email)+dl('Telefon',k.tel)+dl('Mobil',k.mobil)+dl('SAP-Nr.',k.sap_nr)+
     `<div class="drow"><span class="dlbl">DT</span><span class="badge bg">${dts.length}</span></div>`+dl('Netto/J.',eur(netto));
   document.getElementById('k-det-r').innerHTML=
     dl('Strasse',k.strasse)+dl('PLZ',k.plz)+dl('Ort',k.ort)+dl('Land',k.land||'Deutschland')+
@@ -2550,7 +2571,7 @@ function renderTresore(){
       const warnCls=t.naechster_wartungstermin&&new Date(t.naechster_wartungstermin)<=new Date(Date.now()+60*86400000)?'br':'bg';
       const warnLbl=t.naechster_wartungstermin?`<span class="badge ${warnCls}">${fmtDate2(t.naechster_wartungstermin)}</span>`:'<span style="color:var(--mut);font-size:11px">—</span>';
       const wvBtn=t.hat_wartungsvertrag?`<button onclick="loadAndOpenDoc('/api/tresore/${t.id}/wartungsvertrag')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Wartungsvertrag öffnen">📄</button>`:'';
-      return`<tr><td><strong>${t.bezeichnung}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${t.hersteller}${t.modell?' '+t.modell:''}</span>`:''}</td><td style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center"><span class="badge bg">${t.anzahl_dt||0}</span></td><td>${warnLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
+      return`<tr><td><strong style="cursor:pointer;color:var(--i-txt)" onclick="tresorDetail(${t.id})">${t.bezeichnung}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${t.hersteller}${t.modell?' '+t.modell:''}</span>`:''}</td><td style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center"><span class="badge bg">${t.anzahl_dt||0}</span></td><td>${warnLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
 }
 
@@ -2655,13 +2676,11 @@ function showTab(t,e){
   const tabEl=document.querySelector(`.tab[data-tab="${t}"]`);if(tabEl)tabEl.classList.add('active');
   document.getElementById('page-'+t).classList.add('active');
   if(t==='dashboard')renderDashboard();
-  if(t==='kunden'){renderKunden();}
-  if(t==='vertraege'){renderVertraegeListe();const s=document.getElementById('vt-v-kunden_id');if(s)s.innerHTML='<option value="">Firma wählen</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} – ${k.firma}</option>`).join('');}
+  if(t==='kunden'){renderKunden();showKundenSub('kunden');}
   if(t==='datentraeger'){renderSelects();renderDT();dtGotoStep(1);}
   if(t==='uebergabe'){renderSelects();renderUebergabeListe();renderPendingList();gotoStep(1);}
   if(t==='tresore'){renderTresore();}
-  if(t==='rechnung'){renderSelects();}
-  if(t==='historie')renderRechnungHistoriePage();
+  if(t==='rechnung'){renderSelects();showRechnungSub('neu');}
   if(t==='archiv')renderArchiv();
   if(t==='templates'){buildPhBars();loadTemplates();}
   if(t==='admin')loadAdmin();
@@ -2674,6 +2693,54 @@ function dtUpdateZusammenfassung(){const kid=parseInt(document.getElementById('d
 function dtWeiterZuSchritt2(){const kid=parseInt(document.getElementById('dt-kunden_id').value);if(!kid){alert('Bitte Firma wählen.');return;}const bez=document.getElementById('dt-bezeichnung').value.trim();if(!bez){alert('Bitte Bezeichnung eingeben.');return;}const serial=document.getElementById('dt-serial').value.trim();if(!serial){alert('Bitte Seriennummer eingeben.');return;}if(!document.getElementById('dt-datum').value){alert('Bitte Einlagerungsdatum eingeben.');return;}dtGotoStep(2);}
 
 
+
+// ══ SUB-TAB NAVIGATION ═══════════════════════════════
+function showKundenSub(sub){
+  document.querySelectorAll('.sub-tab[id^="kv-sub-"]').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.sub-panel[id^="kv-panel-"]').forEach(el=>el.classList.remove('active'));
+  document.getElementById('kv-sub-'+sub).classList.add('active');
+  document.getElementById('kv-panel-'+sub).classList.add('active');
+  if(sub==='vertraege'){
+    renderVertraegeListe();
+    const s=document.getElementById('vt-v-kunden_id');
+    if(s)s.innerHTML='<option value="">Firma wählen</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} – ${k.firma}</option>`).join('');
+  }
+}
+
+function showRechnungSub(sub){
+  document.querySelectorAll('.sub-tab[id^="re-sub-"]').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.sub-panel[id^="re-panel-"]').forEach(el=>el.classList.remove('active'));
+  document.getElementById('re-sub-'+sub).classList.add('active');
+  document.getElementById('re-panel-'+sub).classList.add('active');
+  if(sub==='historie')renderRechnungHistoriePage();
+}
+
+function tresorDetail(id){
+  const t=tresore.find(x=>x.id===id);if(!t)return;
+  document.getElementById('tr-detail-card').style.display='block';
+  document.getElementById('tr-detail-titel').textContent=t.bezeichnung+(t.hersteller?' – '+t.hersteller:'')+(t.modell?' '+t.modell:'');
+  document.getElementById('tr-detail-bearb-btn').onclick=()=>{tresorBearbeiten(id);document.getElementById('tr-detail-card').style.display='none';};
+  const wvBtn=document.getElementById('tr-detail-wv-btn');
+  if(t.hat_wartungsvertrag){wvBtn.style.display='';wvBtn.onclick=()=>loadAndOpenDoc('/api/tresore/'+id+'/wartungsvertrag');}
+  else{wvBtn.style.display='none';}
+  const dl=(l,v)=>v?`<div class="drow"><span class="dlbl">${l}</span><span>${v}</span></div>`:'';
+  const loc=[t.land,t.stadt,t.gebaeude,t.etage?'Etage '+t.etage:'',t.raum?'Raum '+t.raum:''].filter(Boolean).join(' / ');
+  document.getElementById('tr-detail-body').innerHTML=`
+    <div>
+      ${dl('Hersteller',t.hersteller)}${dl('Modell',t.modell)}${dl('Seriennummer',t.seriennummer)}
+      ${dl('Standort',loc)}
+      ${dl('Kaufdatum',t.kaufdatum?fmtDate(t.kaufdatum):'')}
+      ${dl('Kaufpreis',t.kaufpreis?eur(t.kaufpreis):'')}
+      ${dl('Wartungskosten/J.',t.wartungskosten_jaehrlich?eur(t.wartungskosten_jaehrlich):'')}
+    </div>
+    <div>
+      ${dl('Letzter Wartungstermin',t.letzter_wartungstermin?fmtDate(t.letzter_wartungstermin):'')}
+      ${dl('Nächster Wartungstermin',t.naechster_wartungstermin?fmtDate(t.naechster_wartungstermin):'')}
+      ${dl('Eingelagerte DT',String(t.anzahl_dt||0))}
+      ${t.notizen?`<div class="drow"><span class="dlbl">Notizen</span><span style="white-space:pre-wrap">${t.notizen}</span></div>`:''}
+    </div>`;
+  document.getElementById('tr-detail-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 
 // ══ SAML ADMIN ════════════════════════════════════════
 let samlSettings = {};
