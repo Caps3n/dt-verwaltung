@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [1.1.1] – 2026-04-20
 
+### Added
+- **Tresor tab permission** — role editor now includes a toggle to show/hide the Tresore tab per role; existing roles without the key default to visible (backward compatible)
+- **Responsive design** — layout scales cleanly to tablet and mobile: grids collapse to single column below 900 px, tab bar scrolls horizontally, font sizes and padding adjust below 600 px; max layout width increased from 1200 px to 1600 px
+
 ### Fixed
 - **Tresor save/delete caused unintended logout** — `tresorSpeichern` and `tresorLoeschen` were reading the session token from `localStorage` instead of `sessionStorage` (where the app stores it). This sent `X-Token: null` to the server, which returned 401 and triggered a logout on every Tresor save or delete.
 
