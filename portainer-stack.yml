@@ -1,0 +1,43 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DT-Verwaltung – Portainer Stack
+#
+# How to deploy:
+#   1. Open Portainer → Stacks → + Add stack
+#   2. Name: dtv
+#   3. Select "Web editor" → paste this file content
+#   4. Under "Environment variables" add:
+#        ADMIN_PASSWORD   →  your-secure-password
+#        PORT             →  8123   (or any free port)
+#   5. Click "Deploy the stack"
+#
+# Update (after a new build):
+#   Stacks → dtv → Editor → "Update the stack"
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  dtv-app:
+    build:
+      context: https://github.com/Caps3n/dt-verwaltung.git
+      dockerfile: Dockerfile
+    image: dt-verwaltung:1.1.0
+    container_name: dtv-verwaltung
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8123}:5000"
+    volumes:
+      - dtv-data:/data
+    environment:
+      - DATA_DIR=/data
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-ChangeMe!}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  dtv-data:
+    driver: local

@@ -4,8 +4,8 @@ if [ -z "$BASH_VERSION" ]; then
   exec bash "$0" "$@"
 fi
 # ═══════════════════════════════════════════════════════════════
-#  DT-Verwaltung – Installer / Updater
-#  Verwendung: bash install.sh  ODER  sh install.sh
+#  DT-Verwaltung – Installer
+#  Usage:  bash install.sh  OR  sh install.sh
 # ═══════════════════════════════════════════════════════════════
 set -e
 BOLD='\033[1m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
@@ -18,84 +18,82 @@ p "${BOLD}║     DT-Verwaltung – Installation         ║"
 p "${BOLD}╚══════════════════════════════════════════╝"
 p ""
 
-# ── 1. Docker prüfen ────────────────────────────────────────────
+# ── 1. Check Docker ─────────────────────────────────────────────
 DOCKER_BIN=$(command -v docker 2>/dev/null || ls /usr/bin/docker /usr/local/bin/docker 2>/dev/null | head -1 || true)
 if [ -z "$DOCKER_BIN" ]; then
-  p "${RED}✗ Docker nicht gefunden. Bitte zuerst Docker installieren."
+  p "${RED}✗ Docker not found. Please install Docker first."
   p "  https://docs.docker.com/get-docker/"
   exit 1
 fi
-p "${GREEN}✓ Docker gefunden"
+p "${GREEN}✓ Docker found"
 
 if docker compose version &>/dev/null 2>&1; then DC="docker compose"
 elif docker-compose version &>/dev/null 2>&1; then DC="docker-compose"
 else
-  p "${RED}✗ 'docker compose' nicht gefunden."
+  p "${RED}✗ 'docker compose' not found."
   p "  sudo apt-get install docker-compose-plugin"
   exit 1
 fi
 p "${GREEN}✓ $DC"
 
-# ── 2. Alte Container stoppen ───────────────────────────────────
-ph "[1/4] Alte Container aufräumen ..."
+# ── 2. Stop old containers ──────────────────────────────────────
+ph "[1/4] Cleaning up old containers ..."
 for name in dtv-verwaltung dtv-app dtv-nginx; do
   if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "^${name}$"; then
-    docker rm -f "$name" &>/dev/null && p "  → $name gestoppt"
+    docker rm -f "$name" &>/dev/null && p "  → $name stopped"
   fi
 done
-p "${GREEN}✓ Fertig"
+p "${GREEN}✓ Done"
 
-# ── 3. .env anlegen ─────────────────────────────────────────────
-ph "[2/4] Konfiguration (.env) ..."
+# ── 3. Create .env ──────────────────────────────────────────────
+ph "[2/4] Configuration (.env) ..."
 if [ ! -f .env ]; then
   cp .env.example .env
-  p "  → .env aus .env.example erstellt"
+  p "  → .env created from .env.example"
 fi
 
-# Admin-Passwort prüfen / setzen
+# Check / set admin password
 CURRENT_PW=$(grep "^ADMIN_PASSWORD=" .env | cut -d= -f2-)
-if [ -z "$CURRENT_PW" ] || [ "$CURRENT_PW" = "BitteSichersErsetzt!" ]; then
+if [ -z "$CURRENT_PW" ] || [ "$CURRENT_PW" = "ChangeMe!" ]; then
   p ""
-  p "${YELLOW}⚠ Bitte ein sicheres Admin-Passwort eingeben:"
-  printf "  Admin-Passwort: "
+  p "${YELLOW}⚠ Please enter a secure admin password:"
+  printf "  Admin password: "
   read -rs ADMIN_PW; printf "\n"
   if [ -z "$ADMIN_PW" ]; then
     ADMIN_PW="Admin$(shuf -i 1000-9999 -n1 2>/dev/null || echo $RANDOM)"
-    p "  ${YELLOW}Kein Passwort eingegeben – temporär: ${BOLD}$ADMIN_PW"
-    p "  ${YELLOW}Bitte nach dem Login sofort unter Admin ändern!"
+    p "  ${YELLOW}No password entered – temporary password: ${BOLD}$ADMIN_PW"
+    p "  ${YELLOW}Please change it in the Admin panel immediately after login!"
   fi
   sed -i "s|^ADMIN_PASSWORD=.*|ADMIN_PASSWORD=${ADMIN_PW}|" .env
 fi
 
-# DB-Schlüssel generieren falls leer
-CURRENT_KEY=$(grep "^DB_KEY=" .env 2>/dev/null | cut -d= -f2-)
-if [ -z "$CURRENT_KEY" ]; then
+# Generate DB key if empty (and DB_KEY line exists in .env)
+CURRENT_KEY=$(grep "^DB_KEY=" .env 2>/dev/null | cut -d= -f2- || true)
+if [ -n "$(grep "^#.*DB_KEY\|^DB_KEY=" .env 2>/dev/null)" ] && [ -z "$CURRENT_KEY" ]; then
   DB_KEY=$(python3 -c 'import secrets; print(secrets.token_hex(32))' 2>/dev/null \
            || openssl rand -hex 32)
   if grep -q "^DB_KEY=" .env; then
     sed -i "s|^DB_KEY=.*|DB_KEY=${DB_KEY}|" .env
-  else
-    printf "DB_KEY=%s\n" "$DB_KEY" >> .env
   fi
   p ""
   p "${YELLOW}  ╔══════════════════════════════════════════════════════════╗"
-  p "${YELLOW}  ║  WICHTIG: DB_KEY jetzt sicher aufbewahren!              ║"
-  p "${YELLOW}  ║  Ohne diesen Schlüssel sind die Daten nicht              ║"
-  p "${YELLOW}  ║  wiederherstellbar (z.B. in Passwortmanager speichern).  ║"
+  p "${YELLOW}  ║  IMPORTANT: Save this DB_KEY in a safe place!           ║"
+  p "${YELLOW}  ║  Without it your data cannot be recovered.              ║"
+  p "${YELLOW}  ║  (e.g. store it in your password manager)               ║"
   p "${YELLOW}  ╚══════════════════════════════════════════════════════════╝"
   p ""
   p "  DB_KEY=${DB_KEY}"
   p ""
 fi
-p "${GREEN}✓ Konfiguration OK"
+p "${GREEN}✓ Configuration OK"
 
-# ── 4. Docker Image bauen & starten ────────────────────────────
-ph "[3/4] Docker Image bauen (beim ersten Mal ~3–5 Minuten) ..."
+# ── 4. Build & start Docker image ──────────────────────────────
+ph "[3/4] Building Docker image (first time may take ~3–5 minutes) ..."
 $DC up -d --build
-p "${GREEN}✓ Container gestartet"
+p "${GREEN}✓ Container started"
 
-# ── 5. Warten bis App bereit ────────────────────────────────────
-ph "[4/4] Warte auf App-Start ..."
+# ── 5. Wait for app ready ───────────────────────────────────────
+ph "[4/4] Waiting for app to be ready ..."
 for i in $(seq 1 30); do
   if docker exec dtv-verwaltung python3 -c \
     "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/health')" \
@@ -106,18 +104,18 @@ for i in $(seq 1 30); do
 done
 printf "\n"
 
-# ── Fertig ──────────────────────────────────────────────────────
+# ── Done ────────────────────────────────────────────────────────
 PORT=$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2-)
 PORT=${PORT:-8123}
 SERVER_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "localhost")
 
 p ""
 p "${GREEN}${BOLD}╔══════════════════════════════════════════════════════╗"
-p "${GREEN}${BOLD}║  ✓ DT-Verwaltung erfolgreich installiert!            ║"
+p "${GREEN}${BOLD}║  ✓ DT-Verwaltung installed successfully!             ║"
 p "${GREEN}${BOLD}╚══════════════════════════════════════════════════════╝"
 p ""
-p "  🌐 Browser: ${BOLD}http://${SERVER_IP}:${PORT}"
-p "  🌐 Lokal:   ${BOLD}http://localhost:${PORT}"
+p "  🌐 Network: ${BOLD}http://${SERVER_IP}:${PORT}"
+p "  🌐 Local:   ${BOLD}http://localhost:${PORT}"
 p ""
 p "  📋 Logs: ${BOLD}docker logs dtv-verwaltung -f"
 p "  🛑 Stop: ${BOLD}$DC down"
