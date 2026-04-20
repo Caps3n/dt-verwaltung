@@ -204,7 +204,6 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="tab" data-tab="datentraeger" onclick="showTab('datentraeger',event)">💾 Datenträger</div>
   <div class="tab" data-tab="uebergabe" onclick="showTab('uebergabe',event)">🔄 Übergabe</div>
   <div class="tab" data-tab="rechnung" onclick="showTab('rechnung',event)">🧾 Rechnungen</div>
-  <div class="tab" data-tab="archiv" onclick="showTab('archiv',event)">🗄️ DT Archiv</div>
   <div class="tab" data-tab="tresore" onclick="showTab('tresore',event)">🔒 Tresore</div>
   <div class="tab" id="tab-templates" data-tab="templates" onclick="showTab('templates',event)">🎨 Templates</div>
   <div class="tab" id="tab-admin" data-tab="admin" onclick="showTab('admin',event)">⚙️ Admin</div>
@@ -440,6 +439,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 
 <!-- DATENTRAEGER -->
 <div id="page-datentraeger" class="page">
+  <div class="sub-tabs">
+    <button class="sub-tab active" id="dt-sub-erfassen" onclick="showDTSub('erfassen')">💾 Erfassen</button>
+    <button class="sub-tab" id="dt-sub-archiv" onclick="showDTSub('archiv')">🗄️ Archiv</button>
+  </div>
+  <div class="sub-panel active" id="dt-panel-erfassen">
   <div class="steps">
     <div class="step active" id="dt-step-tab-1" onclick="dtGotoStep(1)"><span class="step-num">1</span>Erfassen</div>
     <div class="step" id="dt-step-tab-2" onclick="dtGotoStep(2)"><span class="step-num">2</span>Eingangsprotokoll</div>
@@ -501,6 +505,19 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       </div>
     </div>
   </div>
+  </div><!-- end dt-panel-erfassen -->
+  <div class="sub-panel" id="dt-panel-archiv">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div class="stitle" style="margin:0">Archiv</div>
+      <div style="display:flex;gap:8px">
+        <input type="search" id="archiv-search" placeholder="Suche..." oninput="renderArchiv()" style="width:160px">
+        <select id="archiv-filter" onchange="renderArchiv()" style="width:180px"><option value="">Alle Firmen</option></select>
+      </div>
+    </div>
+    <div id="archiv-inhalt"><div class="empty">Noch keine archivierten Datenträger</div></div>
+  </div>
+  </div><!-- end dt-panel-archiv -->
 </div>
 
 <!-- RECHNUNG -->
@@ -592,20 +609,6 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   </div>
 </div>
 
-<!-- ARCHIV -->
-<div id="page-archiv" class="page">
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div class="stitle" style="margin:0">Archiv</div>
-      <div style="display:flex;gap:8px">
-        <input type="search" id="archiv-search" placeholder="Suche..." oninput="renderArchiv()" style="width:160px">
-        <select id="archiv-filter" onchange="renderArchiv()" style="width:180px"><option value="">Alle Firmen</option></select>
-      </div>
-    </div>
-    <div id="archiv-inhalt"><div class="empty">Noch keine archivierten Datenträger</div></div>
-  </div>
-</div>
-
 <!-- TEMPLATES -->
 <div id="page-templates" class="page">
   <div class="tpl-tabs"><div class="tpl-tab active" id="tpl-tab-r" onclick="showTplTab('r')">Rechnung</div><div class="tpl-tab" id="tpl-tab-u" onclick="showTplTab('u')">Übergabe</div><div class="tpl-tab" id="tpl-tab-e" onclick="showTplTab('e')">Eingang</div><div class="tpl-tab" id="tpl-tab-v" onclick="showTplTab('v')">Vertrag</div></div>
@@ -617,15 +620,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <div class="upzone" id="logo-zone" onclick="document.getElementById('logo-input').click()" style="margin-bottom:8px"><input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)"><div id="logo-prev">Logo hochladen</div></div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><label style="margin:0;white-space:nowrap">Farbe:</label><input type="color" id="accent-color" value="#0065A4" oninput="syncBrief()" style="width:40px;height:30px;padding:2px;border-radius:4px;cursor:pointer;flex-shrink:0"><button onclick="resetLogo()" class="btn-d" style="padding:4px 8px;font-size:11px">Entfernen</button></div>
         </div>
-        <div class="card">
-          <div class="stitle">Ihr Unternehmen (Briefkopf)</div>
-          <label>Firmenname</label><input id="f-firmenname" placeholder="Muster GmbH" oninput="syncBrief()">
-          <label>Abteilung / Zusatz</label><input id="f-abt" placeholder="z.B. Datentresor-Service" oninput="syncBrief()">
-          <label>Adresse (erscheint oben links)</label><textarea id="f-firma-adr" rows="4" placeholder="Musterstraße 1&#10;12345 Musterstadt&#10;Tel: 0123 456789&#10;info@firma.de" oninput="syncBrief()"></textarea>
-          <div class="r2"><div><label>Bearbeiter</label><input id="f-bearbeiter" oninput="syncBrief()"></div><div><label>Kürzel</label><input id="f-kuerzel" oninput="syncBrief()"></div></div>
-          <div class="r2"><div><label>Tel</label><input id="f-tel" oninput="syncBrief()"></div><div><label>Fax</label><input id="f-fax" oninput="syncBrief()"></div></div>
-          <label>E-Mail</label><input id="f-email" oninput="syncBrief()">
-          <label>Ort (für Datumszeile)</label><input id="f-ort" oninput="syncBrief()">
+        <div class="card" style="background:var(--i-bg);border-color:var(--i-brd)">
+          <div class="stitle" style="color:var(--i-txt)">🏢 Unternehmensdaten</div>
+          <div style="font-size:12px;color:var(--i-txt);margin-bottom:10px">Firmenname, Adresse, Kontakt, Bankdaten und Logo werden jetzt zentral im <strong>Admin-Bereich</strong> verwaltet.</div>
+          <button class="btn-p" onclick="showTab('admin');showAdminSub('unternehmen')" style="font-size:12px">→ Zum Admin-Bereich</button>
+          <!-- Hidden fields kept for backward compatibility with syncBrief -->
+          <input id="f-firmenname" type="hidden"><input id="f-abt" type="hidden"><textarea id="f-firma-adr" style="display:none"></textarea>
+          <input id="f-bearbeiter" type="hidden"><input id="f-kuerzel" type="hidden"><input id="f-tel" type="hidden"><input id="f-fax" type="hidden"><input id="f-email" type="hidden"><input id="f-ort" type="hidden">
         </div>
         <div class="card">
           <div class="stitle">Texte</div>
@@ -636,13 +637,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <label>Gruss</label><input id="f-gruss" value="Freundliche Gruesse," oninput="syncBrief()">
           <label>Unterzeichner</label><input id="f-sig" oninput="syncBrief()">
         </div>
-        <div class="card">
-          <div class="stitle">Fußzeile</div>
-          <label>Adresse</label><textarea id="f-footer-adr" rows="3" oninput="syncBrief()"></textarea>
-          <div class="r2"><div><label>IBAN</label><input id="f-iban" oninput="syncBrief()"></div><div><label>BIC</label><input id="f-bic" oninput="syncBrief()"></div></div>
-          <div class="r2"><div><label>Bank</label><input id="f-bank" oninput="syncBrief()"></div><div><label>Steuernr.</label><input id="f-steuernr" oninput="syncBrief()"></div></div>
-          <label>Geschaeftsfuehrung</label><input id="f-gf" oninput="syncBrief()">
-          <label>Handelsregister</label><input id="f-hrb" oninput="syncBrief()">
+        <div class="card" style="background:var(--i-bg);border-color:var(--i-brd)">
+          <div style="font-size:12px;color:var(--i-txt)">Fußzeile, Bankdaten und Steuerinformationen werden im Admin-Bereich unter <strong>Unternehmen</strong> verwaltet.</div>
+          <!-- Hidden fields kept for backward compatibility -->
+          <textarea id="f-footer-adr" style="display:none"></textarea>
+          <input id="f-iban" type="hidden"><input id="f-bic" type="hidden"><input id="f-bank" type="hidden"><input id="f-steuernr" type="hidden"><input id="f-gf" type="hidden"><input id="f-hrb" type="hidden">
         </div>
         <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1">Zurück</button><button class="btn-p" onclick="tplSpeichern()" id="save-tpl-btn" style="flex:2">Speichern</button></div>
       </div>
@@ -825,6 +824,51 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 
 <!-- ADMIN -->
 <div id="page-admin" class="page">
+  <div class="sub-tabs" id="admin-sub-nav">
+    <button class="sub-tab active" id="adm-sub-unternehmen" onclick="showAdminSub('unternehmen')">🏢 Unternehmen</button>
+    <button class="sub-tab" id="adm-sub-benutzer" onclick="showAdminSub('benutzer')">👤 Benutzer &amp; Rollen</button>
+    <button class="sub-tab" id="adm-sub-saml" onclick="showAdminSub('saml')">🔐 SAML/SSO</button>
+  </div>
+
+  <!-- UNTERNEHMEN PANEL -->
+  <div class="sub-panel active" id="adm-panel-unternehmen">
+  <div class="g2">
+    <div style="overflow-y:auto;max-height:90vh">
+      <div class="card">
+        <div class="stitle">Logo &amp; Farbe</div>
+        <div class="upzone" id="adm-logo-zone" onclick="document.getElementById('adm-logo-input').click()" style="margin-bottom:8px"><input type="file" id="adm-logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)"><div id="adm-logo-prev">Logo hochladen</div></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><label style="margin:0;white-space:nowrap">Farbe:</label><input type="color" id="adm-accent-color" value="#0065A4" oninput="syncAdmBrief()" style="width:40px;height:30px;padding:2px;border-radius:4px;cursor:pointer;flex-shrink:0"><button onclick="resetLogo()" class="btn-d" style="padding:4px 8px;font-size:11px">Entfernen</button></div>
+      </div>
+      <div class="card">
+        <div class="stitle">Ihr Unternehmen (Briefkopf)</div>
+        <label>Firmenname</label><input id="adm-firmenname" placeholder="Muster GmbH" oninput="syncAdmBrief()">
+        <label>Abteilung / Zusatz</label><input id="adm-abt" placeholder="z.B. Datentresor-Service" oninput="syncAdmBrief()">
+        <label>Adresse (erscheint oben links)</label><textarea id="adm-firma-adr" rows="4" placeholder="Musterstraße 1&#10;12345 Musterstadt&#10;Tel: 0123 456789&#10;info@firma.de" oninput="syncAdmBrief()"></textarea>
+        <div class="r2"><div><label>Bearbeiter</label><input id="adm-bearbeiter" oninput="syncAdmBrief()"></div><div><label>Kürzel</label><input id="adm-kuerzel" oninput="syncAdmBrief()"></div></div>
+        <div class="r2"><div><label>Tel</label><input id="adm-tel" oninput="syncAdmBrief()"></div><div><label>Fax</label><input id="adm-fax" oninput="syncAdmBrief()"></div></div>
+        <label>E-Mail</label><input id="adm-email" oninput="syncAdmBrief()">
+        <label>Ort (für Datumszeile)</label><input id="adm-ort" oninput="syncAdmBrief()">
+      </div>
+      <div class="card">
+        <div class="stitle">Fußzeile &amp; Bank</div>
+        <label>Adresse (Fußzeile)</label><textarea id="adm-footer-adr" rows="3" oninput="syncAdmBrief()"></textarea>
+        <div class="r2"><div><label>IBAN</label><input id="adm-iban" oninput="syncAdmBrief()"></div><div><label>BIC</label><input id="adm-bic" oninput="syncAdmBrief()"></div></div>
+        <div class="r2"><div><label>Bank</label><input id="adm-bank" oninput="syncAdmBrief()"></div><div><label>Steuernr.</label><input id="adm-steuernr" oninput="syncAdmBrief()"></div></div>
+        <label>Geschäftsführung</label><input id="adm-gf" oninput="syncAdmBrief()">
+        <label>Handelsregister</label><input id="adm-hrb" oninput="syncAdmBrief()">
+      </div>
+      <div style="display:flex;gap:8px"><button onclick="loadTemplates()" style="flex:1">Zurücksetzen</button><button class="btn-p" onclick="admUnternehmenSpeichern()" style="flex:2">💾 Speichern</button></div>
+    </div>
+    <div>
+      <div class="card" style="border-color:var(--i-brd);background:var(--i-bg)">
+        <div style="font-size:12px;color:var(--i-txt)">Diese Daten werden für alle Dokumente verwendet: Rechnungen, Übergabe- und Eingangsformulare sowie Verträge.</div>
+      </div>
+    </div>
+  </div>
+  </div><!-- end adm-panel-unternehmen -->
+
+  <!-- BENUTZER & ROLLEN PANEL -->
+  <div class="sub-panel" id="adm-panel-benutzer">
   <div class="g2">
     <!-- BENUTZER -->
     <div>
@@ -862,7 +906,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <button onclick="exportCSV('datentraeger')" style="width:100%;margin-bottom:8px;font-size:12px">Datenträger als CSV</button>
         <button onclick="dbClear()" class="btn-d" style="width:100%;font-size:12px">Factory Reset</button>
       </div>
-      <div class="card" id="saml-admin-card">
+      <div class="card" id="saml-admin-card" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <div class="stitle" style="margin:0">SAML / Single Sign-On</div>
           <label class="toggle" title="SAML aktivieren/deaktivieren">
@@ -948,6 +992,51 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       </div>
     </div>
   </div>
+  </div><!-- end adm-panel-benutzer -->
+
+  <!-- SAML PANEL -->
+  <div class="sub-panel" id="adm-panel-saml">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="stitle" style="margin:0">SAML / Single Sign-On</div>
+      <label class="toggle" title="SAML aktivieren/deaktivieren">
+        <input type="checkbox" id="saml-enabled-toggle2" onchange="samlToggleEnabled()">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div id="saml-status-box2" style="border-radius:var(--rad);padding:9px 12px;font-size:12px;margin-bottom:14px;display:none"></div>
+    <div style="margin-bottom:12px">
+      <label>Schnellauswahl IdP</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px">
+        <button onclick="samlPreset('azure')" style="padding:5px 10px;font-size:11px">Azure AD</button>
+        <button onclick="samlPreset('okta')" style="padding:5px 10px;font-size:11px">Okta</button>
+        <button onclick="samlPreset('keycloak')" style="padding:5px 10px;font-size:11px">Keycloak</button>
+        <button onclick="samlPreset('google')" style="padding:5px 10px;font-size:11px">Google Workspace</button>
+        <button onclick="samlPreset('adfs')" style="padding:5px 10px;font-size:11px">ADFS</button>
+      </div>
+    </div>
+    <label>Name des IdP (erscheint auf Login-Button)</label>
+    <input id="saml-idp-name2" placeholder="z.B. Azure AD, Okta, Firmen-SSO">
+    <div style="border:1px solid var(--brd);border-radius:var(--rad);padding:10px 12px;margin-top:12px">
+      <div style="font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px">Service Provider (SP)</div>
+      <label>SP Entity ID / Audience</label>
+      <div style="display:flex;gap:6px"><input id="saml-sp-entity-id2" placeholder="https://dtv.deinefirma.de" style="flex:1"><button onclick="copySamlField('saml-sp-entity-id2')" style="padding:6px 10px;font-size:11px;flex-shrink:0">Kopieren</button></div>
+      <label>ACS URL</label>
+      <div style="display:flex;gap:6px"><input id="saml-sp-acs-url2" placeholder="https://dtv.deinefirma.de/api/saml/acs" style="flex:1"><button onclick="copySamlField('saml-sp-acs-url2')" style="padding:6px 10px;font-size:11px;flex-shrink:0">Kopieren</button></div>
+    </div>
+    <div style="border:1px solid var(--brd);border-radius:var(--rad);padding:10px 12px;margin-top:12px">
+      <div style="font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px">Identity Provider (IdP) Metadata</div>
+      <label>Metadata-URL des IdP</label>
+      <input id="saml-idp-meta-url2" placeholder="https://login.microsoftonline.com/{tenant}/federationmetadata/...">
+      <button onclick="samlTestConnection()" class="btn-w" style="width:100%;margin-top:8px;font-size:12px">Verbindung testen</button>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button onclick="samlLoadConfig()" style="flex:1;font-size:12px">Zurücksetzen</button>
+      <button onclick="samlSaveConfig()" class="btn-p" style="flex:2;font-size:12px">Konfiguration speichern</button>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--mut)">Vollständige SAML-Konfiguration ist auch im Tab Benutzer &amp; Rollen verfügbar.</div>
+  </div>
+  </div><!-- end adm-panel-saml -->
 </div>
 
 <!-- HILFE -->
@@ -1007,6 +1096,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <label>Rabatt (%)</label><input id="ov-dt-rabatt" type="number" min="0" max="100" step="0.1">
     <label>Einlagerungsdatum</label><input id="ov-dt-datum" type="date">
     <label>Beschreibung</label><input id="ov-dt-beschreibung">
+    <label>Tresor / Schrank (optional)</label><select id="ov-dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
     <label>Bild ersetzen</label>
     <div class="upzone" id="ov-bild-zone" onclick="document.getElementById('ov-bild-file').click()"><input type="file" id="ov-bild-file" accept="image/*" style="display:none" onchange="handleOvBild(event)"><div id="ov-bild-prev">Klicken</div></div>
     <div style="margin-top:14px;display:flex;gap:8px"><button onclick="document.getElementById('dt-ov').classList.remove('open')" style="flex:1">Abbrechen</button><button class="btn-p" onclick="dtSpeichern()" style="flex:1">Speichern</button></div>
@@ -1239,7 +1329,7 @@ function can(perm) {
   return currentUser.perms?.[perm] === true;
 }
 function applyTabVisibility(){
-  const tabKeys=['kunden','vertraege','datentraeger','uebergabe','rechnung','historie','archiv','tresore'];
+  const tabKeys=['kunden','vertraege','datentraeger','uebergabe','rechnung','historie','tresore'];
   tabKeys.forEach(t=>{
     const el=document.querySelector(`.tab[data-tab="${t}"]`);
     if(el)el.style.display=can('tab_'+t)?'':'none';
@@ -1404,7 +1494,7 @@ async function zeigeDetail(id) {
   const hist = await apiJ(`/api/kunden/${id}/history`);
   if (hist && hist.length) {
     document.getElementById('k-det-r').innerHTML += `<div class="drow" style="flex-direction:column;align-items:flex-start"><span class="dlbl" style="margin-bottom:4px">Verlauf</span><div style="width:100%">${
-      hist.map(h=>`<div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:6px;align-items:center"><span style="color:var(--mut);min-width:65px">${h.datum}</span><span style="font-weight:600;flex:1">${h.vertragsnr||'-'}</span><span class="badge ${smap[h.status]||'ba'}">${h.status||'-'}</span>${h.doc?`<button onclick="loadAndOpenDoc('/api/uebergaben_doc/${h.id}')" style="padding:2px 6px;font-size:10px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:3px;cursor:pointer">PDF</button>`:''}</div>`).join('')
+      hist.map(h=>`<div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:6px;align-items:center"><span style="color:var(--mut);min-width:65px">${h.datum}</span><span style="font-weight:600;flex:1">${h.vertragsnr||'-'}</span><span class="badge ${smap[h.status]||'ba'}">${h.status||'-'}</span>${h.doc?`<button onclick="loadAndOpenDoc('/api/uebergaben/${h.id}/doc')" style="padding:2px 6px;font-size:10px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:3px;cursor:pointer">PDF</button>`:''}</div>`).join('')
     }</div></div>`;
   }
   document.getElementById('k-detail-card').style.display='block';
@@ -1462,7 +1552,8 @@ async function dtBearbeiten(id) {
   document.getElementById('ov-dt-rabatt').value=d.rabatt;
   document.getElementById('ov-dt-datum').value=d.einlagerungs_datum;
   document.getElementById('ov-dt-beschreibung').value=d.beschreibung||'';
-  document.getElementById('dt-tresor_id').value=d.tresor_id||'';
+  renderSelects(); // ensure tresor dropdown is populated
+  document.getElementById('ov-dt-tresor_id').value=d.tresor_id||'';
   if(d.hat_bild){const img=await apiJ(`/api/datentraeger/${id}/bild`);if(img)document.getElementById('ov-bild-prev').innerHTML=`<img src="${img.data}" style="max-height:50px;max-width:100%;border-radius:4px;object-fit:contain">`;}
   else document.getElementById('ov-bild-prev').textContent='Klicken';
   pendingOvBild=null;document.getElementById('ov-bild-file').value='';
@@ -1473,7 +1564,7 @@ async function dtSpeichern() {
   const id=parseInt(document.getElementById('ov-dt-id').value);
   const preis=parseFloat(document.getElementById('ov-dt-preis').value)||0;
   const einheit=document.getElementById('ov-dt-einheit').value;
-  const data={kunden_id:parseInt(document.getElementById('ov-dt-kunden_id').value),bezeichnung:document.getElementById('ov-dt-bezeichnung').value.trim(),serial:document.getElementById('ov-dt-serial').value.trim(),preis,einheit,preis_jahr:einheit==='monat'?preis*12:preis,rabatt:parseFloat(document.getElementById('ov-dt-rabatt').value)||0,einlagerungs_datum:document.getElementById('ov-dt-datum').value,beschreibung:document.getElementById('ov-dt-beschreibung').value.trim()};
+  const data={kunden_id:parseInt(document.getElementById('ov-dt-kunden_id').value),bezeichnung:document.getElementById('ov-dt-bezeichnung').value.trim(),serial:document.getElementById('ov-dt-serial').value.trim(),preis,einheit,preis_jahr:einheit==='monat'?preis*12:preis,rabatt:parseFloat(document.getElementById('ov-dt-rabatt').value)||0,einlagerungs_datum:document.getElementById('ov-dt-datum').value,beschreibung:document.getElementById('ov-dt-beschreibung').value.trim(),tresor_id:parseInt(document.getElementById('ov-dt-tresor_id').value)||null};
   if(pendingOvBild){data.bild=pendingOvBild.data;data.bild_type=pendingOvBild.type;}
   const result=await apiPut(`/api/datentraeger/${id}`,data);
   if(result){const i=datentraeger.findIndex(d=>d.id===id);if(i>=0)datentraeger[i]={...datentraeger[i],...result};document.getElementById('dt-ov').classList.remove('open');renderAlles();}
@@ -1508,9 +1599,12 @@ function renderSelects(){
   ['dt-kunden_id','r-kunden_id','u-kunden_id'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
   const f=document.getElementById('dt-filter');if(f)f.innerHTML='<option value="">Alle Firmen</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
   const af=document.getElementById('archiv-filter');if(af)af.innerHTML='<option value="">Alle Firmen</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
-  // Tresor dropdown in DT form
+  // Tresor dropdown in DT form and edit overlay
+  const tresorOpts='<option value="">— kein Tresor —</option>'+tresore.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');return`<option value="${t.id}">${t.bezeichnung}${loc?' ('+loc+')':''}</option>`;}).join('');
   const tsel=document.getElementById('dt-tresor_id');
-  if(tsel)tsel.innerHTML='<option value="">— kein Tresor —</option>'+tresore.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');return`<option value="${t.id}">${t.bezeichnung}${loc?' ('+loc+')':''}</option>`;}).join('');
+  if(tsel)tsel.innerHTML=tresorOpts;
+  const tselOv=document.getElementById('ov-dt-tresor_id');
+  if(tselOv)tselOv.innerHTML=tresorOpts;
 }
 
 function renderMetrics(){
@@ -1658,18 +1752,28 @@ function renderRechnungHistoriePage(){
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Datum</th>'+
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)"></th>'+
     '</tr></thead><tbody>'+
-    filtered.map((r,i)=>`<tr style="border-bottom:1px solid var(--brd)">
+    filtered.map((r,i)=>{
+      const idx=hist.indexOf(r);
+      const mKey='dtv_mahnungen_'+r.nr;
+      const mList=JSON.parse(localStorage.getItem(mKey)||'[]');
+      const mCount=mList.length;
+      return`<tr style="border-bottom:1px solid var(--brd)">
       <td style="padding:7px 8px;font-weight:600;font-family:monospace;font-size:12px">${r.nr}</td>
       <td style="padding:7px 8px;font-weight:600">${r.firma}</td>
       <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${r.zr}</td>
       <td style="padding:7px 8px;font-size:12px">${r.netto?'EUR '+r.netto:'-'}</td>
       <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td>
-      <td style="padding:7px 8px"><div style="display:flex;gap:4px">
-        <button onclick="rechnungWiederdrucken(${hist.indexOf(r)})" style="padding:3px 10px;font-size:11px">Drucken</button>
-        <button onclick="rechnungMahnung(${hist.indexOf(r)})" class="btn-w" style="padding:3px 10px;font-size:11px">Mahnung</button>
-        <button onclick="rechnungLoeschen(${hist.indexOf(r)})" class="btn-d" style="padding:3px 7px;font-size:11px">✕</button>
+      <td style="padding:7px 8px"><div style="display:flex;gap:4px;flex-wrap:wrap">
+        <button onclick="rechnungWiederdrucken(${idx})" style="padding:3px 8px;font-size:11px" title="Rechnung als PDF drucken">PDF</button>
+        <button onclick="rechnungMahnung(${idx})" class="btn-w" style="padding:3px 8px;font-size:11px">Mahnung</button>
+        <button onclick="toggleMahnungenRow('${r.nr}')" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="Mahnungen anzeigen">📋 Mahnungen (${mCount})</button>
+        <button onclick="rechnungLoeschen(${idx})" class="btn-d" style="padding:3px 7px;font-size:11px">✕</button>
       </div></td>
-    </tr>`).join('')+
+    </tr>
+    <tr id="mahnung-row-${r.nr}" style="display:none;background:var(--surf)">
+      <td colspan="6" style="padding:8px 16px" id="mahnung-cell-${r.nr}"></td>
+    </tr>`;
+    }).join('')+
     '</tbody></table>';
 }
 function rechnungLoeschen(idx){
@@ -1740,7 +1844,31 @@ ${T.iban?`<div class="brief-txt" style="background:#f8f8f8;border-radius:4px;pad
   ${(T.iban||T.bic)?`<div class="brief-foot-col">${T.iban?'<strong>IBAN</strong><br>'+T.iban+'<br>':''}${T.bic?'<strong>BIC</strong><br>'+T.bic:''}</div>`:''}
   ${(T.steuernr||T.gf||T.hrb)?`<div class="brief-foot-col">${T.steuernr?'<strong>Steuernr.</strong><br>'+T.steuernr+'<br>':''}${T.gf?'<strong>GF</strong> '+T.gf+'<br>':''}${T.hrb||''}</div>`:''}
 </div>`;
+  // Save mahnung to history
+  const mKey='dtv_mahnungen_'+r.nr;
+  const mList=JSON.parse(localStorage.getItem(mKey)||'[]');
+  mList.push({dat:today,html,firma:r.firma,nr:r.nr});
+  localStorage.setItem(mKey,JSON.stringify(mList));
+  renderRechnungHistoriePage();
   printHtml(html,'Mahnung_'+r.kunden_nr+'_'+r.nr+'.pdf');
+}
+
+function toggleMahnungenRow(nr){
+  const row=document.getElementById('mahnung-row-'+nr);
+  if(!row)return;
+  const isOpen=row.style.display!=='none';
+  row.style.display=isOpen?'none':'table-row';
+  if(!isOpen){
+    const mKey='dtv_mahnungen_'+nr;
+    const mList=JSON.parse(localStorage.getItem(mKey)||'[]');
+    const cell=document.getElementById('mahnung-cell-'+nr);
+    if(cell){
+      if(!mList.length){cell.innerHTML='<span style="font-size:11px;color:var(--mut)">Keine Mahnungen</span>';return;}
+      cell.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px">'+
+        mList.map((m,i)=>`<tr><td style="padding:3px 8px;color:var(--mut);width:100px">${fmtDate(m.dat)}</td><td style="padding:3px 8px">Mahnung ${i+1}</td><td style="padding:3px 8px"><button onclick="printHtml(JSON.parse(localStorage.getItem('dtv_mahnungen_${nr}')||'[]')[${i}]?.html||'','Mahnung_${nr}.pdf')" style="padding:2px 8px;font-size:10px">Drucken</button></td></tr>`).join('')+
+        '</table>';
+    }
+  }
 }
 
 function nextReNr(){
@@ -1877,7 +2005,7 @@ function selectPending(id){activePendingId=id;updateS2Info();renderPendingList()
 async function uebergabeAbschliessen(){
   if(!activePendingId){alert('Übergabe auswählen.');return;}
   if(!pendingUDoc){alert('Dokument hochladen.');return;}
-  const r=await apiPost(`/api/Übergaben/${activePendingId}/abschließen`,{doc:pendingUDoc.data,doc_type:pendingUDoc.type,doc_name:pendingUDoc.name});
+  const r=await apiPost(`/api/uebergaben/${activePendingId}/abschliessen`,{doc:pendingUDoc.data,doc_type:pendingUDoc.type,doc_name:pendingUDoc.name});
   if(!r)return;
   const pu=pendingUebergaben.find(p=>p.id===activePendingId);
   if(pu){pu.dt_ids.forEach(did=>{const dt=datentraeger.find(d=>d.id===did);if(dt)dt.status='übergeben';});}
@@ -1930,14 +2058,21 @@ async function loadTemplates(){
   const TVF={par1:'par1',laufzeit:'laufzeit',kfrist:'kfrist','par-entgelt':'parEntgelt','par-haftung':'parHaftung','par-dsgvo':'parDsgvo',schluss:'schluss'};
   Object.entries(TVF).forEach(([fid,key])=>{const el=document.getElementById('tv-'+fid);if(el)el.value=window._TV[key]||'';});
   syncEVorschau();
-  if(d.hat_logo){const logo=await apiJ('/api/templates/logo');if(logo){logoData=logo.data;document.getElementById('logo-prev').innerHTML=`<img src="${logoData}" style="max-height:48px;max-width:160px;object-fit:contain"><div style="font-size:11px;margin-top:3px;color:var(--s-txt)">Klicken zum Ersetzen</div>`;document.getElementById('logo-zone').classList.add('has-file');}}
+  // Also sync adm-* fields
+  const admFields={firmenname:'adm-firmenname',abt:'adm-abt',firmaAdr:'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
+  Object.entries(admFields).forEach(([key,fid])=>{const el=document.getElementById(fid);if(el)el.value=window._T[key]||'';});
+  if(d.akzentfarbe){const ac2=document.getElementById('adm-accent-color');if(ac2)ac2.value=d.akzentfarbe;}
+  if(d.hat_logo){const logo=await apiJ('/api/templates/logo');if(logo){logoData=logo.data;const imgHtml=`<img src="${logoData}" style="max-height:48px;max-width:160px;object-fit:contain"><div style="font-size:11px;margin-top:3px;color:var(--s-txt)">Klicken zum Ersetzen</div>`;document.getElementById('logo-prev').innerHTML=imgHtml;document.getElementById('logo-zone').classList.add('has-file');const alp=document.getElementById('adm-logo-prev');if(alp){alp.innerHTML=imgHtml;document.getElementById('adm-logo-zone').classList.add('has-file');}}}
   syncBrief();
   syncUBrief();
   syncVBrief();
 }
 
 function readTplFields(){
-  const TF={abt:'abt',firmenname:'firmenname','firma-adr':'firmaAdr',bearbeiter:'bearbeiter',kuerzel:'kuerzel',tel:'tel',fax:'fax',email:'email',ort:'ort',anrede:'anrede',intro:'intro',schluss:'schluss',gruss:'gruss',sig:'sig',iban:'iban',bic:'bic',bank:'bank',steuernr:'steuernr',gf:'gf',hrb:'hrb','footer-adr':'footerAdr'};
+  // Read from adm-* fields first (primary), then fall back to f-* (hidden, for compat)
+  const admFieldMap={firmenname:'adm-firmenname',abt:'adm-abt',firmaAdr:'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
+  Object.entries(admFieldMap).forEach(([key,fid])=>{const el=document.getElementById(fid);if(el)window._T[key]=el.value;});
+  const TF={anrede:'anrede',intro:'intro',schluss:'schluss',gruss:'gruss',sig:'sig'};
   Object.entries(TF).forEach(([fid,key])=>{const el=document.getElementById('f-'+fid);if(el)window._T[key]=el.value;});
   window._TU.intro=document.getElementById('u-intro-tpl')?.value||'';
   window._TU.nach=document.getElementById('u-nach-tpl')?.value||'';
@@ -1980,8 +2115,8 @@ function insertPh(tag,type){
   type==='r'?syncBrief():syncUBrief();
 }
 
-function handleLogo(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{logoData=ev.target.result;document.getElementById('logo-zone').classList.add('has-file');document.getElementById('logo-prev').innerHTML=`<img src="${logoData}" style="max-height:48px;max-width:160px;object-fit:contain">`;syncBrief();syncUBrief();};r.readAsDataURL(f);}
-function resetLogo(){logoData=null;document.getElementById('logo-zone').classList.remove('has-file');document.getElementById('logo-prev').textContent='Logo hochladen';syncBrief();syncUBrief();}
+function handleLogo(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{logoData=ev.target.result;['logo-zone','adm-logo-zone'].forEach(id=>{const z=document.getElementById(id);if(z)z.classList.add('has-file');});const imgHtml=`<img src="${logoData}" style="max-height:48px;max-width:160px;object-fit:contain">`;const lp=document.getElementById('logo-prev');if(lp)lp.innerHTML=imgHtml;const alp=document.getElementById('adm-logo-prev');if(alp)alp.innerHTML=imgHtml;syncBrief();syncUBrief();};r.readAsDataURL(f);}
+function resetLogo(){logoData=null;['logo-zone','adm-logo-zone'].forEach(id=>{const z=document.getElementById(id);if(z)z.classList.remove('has-file');});const lp=document.getElementById('logo-prev');if(lp)lp.textContent='Logo hochladen';const alp=document.getElementById('adm-logo-prev');if(alp)alp.textContent='Logo hochladen';syncBrief();syncUBrief();}
 function renderLogoBox(id){const el=document.getElementById(id);if(!el)return;el.innerHTML=logoData?`<img src="${logoData}" style="max-height:54px;max-width:150px;object-fit:contain">`:'<div class="brief-logo-ph">Logo</div>';}
 
 function syncBrief(){
@@ -2065,6 +2200,29 @@ function syncEVorschau(){
 }
 
 // ══ ADMIN ════════════════════════════════════════════
+function showAdminSub(sub){
+  document.querySelectorAll('.sub-tab[id^="adm-sub-"]').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.sub-panel[id^="adm-panel-"]').forEach(el=>el.classList.remove('active'));
+  document.getElementById('adm-sub-'+sub).classList.add('active');
+  document.getElementById('adm-panel-'+sub).classList.add('active');
+}
+
+function syncAdmBrief(){
+  // Mirror adm-* fields to _T so templates stay in sync
+  const TF={abt:'adm-abt',firmenname:'adm-firmenname','firmaAdr':'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
+  Object.entries(TF).forEach(([key,fid])=>{const el=document.getElementById(fid);if(el)window._T[key]=el.value;});
+  const ac=document.getElementById('adm-accent-color');if(ac){accentColor=ac.value;const ac2=document.getElementById('accent-color');if(ac2)ac2.value=accentColor;}
+}
+
+async function admUnternehmenSpeichern(){
+  if(!can('manageUsers')&&!can('editTemplate')){alert('Keine Berechtigung.');return;}
+  syncAdmBrief();
+  const data={rechnung_json:JSON.stringify(window._T),uebergabe_json:JSON.stringify(window._TU),eingang_json:JSON.stringify(window._TE),vertrag_json:JSON.stringify(window._TV),akzentfarbe:accentColor};
+  if(logoData){data.logo=logoData;data.logo_type='image/png';}
+  const r=await apiPut('/api/templates',data);
+  if(r){alert('Unternehmensdaten gespeichert!');}
+}
+
 async function loadAdmin(){
   try { await loadSamlSettings(); } catch(e) { console.warn('SAML settings load error:', e.message); }
   rollen=await apiJ('/api/rollen')||[];
@@ -2074,12 +2232,18 @@ async function loadAdmin(){
   // Fill rolle select
   const sel=document.getElementById('new-rolle-id');
   if(sel)sel.innerHTML=rollen.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
-  // Load support contact
+  // Load support contact + company data
   const tpl=await apiJ('/api/templates');
   if(tpl){
     const sn=document.getElementById('support-name');const se=document.getElementById('support-email');
     if(sn)sn.value=tpl.support_name||'';
     if(se)se.value=tpl.support_email||'';
+    // Populate adm-* fields from template
+    try{window._T=JSON.parse(tpl.rechnung_json||'{}')}catch(e){window._T={};}
+    const admFields={firmenname:'adm-firmenname',abt:'adm-abt',firmaAdr:'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
+    Object.entries(admFields).forEach(([key,fid])=>{const el=document.getElementById(fid);if(el)el.value=window._T[key]||'';});
+    if(tpl.akzentfarbe){accentColor=tpl.akzentfarbe;const ac=document.getElementById('adm-accent-color');if(ac)ac.value=accentColor;}
+    if(tpl.hat_logo){const logo=await apiJ('/api/templates/logo');if(logo&&logo.data){logoData=logo.data;['adm-logo-zone'].forEach(id=>{const z=document.getElementById(id);if(z)z.classList.add('has-file');});const alp=document.getElementById('adm-logo-prev');if(alp)alp.innerHTML=`<img src="${logoData}" style="max-height:48px;max-width:160px;object-fit:contain">`;}}
   }
 }
 
@@ -2124,7 +2288,7 @@ function renderRollenListe(){
     const perms=JSON.parse(r.berechtigungen||'{}');
     const permNames={read:'Lesen',write:'Schreiben',delete:'Loeschen',editTemplate:'Templates',manageUsers:'Benutzer'};
     const permBadges=Object.entries(permNames).map(([k,label])=>`<span class="badge ${perms[k]?'bg':'br'}" style="font-size:10px;margin-right:2px">${label}</span>`).join('')+
-      ['tab_kunden','tab_vertraege','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_historie','tab_archiv','tab_tresore'].filter(k=>k in perms&&!perms[k]).map(k=>`<span class="badge br" style="font-size:10px;margin-right:2px">Kein ${k.replace('tab_','')}</span>`).join('');
+      ['tab_kunden','tab_vertraege','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_historie','tab_tresore'].filter(k=>k in perms&&!perms[k]).map(k=>`<span class="badge br" style="font-size:10px;margin-right:2px">Kein ${k.replace('tab_','')}</span>`).join('');
     return`<div style="border:1px solid var(--brd);border-radius:var(--rad);padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <div><span class="badge ${r.farbe||'bg'}" style="margin-right:8px">${r.name}</span>${permBadges}</div>
       <button onclick="bearbeiteRolle(${r.id})" style="padding:3px 8px;font-size:11px">Bearbeiten</button>
@@ -2217,7 +2381,7 @@ function bearbeiteRolle(id){
 
 function renderPermGrid(perms){
   const permNames={read:'Lesen',write:'Schreiben/Bearbeiten',delete:'Loeschen',editTemplate:'Templates bearbeiten',manageUsers:'Benutzerverwaltung'};
-  const tabNames={tab_kunden:'Tab: Kunden',tab_vertraege:'Tab: Verträge',tab_datentraeger:'Tab: Datenträger',tab_uebergabe:'Tab: Übergabe',tab_rechnung:'Tab: Rechnung',tab_historie:'Tab: Rechnungen',tab_archiv:'Tab: DT Archiv',tab_tresore:'Tab: Tresore'};
+  const tabNames={tab_kunden:'Tab: Kunden',tab_vertraege:'Tab: Verträge',tab_datentraeger:'Tab: Datenträger',tab_uebergabe:'Tab: Übergabe',tab_rechnung:'Tab: Rechnung',tab_historie:'Tab: Rechnungen',tab_tresore:'Tab: Tresore'};
   const mkItem=(key,label,defaultVal)=>`<div class="perm-item"><span>${label}</span><label class="toggle"><input type="checkbox" id="perm-${key}" ${(key in perms?perms[key]:defaultVal)?'checked':''}><span class="toggle-slider"></span></label></div>`;
   document.getElementById('perm-grid').innerHTML=
     `<div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">Berechtigungen</div>`+
@@ -2227,7 +2391,7 @@ function renderPermGrid(perms){
 }
 
 function getPermFromGrid(){
-  const keys=['read','write','delete','editTemplate','manageUsers','tab_kunden','tab_vertraege','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_historie','tab_archiv','tab_tresore'];
+  const keys=['read','write','delete','editTemplate','manageUsers','tab_kunden','tab_vertraege','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_historie','tab_tresore'];
   const perms={};
   keys.forEach(k=>{const el=document.getElementById('perm-'+k);if(el)perms[k]=el.checked;});
   return perms;
@@ -2669,7 +2833,7 @@ async function tresorLoeschen(id){
 function showTab(t,e){
   if(t==='templates'&&!can('editTemplate')){alert('Keine Berechtigung.');return;}
   if(t==='admin'&&!can('manageUsers')){alert('Keine Berechtigung.');return;}
-  const tabKeyMap={kunden:'tab_kunden',vertraege:'tab_vertraege',datentraeger:'tab_datentraeger',uebergabe:'tab_uebergabe',rechnung:'tab_rechnung',historie:'tab_historie',archiv:'tab_archiv',tresore:'tab_tresore'};
+  const tabKeyMap={kunden:'tab_kunden',vertraege:'tab_vertraege',datentraeger:'tab_datentraeger',uebergabe:'tab_uebergabe',rechnung:'tab_rechnung',historie:'tab_historie',tresore:'tab_tresore'};
   if(tabKeyMap[t]&&!can(tabKeyMap[t])){alert('Keine Berechtigung für diesen Bereich.');return;}
   document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
@@ -2677,11 +2841,10 @@ function showTab(t,e){
   document.getElementById('page-'+t).classList.add('active');
   if(t==='dashboard')renderDashboard();
   if(t==='kunden'){renderKunden();showKundenSub('kunden');}
-  if(t==='datentraeger'){renderSelects();renderDT();dtGotoStep(1);}
+  if(t==='datentraeger'){renderSelects();renderDT();dtGotoStep(1);showDTSub('erfassen');}
   if(t==='uebergabe'){renderSelects();renderUebergabeListe();renderPendingList();gotoStep(1);}
   if(t==='tresore'){renderTresore();}
   if(t==='rechnung'){renderSelects();showRechnungSub('neu');}
-  if(t==='archiv')renderArchiv();
   if(t==='templates'){buildPhBars();loadTemplates();}
   if(t==='admin')loadAdmin();
   if(t==='hilfe')renderHilfe();
@@ -2713,6 +2876,14 @@ function showRechnungSub(sub){
   document.getElementById('re-sub-'+sub).classList.add('active');
   document.getElementById('re-panel-'+sub).classList.add('active');
   if(sub==='historie')renderRechnungHistoriePage();
+}
+
+function showDTSub(sub){
+  document.querySelectorAll('.sub-tab[id^="dt-sub-"]').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.sub-panel[id^="dt-panel-"]').forEach(el=>el.classList.remove('active'));
+  document.getElementById('dt-sub-'+sub).classList.add('active');
+  document.getElementById('dt-panel-'+sub).classList.add('active');
+  if(sub==='archiv')renderArchiv();
 }
 
 function tresorDetail(id){
