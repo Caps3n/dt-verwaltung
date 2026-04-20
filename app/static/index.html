@@ -2288,7 +2288,7 @@ function renderRollenListe(){
     const perms=JSON.parse(r.berechtigungen||'{}');
     const permNames={read:'Lesen',write:'Schreiben',delete:'Loeschen',editTemplate:'Templates',manageUsers:'Benutzer'};
     const permBadges=Object.entries(permNames).map(([k,label])=>`<span class="badge ${perms[k]?'bg':'br'}" style="font-size:10px;margin-right:2px">${label}</span>`).join('')+
-      ['tab_kunden','tab_vertraege','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_historie','tab_tresore'].filter(k=>k in perms&&!perms[k]).map(k=>`<span class="badge br" style="font-size:10px;margin-right:2px">Kein ${k.replace('tab_','')}</span>`).join('');
+      ['tab_kunden','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_tresore'].filter(k=>k in perms&&!perms[k]).map(k=>`<span class="badge br" style="font-size:10px;margin-right:2px">Kein ${k.replace('tab_','')}</span>`).join('');
     return`<div style="border:1px solid var(--brd);border-radius:var(--rad);padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <div><span class="badge ${r.farbe||'bg'}" style="margin-right:8px">${r.name}</span>${permBadges}</div>
       <button onclick="bearbeiteRolle(${r.id})" style="padding:3px 8px;font-size:11px">Bearbeiten</button>
@@ -2381,7 +2381,7 @@ function bearbeiteRolle(id){
 
 function renderPermGrid(perms){
   const permNames={read:'Lesen',write:'Schreiben/Bearbeiten',delete:'Loeschen',editTemplate:'Templates bearbeiten',manageUsers:'Benutzerverwaltung'};
-  const tabNames={tab_kunden:'Tab: Kunden',tab_vertraege:'Tab: Verträge',tab_datentraeger:'Tab: Datenträger',tab_uebergabe:'Tab: Übergabe',tab_rechnung:'Tab: Rechnung',tab_historie:'Tab: Rechnungen',tab_tresore:'Tab: Tresore'};
+  const tabNames={tab_kunden:'Tab: Kunden',tab_datentraeger:'Tab: Datenträger',tab_uebergabe:'Tab: Übergabe',tab_rechnung:'Tab: Rechnungen',tab_tresore:'Tab: Tresore'};
   const mkItem=(key,label,defaultVal)=>`<div class="perm-item"><span>${label}</span><label class="toggle"><input type="checkbox" id="perm-${key}" ${(key in perms?perms[key]:defaultVal)?'checked':''}><span class="toggle-slider"></span></label></div>`;
   document.getElementById('perm-grid').innerHTML=
     `<div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">Berechtigungen</div>`+
@@ -2391,7 +2391,7 @@ function renderPermGrid(perms){
 }
 
 function getPermFromGrid(){
-  const keys=['read','write','delete','editTemplate','manageUsers','tab_kunden','tab_vertraege','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_historie','tab_tresore'];
+  const keys=['read','write','delete','editTemplate','manageUsers','tab_kunden','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_tresore'];
   const perms={};
   keys.forEach(k=>{const el=document.getElementById('perm-'+k);if(el)perms[k]=el.checked;});
   return perms;

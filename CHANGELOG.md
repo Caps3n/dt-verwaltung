@@ -6,6 +6,26 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.0] – 2026-04-20
+
+### Added
+- **DT Archiv as sub-tab** — Archive is now a sub-tab inside Datenträger (Erfassen / Archiv), reducing top-level tab count
+- **Kunden & Verträge merged** — single tab with sub-navigation (Firmen / Verträge)
+- **Rechnungen merged** — single tab with sub-navigation (Neue Rechnung / Historie)
+- **Tresor detail view** — click a tresor name to open a detail card with all fields and Wartungsvertrag button
+- **Anrede field** — salutation dropdown (Herr / Frau / Dr. / Prof. / Divers) on Ansprechpartner
+- **Unternehmensdaten in Admin** — company data moved from Templates to Admin tab with sub-navigation (Unternehmen / Benutzer & Rollen / SAML)
+- **Invoice PDF in history** — each invoice in Rechnungshistorie has a "PDF" button to regenerate the invoice
+- **Mahnungen in history** — Rechnungshistorie shows expandable Mahnungen per invoice with print buttons
+
+### Fixed
+- **Tresor dropdown when editing DT** — Tresor/Schrank field now correctly populated in the DT edit overlay
+- **Übergabe completion after document download** — fixed API URL mismatch that caused errors when finalizing a Übergabe after viewing the document
+- **Permission cleanup** — removed tab_vertraege, tab_historie, tab_archiv from role editor (merged into parent tabs)
+- **Responsive design** — tab bar wraps instead of scrolling; layout scales to mobile
+
+---
+
 ## [1.1.1] – 2026-04-20
 
 ### Added
