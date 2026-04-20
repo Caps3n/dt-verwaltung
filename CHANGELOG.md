@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.1] – 2026-04-20
+
+### Fixed
+- **Tresor save/delete caused unintended logout** — `tresorSpeichern` and `tresorLoeschen` were reading the session token from `localStorage` instead of `sessionStorage` (where the app stores it). This sent `X-Token: null` to the server, which returned 401 and triggered a logout on every Tresor save or delete.
+
+---
+
 ## [1.1.0] – 2026-04-20
 
 ### Added
