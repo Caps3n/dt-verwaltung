@@ -1,4 +1,4 @@
-# 💾 DT-Verwaltung v1.0
+# 💾 DT-Verwaltung v1.1
 
 **Web-based management software for stored data carriers (storage media)**  
 Developed by [Marcel Capelan](https://capelan.de) · [info@capelan.de](mailto:info@capelan.de)
@@ -13,14 +13,15 @@ Developed by [Marcel Capelan](https://capelan.de) · [info@capelan.de](mailto:in
 
 | Module | Description |
 |---|---|
-| 📊 Dashboard | KPIs, active contracts, revenue overview, expiry warnings |
+| 📊 Dashboard | KPIs, active contracts, revenue overview, expiry & maintenance warnings |
 | 👥 Customers | Create & edit customers, contract data, customer-specific volume discounts |
 | 📄 Contracts | Overview of all contracts, printable contract documents |
-| 💾 Storage Media | Check-in, edit, photo upload, printable intake protocol |
+| 💾 Storage Media | Check-in, edit, photo upload, safe/vault assignment, printable intake protocol |
 | 🔄 Handover | Return workflow with printable handover protocol |
 | 🧾 Invoice | Automatic billing, volume discounts, general discounts, VAT |
 | 📋 Invoice History | Invoice archive, reprint, dunning notice |
 | 🗄️ DT Archive | All returned media, search function |
+| 🔒 Tresore | Safe & cabinet management: location, maintenance schedule, contract PDF |
 | 🎨 Templates | Letter templates for all documents, logo, accent color |
 | ⚙️ Admin | User management, roles & permissions, SAML/SSO |
 | ❓ Help | FAQ documentation, contact |
@@ -32,8 +33,11 @@ Developed by [Marcel Capelan](https://capelan.de) · [info@capelan.de](mailto:in
 | Layer | Method | Status |
 |---|---|---|
 | Passwords | PBKDF2-HMAC-SHA256, 600,000 iterations, random salt | ✅ active |
+| Database | SQLCipher AES-256 (optional, set `DB_KEY` in `.env` before first start) | ⚙️ optional |
 | Transport | TLS 1.2/1.3 via your reverse proxy (nginx, Traefik, etc.) | ✅ recommended |
 | Session tokens | 64-character cryptographically random, DB-backed, 8h TTL | ✅ active |
+
+> **Database encryption:** Generate a key with `openssl rand -hex 32`, add it as `DB_KEY=...` to your `.env` **before** the very first start. The key cannot be changed on an existing database without a fresh installation.
 
 ---
 
@@ -188,7 +192,7 @@ Configure under **⚙️ Admin → SAML/SSO**.
 | Component | Technology |
 |---|---|
 | Backend | Python 3.12, Flask 3.x, Gunicorn |
-| Database | SQLite (WAL mode, Docker volume) |
+| Database | SQLite (WAL mode, Docker volume) · optional SQLCipher AES-256 |
 | Frontend | Vanilla JS, Single-Page App (no framework) |
 | Container | Docker, non-root user (UID 1000) |
 | Auth | Token-based (X-Token header), DB-backed sessions |

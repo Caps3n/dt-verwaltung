@@ -6,6 +6,31 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.0] – 2026-04-20
+
+### Added
+- **Safe/Vault management (🔒 Tresore)** — new dedicated tab for managing physical safes and storage cabinets:
+  - Full CRUD with name, manufacturer, model, serial number
+  - Location tracking: Country / City / Building / Floor / Room
+  - Purchase date and purchase cost
+  - Annual maintenance cost
+  - Last and next maintenance date
+  - Maintenance contract upload (PDF)
+  - Notes field
+- **Tresor assignment on storage media** — when checking in a data carrier, optionally assign it to a safe/vault; location is shown in the DT list view and included in CSV exports
+- **Dashboard: maintenance warnings** — upcoming or overdue safe maintenance appointments (within 60 days) shown as a dedicated card with color-coded badges
+- **CSV export extended** — Datenträger export now includes all Tresor location columns (Tresor name, Country, City, Building, Floor, Room); exported via server-side endpoint for accuracy
+- **Optional database encryption** — SQLite database can be encrypted with SQLCipher AES-256 by setting `DB_KEY` in `.env` before first start; plain SQLite remains the default
+
+### Changed
+- Contact email updated: `marcel.capelan@tuv.com` → `info@capelan.de` throughout all files
+
+### Notes
+- Tresor information is intentionally **not** included in printed documents (intake protocol, handover protocol) — only shown in the web interface and CSV exports
+- `DB_KEY` must be set before first start; changing it on an existing database is not supported without a fresh installation
+
+---
+
 ## [1.0.0] – 2025-04-19
 
 ### 🎉 Initial public release
