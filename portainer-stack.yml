@@ -21,7 +21,7 @@ services:
     build:
       context: https://github.com/Caps3n/dt-verwaltung.git
       dockerfile: Dockerfile
-    image: dt-verwaltung:1.1.0
+    image: dt-verwaltung:latest
     container_name: dtv-verwaltung
     restart: unless-stopped
     ports:
