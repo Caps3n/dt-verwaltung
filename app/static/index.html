@@ -2604,7 +2604,7 @@ async function tresorSpeichern(){
   if(_tresorWVData){body.wartungsvertrag_doc=_tresorWVData;body.wartungsvertrag_doc_type=_tresorWVType;body.wartungsvertrag_doc_name=_tresorWVName;}
   const url=id?`/api/tresore/${id}`:'/api/tresore';
   const method=id?'PUT':'POST';
-  const res=await apiJ(url,{method,headers:{'Content-Type':'application/json','X-Token':localStorage.getItem('dtv_token')},body:JSON.stringify(body)});
+  const res=await apiJ(url,{method,headers:{'Content-Type':'application/json','X-Token':TOKEN},body:JSON.stringify(body)});
   if(res?.error){alert('Fehler: '+res.error);return;}
   tresore=await apiJ('/api/tresore')||[];
   renderTresore();
@@ -2615,7 +2615,7 @@ async function tresorSpeichern(){
 async function tresorLoeschen(id){
   const t=tresore.find(x=>x.id===id);
   if(!confirm(`Tresor "${t?.bezeichnung}" wirklich löschen? Alle zugeordneten Datenträger werden entsperrt.`))return;
-  await apiJ(`/api/tresore/${id}`,{method:'DELETE',headers:{'X-Token':localStorage.getItem('dtv_token')}});
+  await apiJ(`/api/tresore/${id}`,{method:'DELETE',headers:{'X-Token':TOKEN}});
   tresore=await apiJ('/api/tresore')||[];
   datentraeger=await apiJ('/api/datentraeger')||[];
   renderTresore();
