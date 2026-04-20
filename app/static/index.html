@@ -25,8 +25,8 @@
   --d-bg:#450a0a;--d-txt:#fca5a5;--d-brd:#991b1b;
 }}
 body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--txt);background:var(--surf2);min-height:100vh}
-.app{max-width:1200px;margin:0 auto;padding:12px 16px}
-.tabs{display:flex;border-bottom:1.5px solid var(--brd2);margin-bottom:1.25rem;flex-wrap:wrap;background:var(--bg);border-radius:var(--radl) var(--radl) 0 0;padding:0 12px}
+.app{max-width:1600px;margin:0 auto;padding:12px 20px}
+.tabs{display:flex;border-bottom:1.5px solid var(--brd2);margin-bottom:1.25rem;flex-wrap:wrap;background:var(--bg);border-radius:var(--radl) var(--radl) 0 0;padding:0 12px;overflow-x:auto}
 .tab{padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-1.5px;background:transparent;border-top:none;border-left:none;border-right:none}
 .tab:hover{color:var(--txt)}.tab.active{color:var(--txt);border-bottom:2px solid var(--txt)}
 .page{display:none}.page.active{display:block}
@@ -133,6 +133,28 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 .toggle-slider:before{content:"";position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.2s}
 .toggle input:checked + .toggle-slider{background:var(--i-txt)}
 .toggle input:checked + .toggle-slider:before{transform:translateX(16px)}
+@media(max-width:900px){
+  .app{padding:8px 10px}
+  .g2{grid-template-columns:1fr}
+  .g3{grid-template-columns:repeat(2,1fr)}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .tabs{padding:0 4px}
+  .tab{padding:8px 10px;font-size:11px}
+  .card{padding:.75rem .9rem}
+}
+@media(max-width:600px){
+  .app{padding:6px 6px}
+  .g3,.g4{grid-template-columns:1fr}
+  .tabs{gap:0}
+  .tab{padding:8px 8px;font-size:10px;letter-spacing:0}
+  table{font-size:11px}
+  td,th{padding:5px 4px}
+  .r2{flex-direction:column}
+  .overlay-box{width:98%;padding:.9rem}
+  .steps{font-size:11px}
+  .step{padding:8px 4px;font-size:10px}
+  .metric .val{font-size:16px}
+}
 </style>
 </head>
 <body>
@@ -2081,7 +2103,7 @@ function renderRollenListe(){
     const perms=JSON.parse(r.berechtigungen||'{}');
     const permNames={read:'Lesen',write:'Schreiben',delete:'Loeschen',editTemplate:'Templates',manageUsers:'Benutzer'};
     const permBadges=Object.entries(permNames).map(([k,label])=>`<span class="badge ${perms[k]?'bg':'br'}" style="font-size:10px;margin-right:2px">${label}</span>`).join('')+
-      ['tab_kunden','tab_vertraege','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_historie','tab_archiv'].filter(k=>k in perms&&!perms[k]).map(k=>`<span class="badge br" style="font-size:10px;margin-right:2px">Kein ${k.replace('tab_','')}</span>`).join('');
+      ['tab_kunden','tab_vertraege','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_historie','tab_archiv','tab_tresore'].filter(k=>k in perms&&!perms[k]).map(k=>`<span class="badge br" style="font-size:10px;margin-right:2px">Kein ${k.replace('tab_','')}</span>`).join('');
     return`<div style="border:1px solid var(--brd);border-radius:var(--rad);padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <div><span class="badge ${r.farbe||'bg'}" style="margin-right:8px">${r.name}</span>${permBadges}</div>
       <button onclick="bearbeiteRolle(${r.id})" style="padding:3px 8px;font-size:11px">Bearbeiten</button>
@@ -2174,7 +2196,7 @@ function bearbeiteRolle(id){
 
 function renderPermGrid(perms){
   const permNames={read:'Lesen',write:'Schreiben/Bearbeiten',delete:'Loeschen',editTemplate:'Templates bearbeiten',manageUsers:'Benutzerverwaltung'};
-  const tabNames={tab_kunden:'Tab: Kunden',tab_vertraege:'Tab: Verträge',tab_datentraeger:'Tab: Datenträger',tab_uebergabe:'Tab: Übergabe',tab_rechnung:'Tab: Rechnung',tab_historie:'Tab: Rechnungen',tab_archiv:'Tab: DT Archiv'};
+  const tabNames={tab_kunden:'Tab: Kunden',tab_vertraege:'Tab: Verträge',tab_datentraeger:'Tab: Datenträger',tab_uebergabe:'Tab: Übergabe',tab_rechnung:'Tab: Rechnung',tab_historie:'Tab: Rechnungen',tab_archiv:'Tab: DT Archiv',tab_tresore:'Tab: Tresore'};
   const mkItem=(key,label,defaultVal)=>`<div class="perm-item"><span>${label}</span><label class="toggle"><input type="checkbox" id="perm-${key}" ${(key in perms?perms[key]:defaultVal)?'checked':''}><span class="toggle-slider"></span></label></div>`;
   document.getElementById('perm-grid').innerHTML=
     `<div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">Berechtigungen</div>`+
@@ -2184,7 +2206,7 @@ function renderPermGrid(perms){
 }
 
 function getPermFromGrid(){
-  const keys=['read','write','delete','editTemplate','manageUsers','tab_kunden','tab_vertraege','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_historie','tab_archiv'];
+  const keys=['read','write','delete','editTemplate','manageUsers','tab_kunden','tab_vertraege','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_historie','tab_archiv','tab_tresore'];
   const perms={};
   keys.forEach(k=>{const el=document.getElementById('perm-'+k);if(el)perms[k]=el.checked;});
   return perms;
@@ -2626,7 +2648,7 @@ async function tresorLoeschen(id){
 function showTab(t,e){
   if(t==='templates'&&!can('editTemplate')){alert('Keine Berechtigung.');return;}
   if(t==='admin'&&!can('manageUsers')){alert('Keine Berechtigung.');return;}
-  const tabKeyMap={kunden:'tab_kunden',vertraege:'tab_vertraege',datentraeger:'tab_datentraeger',uebergabe:'tab_uebergabe',rechnung:'tab_rechnung',historie:'tab_historie',archiv:'tab_archiv'};
+  const tabKeyMap={kunden:'tab_kunden',vertraege:'tab_vertraege',datentraeger:'tab_datentraeger',uebergabe:'tab_uebergabe',rechnung:'tab_rechnung',historie:'tab_historie',archiv:'tab_archiv',tresore:'tab_tresore'};
   if(tabKeyMap[t]&&!can(tabKeyMap[t])){alert('Keine Berechtigung für diesen Bereich.');return;}
   document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
