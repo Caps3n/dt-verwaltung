@@ -386,6 +386,11 @@ def init_db():
         admin_pass = os.environ.get('ADMIN_PASSWORD', 'admin123')
     admin_hash = hash_pw(admin_pass)
     db.execute("INSERT OR IGNORE INTO benutzer(username,name,password_hash,rollen_id) VALUES('admin','Administrator',?,1)", (admin_hash,))
+    # One-time admin password reset via RESET_ADMIN_PASSWORD env var
+    _reset_pw = os.environ.get('RESET_ADMIN_PASSWORD', '').strip()
+    if _reset_pw:
+        db.execute("UPDATE benutzer SET password_hash=? WHERE username='admin'", (hash_pw(_reset_pw),))
+        print(f"[AUTH] Admin password reset via RESET_ADMIN_PASSWORD env var")
     # Migration: add eingang_doc columns if missing
     for col, typ in [('eingang_doc','BLOB'),('eingang_doc_type','TEXT'),('eingang_doc_name','TEXT')]:
         try:
