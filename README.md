@@ -1,265 +1,150 @@
-# 💾 DT-Verwaltung v1.1
+# DT-Verwaltung v1.3.0
 
-**Web-based management software for stored data carriers (storage media)**  
-Developed by [Marcel Capelan](https://capelan.de) · [info@capelan.de](mailto:info@capelan.de)
-
-[![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)](https://www.docker.com/)
-[![Python](https://img.shields.io/badge/Python-3.12-green?logo=python)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+Webbasierte Verwaltungslösung für die sichere Einlagerung von Datenträgern.
+Entwickelt für Dienstleister, die Datenträger (HDDs, SSDs, Tapes, USB-Sticks u.ä.) im Auftrag von Kunden lagern, verwalten und dokumentiert zurückgeben.
 
 ---
 
-## 📋 Features
+## Features
 
-| Module | Description |
-|---|---|
-| 📊 Dashboard | KPIs, active contracts, revenue overview, expiry & maintenance warnings |
-| 👥 Customers | Create & edit customers, contract data, customer-specific volume discounts |
-| 📄 Contracts | Overview of all contracts, printable contract documents |
-| 💾 Storage Media | Check-in, edit, photo upload, safe/vault assignment, printable intake protocol |
-| 🔄 Handover | Return workflow with printable handover protocol |
-| 🧾 Invoice | Automatic billing, volume discounts, general discounts, VAT |
-| 📋 Invoice History | Invoice archive, reprint, dunning notice |
-| 🗄️ DT Archive | All returned media, search function |
-| 🔒 Tresore | Safe & cabinet management: location, maintenance schedule, contract PDF |
-| 🎨 Templates | Letter templates for all documents, logo, accent color |
-| ⚙️ Admin | User management, roles & permissions, SAML/SSO |
-| ❓ Help | FAQ documentation, contact |
+### Übersicht / Dashboard
+- KPIs: Aktive Verträge, eingelagerte Datenträger, Monats- und Jahresumsatz
+- Ablaufwarnungen für auslaufende Verträge (60-Tage-Vorschau, farbkodiert)
+- Wartungswarnungen für Tresore und Schränke
+
+### Kunden & Verträge
+- Vollständiges Kunden-CRUD mit Ansprechpartner, Adresse, Anrede
+- Vertragsdaten: Vertragsnummer, Status, Laufzeit, Kündigungsfrist, Vertragsnotizen
+- Vertragsdokument-Upload (PDF) pro Kunden
+- **Multi-Firmen:** optionaler Rechnungsempfänger (Firma B zahlt für Firma A) und Eigentümer der DTs wählbar
+- Mengenrabatte: bis zu 5 kundenspezifische Preisstaffeln
+- Kundenverlauf / Vertragshistorie
+
+### Datenträger (DTs)
+- Einlagerung mit Typ, Seriennummer, **interner Nummer**, Preis/Einheit, Rabatt
+- Foto-Upload pro Datenträger
+- Eingangsprotokoll als druckfertiges PDF mit Briefkopf
+- Statusverfolgung: `eingelagert` / `übergeben`
+- Tresor-/Schrank-Zuweisung mit Standortanzeige
+- CSV-Export mit allen Spalten inkl. Tresor-Standort und interner Nummer
+
+### Übergabe-Workflow
+- Schritt 1: Firma wählen, Datenträger auswählen, Übergabeprotokoll generieren und drucken
+- Schritt 2: Unterschriebenes Dokument hochladen (optional), Übergabe abschließen
+- **„Im Bestand lassen"**: Übergabe abschließen ohne DTs als übergeben zu markieren
+- **Offene Übergaben löschen** mit 🗑-Button
+- **Archiv aller abgeschlossenen Übergaben** mit Protokollnummer, Modus und PDF-Button
+
+### Rechnungen
+- Automatische Rechnungserstellung mit Mengenrabatt, Pauschalrabatt und MwSt.
+- Rechnungshistorie mit PDF-Regenerierung pro Rechnung
+- Mahnungsfunktion: 1./2./3. Mahnung pro Rechnung mit Druck-Button
+
+### Tresorverwaltung (🔒)
+- CRUD für physische Tresore/Schränke: Name, Hersteller, Modell, Seriennummer
+- Standort: Land / Stadt / Gebäude / Etage / Raum
+- Kaufdatum, Kaufpreis, jährliche Wartungskosten
+- Letzter und nächster Wartungstermin
+- Wartungsvertrag-Upload (PDF)
+- Tresor-Detailansicht per Klick
+
+### Templates & Briefvorlagen
+- Logo-Upload, Akzentfarbe für alle Dokumente
+- Vorlagen für: Rechnung, Übergabe, Eingangsprotokoll, Vertrag
+- Live-Vorschau beim Bearbeiten
+- Platzhalter-System (Firma, Datum, Beträge, DT-Liste etc.)
+
+### Admin-Bereich
+- Unternehmensdaten: Firmenname, Adresse, Bankverbindung, Steuernummer, Fußzeile
+- Benutzerverwaltung: Anlegen, Passwort zurücksetzen, Rolle zuweisen
+- Rollen & Berechtigungen: fein granulare Tab-Sichtbarkeit pro Rolle
+- SAML 2.0 / SSO: Azure AD, Okta, Keycloak und andere IdPs
+
+### Sicherheit
+- Passwörter: PBKDF2-HMAC-SHA256 (600.000 Iterationen, zufälliger Salt)
+- Sessions: 64-Zeichen kryptografisch sichere Tokens, DB-gesichert, 8h TTL
+- Optionale SQLite-Verschlüsselung via SQLCipher AES-256 (`DB_KEY` in `.env`)
+- Betrieb als Non-Root-Container (UID 1000)
 
 ---
 
-## 🔒 Security
+## Deployment (Docker / Portainer)
 
-| Layer | Method | Status |
-|---|---|---|
-| Passwords | PBKDF2-HMAC-SHA256, 600,000 iterations, random salt | ✅ active |
-| Database | SQLCipher AES-256 (optional, set `DB_KEY` in `.env` before first start) | ⚙️ optional |
-| Transport | TLS 1.2/1.3 via your reverse proxy (nginx, Traefik, etc.) | ✅ recommended |
-| Session tokens | 64-character cryptographically random, DB-backed, 8h TTL | ✅ active |
+### Portainer Stack (empfohlen)
 
-> **Database encryption:** Generate a key with `openssl rand -hex 32`, add it as `DB_KEY=...` to your `.env` **before** the very first start. The key cannot be changed on an existing database without a fresh installation.
+```yaml
+version: "3.8"
+services:
+  dtv:
+    image: ghcr.io/caps3n/dt-verwaltung:latest
+    ports:
+      - "5000:5000"
+    volumes:
+      - dtv_data:/data
+    environment:
+      - ADMIN_PASSWORD=sicheresPasswort
+      # - DB_KEY=verschlüsselungsSchlüssel   # nur bei Erstinstallation setzen
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+
+volumes:
+  dtv_data:
+```
+
+1. Portainer → Stacks → Add Stack
+2. Stack einfügen, `ADMIN_PASSWORD` setzen
+3. Deploy the Stack
+4. Öffnen: `http://<server-ip>:5000`
+
+### Update auf neue Version
+
+Portainer → Stack → **Pull and Redeploy**
+(GitHub Actions baut automatisch bei jedem Push auf `main`)
 
 ---
 
-## 🚀 Quick Start (single host)
-
-### Prerequisites
-
-- [Docker](https://docs.docker.com/get-docker/) ≥ 24
-- [Docker Compose](https://docs.docker.com/compose/) ≥ 2
-
-### Install
+## Lokale Entwicklung
 
 ```bash
-# 1. Clone the repository
 git clone https://github.com/Caps3n/dt-verwaltung.git
 cd dt-verwaltung
-
-# 2. Create your configuration
-cp .env.example .env
-# Edit .env and set a strong ADMIN_PASSWORD
-
-# 3. Start
-docker compose up -d --build
-
-# 4. Open in browser
-http://localhost:8123
+pip install flask flask-cors gunicorn pysaml2 cryptography
+python app/server.py
 ```
 
-**Default login:**
-```
-Username: admin
-Password: (as set in .env)
-```
-
-> ⚠️ Set `ADMIN_PASSWORD` in `.env` and change it in the Admin panel immediately after first login!
-
-### Change the port
-
-```bash
-PORT=9000 docker compose up -d --build
-```
+Öffnen: `http://localhost:5000`
+Standard-Login: `admin` / Passwort aus `ADMIN_PASSWORD` (Standard: `admin`)
 
 ---
 
-## 🐝 Docker Swarm Stack (production)
+## Datenbankstruktur
 
-DT-Verwaltung ships a Swarm-ready `docker-compose.yml` with `deploy:` sections,
-resource limits, and Docker secrets support.
+SQLite-Datenbank in `/data/dtv.db` (persistentes Docker-Volume).
+Migrationen werden automatisch beim Start angewendet – kein manuelles Schema-Management nötig.
 
-### 1. Create the admin-password secret
-
-```bash
-printf 'YourSecurePassword' | docker secret create dtv_admin_password -
-```
-
-### 2. Deploy the stack
-
-```bash
-docker stack deploy -c docker-compose.yml dtv
-```
-
-### 3. Verify
-
-```bash
-docker stack ps dtv
-docker service logs dtv_app -f
-```
-
-### Update
-
-```bash
-# Pull the latest image
-docker service update --image ghcr.io/caps3n/dt-verwaltung:latest dtv_app
-
-# Or force a redeploy (e.g. after a config change)
-docker service update --force dtv_app
-```
-
-### Remove
-
-```bash
-docker stack rm dtv
-```
-
-> **Data persistence:** The database lives in the `dtv-data` Docker volume and survives all updates and redeployments.
+Optionale Verschlüsselung: `DB_KEY` in der Umgebung setzen **vor** dem ersten Start.
+⚠️ Nachträgliches Aktivieren auf bestehender Datenbank wird nicht unterstützt.
 
 ---
 
-## ⬆️ Update (single host)
+## Technischer Stack
 
-```bash
-docker compose pull          # or rebuild: docker compose build
-docker compose up -d
-```
-
----
-
-## 🔄 Restart / Stop
-
-```bash
-# Stop
-docker compose down
-
-# Start
-docker compose up -d
-
-# Logs
-docker logs dtv-verwaltung -f
-```
-
----
-
-## 🗄️ Backup & Restore
-
-```bash
-# Create backup
-docker run --rm -v dtv-data:/data -v $(pwd):/backup alpine \
-  tar czf /backup/dtv-backup-$(date +%Y%m%d).tar.gz /data
-
-# Restore backup
-docker run --rm -v dtv-data:/data -v $(pwd):/backup alpine \
-  tar xzf /backup/dtv-backup-YYYYMMDD.tar.gz -C /
-```
-
-Alternatively, use the built-in **Admin → Export DB** button for a single-file `.db` download.
-
----
-
-## 👤 Users & Roles
-
-Three default roles are created automatically:
-
-| Role | Read | Write | Delete | Templates | Users |
-|---|:---:|:---:|:---:|:---:|:---:|
-| **Admin** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **User** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **Viewer** | ✅ | ❌ | ❌ | ❌ | ❌ |
-
-Custom roles with individual tab visibility can be created in the Admin panel.
-
----
-
-## 🔐 SAML / Single Sign-On (optional)
-
-SAML 2.0 is supported (Azure AD, Okta, Keycloak, and others).  
-Configure under **⚙️ Admin → SAML/SSO**.
-
----
-
-## 🏗️ Technical Details
-
-| Component | Technology |
+| Komponente | Technologie |
 |---|---|
 | Backend | Python 3.12, Flask 3.x, Gunicorn |
-| Database | SQLite (WAL mode, Docker volume) · optional SQLCipher AES-256 |
-| Frontend | Vanilla JS, Single-Page App (no framework) |
-| Container | Docker, non-root user (UID 1000) |
-| Auth | Token-based (X-Token header), DB-backed sessions |
-
-### Project structure
-
-```
-dt-verwaltung/
-├── app/
-│   ├── server.py          # Flask backend, all API routes
-│   ├── saml_auth.py       # SAML 2.0 helpers (optional)
-│   └── static/
-│       └── index.html     # Frontend SPA
-├── scripts/
-│   └── generate-key.sh    # Utility scripts
-├── Dockerfile
-├── docker-compose.yml     # Compose / Swarm stack file
-├── .env.example
-├── install.sh
-├── update.sh
-├── CHANGELOG.md
-├── LICENSE
-└── README.md
-```
-
-### API Endpoints
-
-```
-GET/POST   /api/kunden
-GET/PUT    /api/kunden/<id>
-DELETE     /api/kunden/<id>
-
-GET/POST   /api/datentraeger
-GET/PUT    /api/datentraeger/<id>
-DELETE     /api/datentraeger/<id>
-GET        /api/datentraeger/<id>/bild
-
-GET/POST   /api/uebergaben
-GET        /api/uebergaben/<id>
-
-GET/PUT    /api/templates
-GET        /api/templates/logo
-
-GET/POST   /api/rollen
-PUT/DELETE /api/rollen/<id>
-
-GET/POST   /api/benutzer
-PUT        /api/benutzer/<id>
-DELETE     /api/benutzer/<id>
-
-POST       /api/login
-POST       /api/logout
-GET        /api/me
-GET        /api/health
-GET        /api/db/export
-```
+| Datenbank | SQLite (WAL-Modus), optional SQLCipher |
+| Frontend | Vanilla JS SPA (kein Framework), HTML5, CSS3 |
+| Authentifizierung | Token-basiert (`X-Token`-Header), optional SAML 2.0 |
+| Container | Docker, non-root (UID 1000), Health-Check |
+| CI/CD | GitHub Actions → ghcr.io |
 
 ---
 
-## 📄 License
+## Lizenz
 
-MIT License — © 2025 [Marcel Capelan](https://capelan.de)
-
----
-
-## 📞 Contact & Support
-
-**Marcel Capelan**  
-📧 [info@capelan.de](mailto:info@capelan.de)  
-🌐 [capelan.de](https://capelan.de)
+MIT License — © 2025 Marcel Capelan · [capelan.de](https://capelan.de)

@@ -927,7 +927,7 @@ def create_uebergabe():
     db = get_db()
     db.execute(
         "INSERT INTO uebergaben(kunden_id,datum,empfaenger,grund,protokoll_nr,abgeschlossen) VALUES(?,?,?,?,?,0)",
-        (data['kunden_id'], data.get('datum', ''), data.get('Empfänger', data.get('empfaenger', '')), data.get('grund', ''), pnr)
+        (data['kunden_id'], data.get('datum', ''), data.get('Empfänger', data.get('Empfänger', data.get('empfaenger', ''))), data.get('grund', ''), pnr)
     )
     db.commit()
     uid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
@@ -951,6 +951,20 @@ def abschliesse_uebergabe(uid):
         pos = db.execute("SELECT datentraeger_id FROM uebergabe_positionen WHERE uebergabe_id=?", (uid,)).fetchall()
         for p in pos:
             db.execute("UPDATE datentraeger SET status='uebergeben' WHERE id=?", (p['datentraeger_id'],))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+@app.route('/api/uebergaben/<int:uid>', methods=['DELETE'])
+@require_auth('write')
+def delete_uebergabe(uid):
+    db = get_db()
+    row = db.execute("SELECT id FROM uebergaben WHERE id=?", (uid,)).fetchone()
+    if not row:
+        db.close()
+        return jsonify({'error': 'Nicht gefunden'}), 404
+    db.execute("DELETE FROM uebergabe_positionen WHERE uebergabe_id=?", (uid,))
+    db.execute("DELETE FROM uebergaben WHERE id=?", (uid,))
     db.commit()
     db.close()
     return jsonify({'ok': True})
