@@ -1,64 +1,58 @@
 # Changelog
 
-All notable changes to DT-Verwaltung are documented in this file.  
-Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
+All notable changes to DT-Verwaltung are documented in this file.
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
+
+---
+
+## [1.3.0] – 2026-04-24
+
+### Added
+- **Übergabe-Archiv** — abgeschlossene Übergaben direkt im Tab mit PDF-Button und Protokollnummer
+- **Offene Übergaben löschen** — 🗑-Button pro Eintrag; löscht Übergabe + Positionen aus DB
+- **„Im Bestand lassen"** — Übergabe abschließen ohne DTs auf "übergeben" zu setzen
+- **Dokument-Upload optional** — Abschließen auch ohne Scan (mit Bestätigungsdialog)
+- **Interne Nummer für Datenträger** — Feld beim Anlegen/Bearbeiten, Spalte in Liste und CSV
+- **Multi-Firmen** — Rechnungsempfänger + Eigentümer pro Kunde; Firma A lagert, Firma B zahlt
+- **Hilfe-Layout** — volle Breite, kein `max-width`-Limit mehr
+- **Mobile** — Tab-Leiste scrollt horizontal, Tabellen scrollbar auf kleinen Screens
+
+### Fixed
+- **Übergabe Empfänger-Bug** — Feld `Empfänger` (falsch) → `empfaenger` (korrekt)
+- **DB-Migrationen** — neue Spalten werden automatisch beim Start ergänzt
 
 ---
 
 ## [1.2.0] – 2026-04-20
 
 ### Added
-- **DT Archiv as sub-tab** — Archive is now a sub-tab inside Datenträger (Erfassen / Archiv), reducing top-level tab count
-- **Kunden & Verträge merged** — single tab with sub-navigation (Firmen / Verträge)
-- **Rechnungen merged** — single tab with sub-navigation (Neue Rechnung / Historie)
-- **Tresor detail view** — click a tresor name to open a detail card with all fields and Wartungsvertrag button
-- **Anrede field** — salutation dropdown (Herr / Frau / Dr. / Prof. / Divers) on Ansprechpartner
-- **Unternehmensdaten in Admin** — company data moved from Templates to Admin tab with sub-navigation (Unternehmen / Benutzer & Rollen / SAML)
-- **Invoice PDF in history** — each invoice in Rechnungshistorie has a "PDF" button to regenerate the invoice
-- **Mahnungen in history** — Rechnungshistorie shows expandable Mahnungen per invoice with print buttons
+- DT Archiv als Sub-Tab, Kunden & Verträge merged, Rechnungen merged
+- Tresor Detail-Ansicht, Anrede-Feld, Unternehmensdaten im Admin
+- PDF-Button in Rechnungshistorie, Mahnungen in Rechnungshistorie
 
 ### Fixed
-- **Tresor dropdown when editing DT** — Tresor/Schrank field now correctly populated in the DT edit overlay
-- **Übergabe completion after document download** — fixed API URL mismatch that caused errors when finalizing a Übergabe after viewing the document
-- **Permission cleanup** — removed tab_vertraege, tab_historie, tab_archiv from role editor (merged into parent tabs)
-- **Responsive design** — tab bar wraps instead of scrolling; layout scales to mobile
+- Tresor-Dropdown beim DT-Bearbeiten, Übergabe-Abschluss nach Dokument-Download
+- Berechtigungs-Cleanup (gemergete Tabs), Responsive Design
 
 ---
 
 ## [1.1.1] – 2026-04-20
 
-### Added
-- **Tresor tab permission** — role editor now includes a toggle to show/hide the Tresore tab per role; existing roles without the key default to visible (backward compatible)
-- **Responsive design** — layout scales cleanly to tablet and mobile: grids collapse to single column below 900 px, tab bar scrolls horizontally, font sizes and padding adjust below 600 px; max layout width increased from 1200 px to 1600 px
-
 ### Fixed
-- **Tresor save/delete caused unintended logout** — `tresorSpeichern` and `tresorLoeschen` were reading the session token from `localStorage` instead of `sessionStorage` (where the app stores it). This sent `X-Token: null` to the server, which returned 401 and triggered a logout on every Tresor save or delete.
+- Tresor speichern/löschen löste unbeabsichtigten Logout aus (localStorage vs sessionStorage)
+
+### Added
+- Tresor-Tab Berechtigung in Rollenverwaltung, Responsive Design
 
 ---
 
 ## [1.1.0] – 2026-04-20
 
 ### Added
-- **Safe/Vault management (🔒 Tresore)** — new dedicated tab for managing physical safes and storage cabinets:
-  - Full CRUD with name, manufacturer, model, serial number
-  - Location tracking: Country / City / Building / Floor / Room
-  - Purchase date and purchase cost
-  - Annual maintenance cost
-  - Last and next maintenance date
-  - Maintenance contract upload (PDF)
-  - Notes field
-- **Tresor assignment on storage media** — when checking in a data carrier, optionally assign it to a safe/vault; location is shown in the DT list view and included in CSV exports
-- **Dashboard: maintenance warnings** — upcoming or overdue safe maintenance appointments (within 60 days) shown as a dedicated card with color-coded badges
-- **CSV export extended** — Datenträger export now includes all Tresor location columns (Tresor name, Country, City, Building, Floor, Room); exported via server-side endpoint for accuracy
-- **Optional database encryption** — SQLite database can be encrypted with SQLCipher AES-256 by setting `DB_KEY` in `.env` before first start; plain SQLite remains the default
-
-### Changed
-- Contact email updated: `marcel.capelan@tuv.com` → `info@capelan.de` throughout all files
-
-### Notes
-- Tresor information is intentionally **not** included in printed documents (intake protocol, handover protocol) — only shown in the web interface and CSV exports
-- `DB_KEY` must be set before first start; changing it on an existing database is not supported without a fresh installation
+- Tresorverwaltung (🔒 Tresore) mit vollem CRUD, Standort, Wartungsdaten
+- Tresor-Zuweisung auf Datenträger, Dashboard-Wartungswarnungen
+- CSV-Export mit Tresor-Spalten, optionale DB-Verschlüsselung (SQLCipher)
 
 ---
 
@@ -66,31 +60,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### 🎉 Initial public release
 
-#### Added
-- **Dashboard** — KPIs (active contracts, stored media, monthly/annual revenue), expiry warnings
-- **Customers** — full CRUD with contract data and contract history
-- **Volume discounts** — customer-specific, configurable up to 5 pricing tiers
-- **Storage media** — check-in, editing, photo upload, status tracking (stored / returned)
-- **Intake protocol** — printable PDF receipt for incoming media
-- **Handover workflow** — return process with printable handover protocol
-- **Invoicing** — automatic billing with volume discount, general discount, and VAT
-- **Invoice history** — archive with reprint and dunning notice function
-- **DT Archive** — searchable list of all returned media
-- **Templates** — letter/document templates with logo upload and accent color
-- **Admin panel** — user management, roles & permissions with per-tab visibility control
-- **SAML 2.0 / SSO** — optional integration with Azure AD, Okta, Keycloak and others
-- **Help tab** — FAQ accordion with configurable support contact
-- **Security** — PBKDF2-HMAC-SHA256 passwords (600,000 iterations, random salt), auto-upgrade from legacy SHA-256 hashes on login
-- **Session management** — 64-character cryptographically random tokens, DB-backed, 8h TTL
-- **Docker Swarm** — production-ready stack with `deploy:` sections, resource limits, and Docker secrets
-- **Non-root container** — runs as UID 1000 for improved security
-- **Health check** — `/api/health` endpoint with Docker `HEALTHCHECK` integration
-
-#### Technical Stack
-- Python 3.12, Flask 3.x, Gunicorn
-- SQLite with WAL mode, persisted in Docker volume
-- Vanilla JS single-page application (no framework)
-- Token-based authentication (`X-Token` header)
+- Dashboard, Kunden, Mengenrabatte, Datenträger, Eingangsprotokoll
+- Übergabe-Workflow, Rechnungen, Archiv, Templates, Admin, SAML 2.0
+- PBKDF2-Sicherheit, Docker Swarm, Health-Check
 
 ---
 

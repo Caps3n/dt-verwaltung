@@ -911,6 +911,7 @@ def get_uebergaben():
     for r in rows:
         d = dict(r)
         d['hat_doc'] = bool(d.get('doc'))
+        d['weiter_im_bestand'] = bool(d.get('weiter_im_bestand'))
         d.pop('doc', None)
         pos = db.execute("SELECT datentraeger_id FROM uebergabe_positionen WHERE uebergabe_id=?", (d['id'],)).fetchall()
         d['dt_ids'] = [p['datentraeger_id'] for p in pos]
@@ -926,7 +927,7 @@ def create_uebergabe():
     db = get_db()
     db.execute(
         "INSERT INTO uebergaben(kunden_id,datum,empfaenger,grund,protokoll_nr,abgeschlossen) VALUES(?,?,?,?,?,0)",
-        (data['kunden_id'], data.get('datum', ''), data.get('empfaenger', ''), data.get('grund', ''), pnr)
+        (data['kunden_id'], data.get('datum', ''), data.get('Empfänger', data.get('empfaenger', '')), data.get('grund', ''), pnr)
     )
     db.commit()
     uid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
@@ -940,14 +941,30 @@ def create_uebergabe():
 @require_auth('write')
 def abschliesse_uebergabe(uid):
     data = request.json or {}
+    weiter_im_bestand = 1 if data.get('weiter_im_bestand') else 0
     db = get_db()
     db.execute(
-        "UPDATE uebergaben SET abgeschlossen=1,doc=?,doc_type=?,doc_name=? WHERE id=?",
-        (data.get('doc'), data.get('doc_type'), data.get('doc_name'), uid)
+        "UPDATE uebergaben SET abgeschlossen=1,doc=?,doc_type=?,doc_name=?,weiter_im_bestand=? WHERE id=?",
+        (data.get('doc'), data.get('doc_type'), data.get('doc_name'), weiter_im_bestand, uid)
     )
-    pos = db.execute("SELECT datentraeger_id FROM uebergabe_positionen WHERE uebergabe_id=?", (uid,)).fetchall()
-    for p in pos:
-        db.execute("UPDATE datentraeger SET status='uebergeben' WHERE id=?", (p['datentraeger_id'],))
+    if not weiter_im_bestand:
+        pos = db.execute("SELECT datentraeger_id FROM uebergabe_positionen WHERE uebergabe_id=?", (uid,)).fetchall()
+        for p in pos:
+            db.execute("UPDATE datentraeger SET status='uebergeben' WHERE id=?", (p['datentraeger_id'],))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+@app.route('/api/uebergaben/<int:uid>', methods=['DELETE'])
+@require_auth('write')
+def delete_uebergabe(uid):
+    db = get_db()
+    row = db.execute("SELECT id FROM uebergaben WHERE id=?", (uid,)).fetchone()
+    if not row:
+        db.close()
+        return jsonify({'error': 'Nicht gefunden'}), 404
+    db.execute("DELETE FROM uebergabe_positionen WHERE uebergabe_id=?", (uid,))
+    db.execute("DELETE FROM uebergaben WHERE id=?", (uid,))
     db.commit()
     db.close()
     return jsonify({'ok': True})
