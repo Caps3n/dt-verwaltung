@@ -445,6 +445,19 @@ def init_db():
         db.execute("ALTER TABLE kunden ADD COLUMN eigentuemer_id INTEGER")
     except Exception:
         pass
+    # Migration: add 3-party ownership fields to datentraeger
+    try:
+        db.execute("ALTER TABLE datentraeger ADD COLUMN eigentuemer_id INTEGER")
+    except Exception:
+        pass
+    try:
+        db.execute("ALTER TABLE datentraeger ADD COLUMN neben_eigentuemer_id INTEGER")
+    except Exception:
+        pass
+    try:
+        db.execute("ALTER TABLE datentraeger ADD COLUMN rechnungsempfaenger_id INTEGER")
+    except Exception:
+        pass
     db.execute("INSERT OR IGNORE INTO template_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_config(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_settings(id) VALUES(1)")
@@ -702,12 +715,11 @@ def create_kunde():
     db = get_db()
     try:
         db.execute(
-            "INSERT INTO kunden(nr,firma,anrede,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,mengenrabatt_json,rechnungsempfaenger_id,eigentuemer_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO kunden(nr,firma,anrede,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,mengenrabatt_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (data['nr'], data['firma'], data.get('anrede',''), data.get('ansprechpartner'), data.get('email'), data.get('tel'),
              data.get('mobil'), data.get('strasse'), data.get('plz'), data.get('ort'), data.get('land', 'Deutschland'),
              data.get('sap_nr'), data.get('vertragsnr'), data.get('vertragsbeginn'), data.get('vertragsende'),
-             data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'),
-             data.get('rechnungsempfaenger_id') or None, data.get('eigentuemer_id') or None)
+             data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'))
         )
         db.commit()
         kid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
@@ -731,12 +743,11 @@ def update_kunde(kid):
              old['vertragsstatus'] or 'abgelaufen', old['vertragsnotiz'] or '')
         )
     db.execute(
-        "UPDATE kunden SET nr=?,firma=?,anrede=?,ansprechpartner=?,email=?,tel=?,mobil=?,strasse=?,plz=?,ort=?,land=?,sap_nr=?,vertragsnr=?,vertragsbeginn=?,vertragsende=?,vertragsstatus=?,vertragsnotiz=?,mengenrabatt_json=?,rechnungsempfaenger_id=?,eigentuemer_id=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
+        "UPDATE kunden SET nr=?,firma=?,anrede=?,ansprechpartner=?,email=?,tel=?,mobil=?,strasse=?,plz=?,ort=?,land=?,sap_nr=?,vertragsnr=?,vertragsbeginn=?,vertragsende=?,vertragsstatus=?,vertragsnotiz=?,mengenrabatt_json=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
         (data['nr'], data['firma'], data.get('anrede',''), data.get('ansprechpartner'), data.get('email'), data.get('tel'),
          data.get('mobil'), data.get('strasse'), data.get('plz'), data.get('ort'), data.get('land', 'Deutschland'),
          data.get('sap_nr'), data.get('vertragsnr'), data.get('vertragsbeginn'), data.get('vertragsende'),
-         data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'),
-         data.get('rechnungsempfaenger_id') or None, data.get('eigentuemer_id') or None, kid)
+         data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'), kid)
     )
     db.commit()
     row = db.execute("SELECT * FROM kunden WHERE id=?", (kid,)).fetchone()
@@ -801,11 +812,11 @@ def get_datentraeger():
     db = get_db()
     if kunden_id:
         rows = db.execute(
-            "SELECT d.*,k.firma,k.nr as kunden_nr,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN tresore t ON d.tresor_id=t.id WHERE d.kunden_id=? ORDER BY d.id", (kunden_id,)
+            "SELECT d.*,k.firma,k.nr as kunden_nr,e.firma as eigentuemer_firma,ne.firma as neben_eigentuemer_firma,re.firma as rechnungsempfaenger_firma,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN kunden e ON d.eigentuemer_id=e.id LEFT JOIN kunden ne ON d.neben_eigentuemer_id=ne.id LEFT JOIN kunden re ON d.rechnungsempfaenger_id=re.id LEFT JOIN tresore t ON d.tresor_id=t.id WHERE d.kunden_id=? ORDER BY d.id", (kunden_id,)
         ).fetchall()
     else:
         rows = db.execute(
-            "SELECT d.*,k.firma,k.nr as kunden_nr,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN tresore t ON d.tresor_id=t.id ORDER BY d.id"
+            "SELECT d.*,k.firma,k.nr as kunden_nr,e.firma as eigentuemer_firma,ne.firma as neben_eigentuemer_firma,re.firma as rechnungsempfaenger_firma,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN kunden e ON d.eigentuemer_id=e.id LEFT JOIN kunden ne ON d.neben_eigentuemer_id=ne.id LEFT JOIN kunden re ON d.rechnungsempfaenger_id=re.id LEFT JOIN tresore t ON d.tresor_id=t.id ORDER BY d.id"
         ).fetchall()
     db.close()
     result = []
@@ -844,17 +855,18 @@ def create_dt():
     data = request.json or {}
     db = get_db()
     db.execute(
-        "INSERT INTO datentraeger(kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt,einlagerungs_datum,beschreibung,bild,bild_type,eingang_doc,eingang_doc_type,eingang_doc_name,tresor_id,interne_nr) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO datentraeger(kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt,einlagerungs_datum,beschreibung,bild,bild_type,eingang_doc,eingang_doc_type,eingang_doc_name,tresor_id,interne_nr,eigentuemer_id,neben_eigentuemer_id,rechnungsempfaenger_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis', 0), data.get('einheit', 'monat'),
          data.get('preis_jahr', 0), data.get('rabatt', 0), data['einlagerungs_datum'],
          data.get('beschreibung', ''), data.get('bild'), data.get('bild_type'),
          data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
-         data.get('tresor_id') or None, data.get('interne_nr',''))
+         data.get('tresor_id') or None, data.get('interne_nr',''),
+         data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None)
     )
     db.commit()
     did = db.execute("SELECT last_insert_rowid()").fetchone()[0]
     row = db.execute(
-        "SELECT d.*,k.firma,k.nr as kunden_nr,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN tresore t ON d.tresor_id=t.id WHERE d.id=?", (did,)
+        "SELECT d.*,k.firma,k.nr as kunden_nr,e.firma as eigentuemer_firma,ne.firma as neben_eigentuemer_firma,re.firma as rechnungsempfaenger_firma,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN kunden e ON d.eigentuemer_id=e.id LEFT JOIN kunden ne ON d.neben_eigentuemer_id=ne.id LEFT JOIN kunden re ON d.rechnungsempfaenger_id=re.id LEFT JOIN tresore t ON d.tresor_id=t.id WHERE d.id=?", (did,)
     ).fetchone()
     db.close()
     d = dict(row)
@@ -871,39 +883,43 @@ def update_dt(did):
     db = get_db()
     if data.get('bild') and data.get('eingang_doc'):
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=?,interne_nr=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
              data.get('beschreibung',''), data.get('bild'), data.get('bild_type'),
              data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
-             data.get('tresor_id') or None, data.get('interne_nr',''), did)
+             data.get('tresor_id') or None, data.get('interne_nr',''),
+             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, did)
         )
     elif data.get('bild'):
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,tresor_id=?,interne_nr=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
              data.get('beschreibung',''), data.get('bild'), data.get('bild_type'),
-             data.get('tresor_id') or None, data.get('interne_nr',''), did)
+             data.get('tresor_id') or None, data.get('interne_nr',''),
+             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, did)
         )
     elif data.get('eingang_doc'):
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=?,interne_nr=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
              data.get('beschreibung',''), data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
-             data.get('tresor_id') or None, data.get('interne_nr',''), did)
+             data.get('tresor_id') or None, data.get('interne_nr',''),
+             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, did)
         )
     else:
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,tresor_id=?,interne_nr=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
-             data.get('beschreibung',''), data.get('tresor_id') or None, did)
+             data.get('beschreibung',''), data.get('tresor_id') or None, data.get('interne_nr',''),
+             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, did)
         )
     db.commit()
     row = db.execute(
-        "SELECT d.*,k.firma,k.nr as kunden_nr,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN tresore t ON d.tresor_id=t.id WHERE d.id=?", (did,)
+        "SELECT d.*,k.firma,k.nr as kunden_nr,e.firma as eigentuemer_firma,ne.firma as neben_eigentuemer_firma,re.firma as rechnungsempfaenger_firma,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN kunden e ON d.eigentuemer_id=e.id LEFT JOIN kunden ne ON d.neben_eigentuemer_id=ne.id LEFT JOIN kunden re ON d.rechnungsempfaenger_id=re.id LEFT JOIN tresore t ON d.tresor_id=t.id WHERE d.id=?", (did,)
     ).fetchone()
     db.close()
     d = dict(row)

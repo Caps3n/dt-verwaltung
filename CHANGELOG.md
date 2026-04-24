@@ -6,16 +6,33 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.3] – 2026-04-24
+
+### Added
+- **3-party ownership on Datenträger level** — each media record now has three optional ownership fields:
+  - **Haupt-Eigentümer** (main owner, e.g. the software developer / Firma 3)
+  - **Neben-Eigentümer** (co-owner / commissioning party, e.g. Firma 2)
+  - **Rechnungsempfänger** (billing recipient — whoever pays)
+  - All three reference existing customer records and default to the commissioning party (Auftraggeber) when left blank.
+  - Supports the full escrow scenario: Firma 2 commissions storage, Firma 3 owns the IP on the media, either may pay.
+
+### Fixed
+- **`else` branch of DT UPDATE was missing the `interne_nr` binding** — the SQL contained `interne_nr=?` but the values tuple only had `tresor_id, did`, causing a `ProgrammingError: Incorrect number of bindings` whenever a media record was updated without a new photo or scan document.
+- **Duplicate `renderAbgeschlosseneUebergaben` function** — the second definition shadowed the first; only one is now present.
+
+### Changed
+- Ownership fields (Rechnungsempfänger, Eigentümer) moved from customer record to individual media record level, which matches the actual business requirement (each DT can have different owners).
+- Customer form simplified: removed the kunden-level Rechnungsempfänger and Eigentümer dropdowns.
+
+---
+
 ## [1.3.2] – 2026-04-24
 
 ### Fixed
-- **Duplicate code from multiple patch runs** — running the v1.3.0/v1.3.1 scripts more than once caused non-idempotent string patches to insert duplicate HTML sections, JS functions, and buttons. Removed: 2× extra "Abgeschlossene Übergaben" card, 2× extra `deletePending` function, 1× extra `renderAbgeschlosseneUebergaben` function, 2× extra 🗑 trash buttons per pending entry
-- **Multi-company fields missing** — the original patch used a wrong anchor (`<label>Anrede Ansprechpartner</label>`) that didn't match the actual HTML (`<label>Ansprechpartner</label>`); billing-recipient and owner selects were never inserted. Fixed with correct anchor.
-- **Internal number (Interne Nr.) missing** — original patch anchor used placeholder `"z.B. SN-12345"` which didn't match the actual `"HDD-2024-001"`. Field now correctly added to both the registration form and the edit overlay.
-- **Logo missing in handover preview** — `logoData` was only loaded when the user visited the Templates tab; the handover document preview showed a placeholder box instead. Templates (including logo, accent colour, `_T`, `_TU`) are now loaded at startup.
-- **DB migrations missing for interne_nr, rechnungsempfaenger_id, eigentuemer_id** — columns were never added to the database because the migration patch used a wrong anchor. All four new columns now migrate correctly on container start.
-- **interne_nr not persisted** — missing from all DT INSERT/UPDATE branches on the server.
-- **rechnungsempfaenger_id / eigentuemer_id not persisted** — missing from kunden INSERT and UPDATE on the server.
+- **`dt-interne_nr` field not visible** — patch anchor mismatch in v1.3.1 script (placeholder text differed); field now correctly added below Seriennummer.
+- **Multi-company customer selects never appeared** — wrong anchor (`Anrede Ansprechpartner` vs actual `Ansprechpartner`); now correctly inserted.
+- **Logo missing in Übergabe preview** — `logoData` was only populated when the Templates tab was visited; startup now also fetches the logo.
+- **Duplicate HTML/JS sections** — non-idempotent v1.3.0 patch anchor caused re-insertion on each script run; duplicates removed.
 
 ---
 
@@ -31,54 +48,82 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - **Handover archive** — completed handovers are shown directly in the tab with protocol number, company, date, media count, reason, mode badge, and PDF download button
 - **Delete open handovers** — 🗑 button per pending entry; removes the handover and its positions from the database
-- **"Keep in stock" mode** — new button when closing a handover: marks the handover as completed but leaves the media as `stored`
+- **"Keep in stock" mode** — new button when closing a handover: marks the handover as completed but leaves the media as `stored` (useful when a customer temporarily takes media but keeps paying)
 - **Optional document upload** — a handover can now be closed without an uploaded document; a confirmation dialog is shown instead of a hard block
 - **Internal number for media** — free-text `Internal No.` field when creating or editing a media record; visible in the list and included in CSV export
-- **Multi-company logic** — optional billing recipient and media owner selectable per customer record
-- **Help tab full width** — removed the `max-width: 860px` constraint
-- **Mobile view improvements** — tab bar scrolls horizontally, tables scrollable on small screens
+- **Multi-company logic** — optional billing recipient (Firma B pays for Firma A) and media owner selectable per customer record
+- **Help tab full width** — removed the `max-width: 860px` constraint so the content fills the available space
+- **Mobile view improvements** — tab bar scrolls horizontally without wrapping; tables are horizontally scrollable on small screens; more compact padding below 600 px
 
 ### Fixed
-- **Handover recipient bug** — recipient field sent with wrong JS key and was always empty in DB
-- **DB migrations** — new columns added automatically on container start
+- **Handover recipient bug** — the recipient field was sent with the wrong JS key (`Empfänger` instead of `empfaenger`) and was always empty in the database; fixed on both client and server
+- **DB migrations** — new columns (`weiter_im_bestand`, `interne_nr`, `rechnungsempfaenger_id`, `eigentuemer_id`) are added automatically on the next container start without manual schema changes
+
+### Changed
+- Closing a handover without a document now shows a confirmation dialog instead of blocking the action entirely
+- Completed handovers appear in the archive immediately without a page reload
 
 ---
 
 ## [1.2.0] – 2026-04-20
 
 ### Added
-- Media archive sub-tab, Customers & Contracts sub-navigation, Invoices & History sub-navigation
-- Safe detail view, salutation field for contacts, company data in Admin section
-- PDF button and reminder function per invoice
+- Media archive as a sub-tab (Media → Record / Archive)
+- Customers & Contracts combined as one tab with sub-navigation
+- Invoices & History combined as one tab with sub-navigation
+- Safe detail view accessible by clicking the safe name
+- Salutation field (Mr / Ms / Dr / Prof / Other) for contact persons
+- Company data moved to the Admin section instead of the Templates section
+- PDF button per invoice in the invoice history
+- Reminder function per invoice in the invoice history with print button
 
 ### Fixed
-- Safe dropdown empty when editing media, handover completion error after doc download
-- Removed outdated tab permissions, responsive tab bar wrapping
+- Safe dropdown was empty when editing a media record
+- Handover completion after document download threw an error
+- Removed outdated tab permissions from role management
+- Responsive design: tab bar was wrapping instead of scrolling
 
 ---
 
 ## [1.1.1] – 2026-04-20
 
+### Added
+- Safe tab permission: roles can show/hide the Safes tab
+- Responsive layout improvements for tablet and mobile
+
 ### Fixed
-- Safe tab permission toggle for roles
-- Unintended logout when saving/deleting a safe (`localStorage` vs `sessionStorage`)
+- Saving or deleting a safe triggered an unintended logout (`localStorage` vs `sessionStorage` mismatch)
 
 ---
 
 ## [1.1.0] – 2026-04-20
 
 ### Added
-- Safe management (🔒), safe assignment for media, dashboard maintenance warnings
-- CSV export with safe location columns, optional SQLite encryption (SQLCipher AES-256)
+- Safe management (🔒 Safes) — full CRUD with location, purchase data, maintenance dates, and maintenance contract upload
+- Safe assignment when registering a media record
+- Dashboard: maintenance warnings for safes (60-day preview)
+- CSV export extended with safe location columns
+- Optional SQLite encryption via `DB_KEY` environment variable (SQLCipher AES-256)
+
+### Changed
+- Contact email updated: `marcel.capelan@tuv.com` → `info@capelan.de`
 
 ---
 
 ## [1.0.0] – 2025-04-19
 
 ### Initial public release
-- Dashboard, customer & contract management, media management, handover workflow
-- Invoice generation with reminders, archive, letter templates, admin panel
-- SAML 2.0 / SSO, PBKDF2 passwords, token sessions, Docker Swarm support
+
+- Dashboard with KPIs, contract expiry warnings, and maintenance notices
+- Customer management with contracts, volume discounts, and contract history
+- Media management: registration, photos, incoming inspection report
+- Handover workflow with print-ready handover protocol
+- Invoice generation with discount tiers, VAT, and reminder function
+- Archive of all returned media
+- Letter template editor (invoice, handover, incoming, contract)
+- Admin panel: user management, roles & permissions
+- SAML 2.0 / SSO (Azure AD, Okta, Keycloak)
+- PBKDF2 password security, token-based sessions, Docker Swarm support
 
 ---
 
