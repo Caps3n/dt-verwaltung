@@ -1,76 +1,76 @@
 # DT-Verwaltung v1.3.0
 
-Webbasierte Verwaltungslösung für die sichere Einlagerung von Datenträgern.
-Entwickelt für Dienstleister, die Datenträger (HDDs, SSDs, Tapes, USB-Sticks u.ä.) im Auftrag von Kunden lagern, verwalten und dokumentiert zurückgeben.
+Web-based management solution for secure data-carrier storage.
+Built for service providers who store, manage, and document the return of data carriers (HDDs, SSDs, tapes, USB drives, etc.) on behalf of their customers.
 
 ---
 
 ## Features
 
-### Übersicht / Dashboard
-- KPIs: Aktive Verträge, eingelagerte Datenträger, Monats- und Jahresumsatz
-- Ablaufwarnungen für auslaufende Verträge (60-Tage-Vorschau, farbkodiert)
-- Wartungswarnungen für Tresore und Schränke
+### Dashboard
+- KPIs: active contracts, stored media, monthly and annual revenue
+- Contract expiry warnings (60-day preview, colour-coded)
+- Safe and cabinet maintenance warnings
 
-### Kunden & Verträge
-- Vollständiges Kunden-CRUD mit Ansprechpartner, Adresse, Anrede
-- Vertragsdaten: Vertragsnummer, Status, Laufzeit, Kündigungsfrist, Vertragsnotizen
-- Vertragsdokument-Upload (PDF) pro Kunden
-- **Multi-Firmen:** optionaler Rechnungsempfänger (Firma B zahlt für Firma A) und Eigentümer der DTs wählbar
-- Mengenrabatte: bis zu 5 kundenspezifische Preisstaffeln
-- Kundenverlauf / Vertragshistorie
+### Customers & Contracts
+- Full customer CRUD with contact person, address, and salutation
+- Contract data: number, status, duration, notice period, notes
+- Contract document upload (PDF) per customer
+- **Multi-company support:** optional billing recipient (Company B pays for Company A) and media owner selectable per customer record
+- Volume discounts: up to 5 customer-specific price tiers
+- Contract history / audit trail
 
-### Datenträger (DTs)
-- Einlagerung mit Typ, Seriennummer, **interner Nummer**, Preis/Einheit, Rabatt
-- Foto-Upload pro Datenträger
-- Eingangsprotokoll als druckfertiges PDF mit Briefkopf
-- Statusverfolgung: `eingelagert` / `übergeben`
-- Tresor-/Schrank-Zuweisung mit Standortanzeige
-- CSV-Export mit allen Spalten inkl. Tresor-Standort und interner Nummer
+### Media (Datenträger)
+- Registration with type, serial number, **internal number**, unit price, discount
+- Photo upload per media record
+- Print-ready incoming inspection report with letterhead
+- Status tracking: `stored` / `handed over`
+- Safe / cabinet assignment with location display
+- CSV export with all columns including safe location and internal number
 
-### Übergabe-Workflow
-- Schritt 1: Firma wählen, Datenträger auswählen, Übergabeprotokoll generieren und drucken
-- Schritt 2: Unterschriebenes Dokument hochladen (optional), Übergabe abschließen
-- **„Im Bestand lassen"**: Übergabe abschließen ohne DTs als übergeben zu markieren
-- **Offene Übergaben löschen** mit 🗑-Button
-- **Archiv aller abgeschlossenen Übergaben** mit Protokollnummer, Modus und PDF-Button
+### Handover Workflow
+- Step 1: select company, pick media, generate and print the handover protocol
+- Step 2: upload the signed document (optional), close the handover
+- **"Keep in stock" mode:** close a handover without marking media as handed over
+- **Delete open handovers** with the 🗑 button
+- **Archive of all completed handovers** with protocol number, mode badge, and PDF download
 
-### Rechnungen
-- Automatische Rechnungserstellung mit Mengenrabatt, Pauschalrabatt und MwSt.
-- Rechnungshistorie mit PDF-Regenerierung pro Rechnung
-- Mahnungsfunktion: 1./2./3. Mahnung pro Rechnung mit Druck-Button
+### Invoices
+- Automatic invoice creation with volume discount, flat discount, and VAT
+- Invoice history with per-invoice PDF regeneration
+- Reminder function: 1st / 2nd / 3rd reminder per invoice with print button
 
-### Tresorverwaltung (🔒)
-- CRUD für physische Tresore/Schränke: Name, Hersteller, Modell, Seriennummer
-- Standort: Land / Stadt / Gebäude / Etage / Raum
-- Kaufdatum, Kaufpreis, jährliche Wartungskosten
-- Letzter und nächster Wartungstermin
-- Wartungsvertrag-Upload (PDF)
-- Tresor-Detailansicht per Klick
+### Safe Management (🔒)
+- CRUD for physical safes and cabinets: name, manufacturer, model, serial number
+- Location: country / city / building / floor / room
+- Purchase date, purchase price, annual maintenance costs
+- Last and next maintenance date
+- Maintenance contract upload (PDF)
+- Safe detail view accessible by clicking the safe name
 
-### Templates & Briefvorlagen
-- Logo-Upload, Akzentfarbe für alle Dokumente
-- Vorlagen für: Rechnung, Übergabe, Eingangsprotokoll, Vertrag
-- Live-Vorschau beim Bearbeiten
-- Platzhalter-System (Firma, Datum, Beträge, DT-Liste etc.)
+### Templates & Letter Layouts
+- Logo upload and accent colour for all documents
+- Templates for: invoice, handover, incoming report, contract
+- Live preview while editing
+- Placeholder system (company, date, amounts, media list, etc.)
 
-### Admin-Bereich
-- Unternehmensdaten: Firmenname, Adresse, Bankverbindung, Steuernummer, Fußzeile
-- Benutzerverwaltung: Anlegen, Passwort zurücksetzen, Rolle zuweisen
-- Rollen & Berechtigungen: fein granulare Tab-Sichtbarkeit pro Rolle
-- SAML 2.0 / SSO: Azure AD, Okta, Keycloak und andere IdPs
+### Admin Panel
+- Company data: name, address, bank details, tax number, footer text
+- User management: create users, reset passwords, assign roles
+- Roles & permissions: fine-grained tab visibility per role
+- SAML 2.0 / SSO: Azure AD, Okta, Keycloak, and other IdPs
 
-### Sicherheit
-- Passwörter: PBKDF2-HMAC-SHA256 (600.000 Iterationen, zufälliger Salt)
-- Sessions: 64-Zeichen kryptografisch sichere Tokens, DB-gesichert, 8h TTL
-- Optionale SQLite-Verschlüsselung via SQLCipher AES-256 (`DB_KEY` in `.env`)
-- Betrieb als Non-Root-Container (UID 1000)
+### Security
+- Passwords: PBKDF2-HMAC-SHA256 (600,000 iterations, random salt)
+- Sessions: 64-character cryptographically secure tokens, DB-backed, 8 h TTL
+- Optional SQLite encryption via SQLCipher AES-256 (`DB_KEY` env var)
+- Runs as a non-root container (UID 1000)
 
 ---
 
 ## Deployment (Docker / Portainer)
 
-### Portainer Stack (empfohlen)
+### Portainer Stack (recommended)
 
 ```yaml
 version: "3.8"
@@ -82,8 +82,8 @@ services:
     volumes:
       - dtv_data:/data
     environment:
-      - ADMIN_PASSWORD=sicheresPasswort
-      # - DB_KEY=verschlüsselungsSchlüssel   # nur bei Erstinstallation setzen
+      - ADMIN_PASSWORD=yourSecurePassword
+      # - DB_KEY=encryptionKey   # set only on first install
     restart: unless-stopped
     deploy:
       replicas: 1
@@ -97,18 +97,18 @@ volumes:
 ```
 
 1. Portainer → Stacks → Add Stack
-2. Stack einfügen, `ADMIN_PASSWORD` setzen
+2. Paste the stack, set `ADMIN_PASSWORD`
 3. Deploy the Stack
-4. Öffnen: `http://<server-ip>:5000`
+4. Open: `http://<server-ip>:5000`
 
-### Update auf neue Version
+### Updating to a new version
 
 Portainer → Stack → **Pull and Redeploy**
-(GitHub Actions baut automatisch bei jedem Push auf `main`)
+(GitHub Actions builds a new image automatically on every push to `main`)
 
 ---
 
-## Lokale Entwicklung
+## Local Development
 
 ```bash
 git clone https://github.com/Caps3n/dt-verwaltung.git
@@ -117,34 +117,34 @@ pip install flask flask-cors gunicorn pysaml2 cryptography
 python app/server.py
 ```
 
-Öffnen: `http://localhost:5000`
-Standard-Login: `admin` / Passwort aus `ADMIN_PASSWORD` (Standard: `admin`)
+Open: `http://localhost:5000`
+Default login: `admin` / value of `ADMIN_PASSWORD` (default: `admin`)
 
 ---
 
-## Datenbankstruktur
+## Database
 
-SQLite-Datenbank in `/data/dtv.db` (persistentes Docker-Volume).
-Migrationen werden automatisch beim Start angewendet – kein manuelles Schema-Management nötig.
+SQLite database at `/data/dtv.db` (persistent Docker volume).
+Migrations are applied automatically on start — no manual schema management required.
 
-Optionale Verschlüsselung: `DB_KEY` in der Umgebung setzen **vor** dem ersten Start.
-⚠️ Nachträgliches Aktivieren auf bestehender Datenbank wird nicht unterstützt.
+Optional encryption: set `DB_KEY` in the environment **before** the first start.
+⚠️ Enabling encryption on an existing unencrypted database is not supported.
 
 ---
 
-## Technischer Stack
+## Tech Stack
 
-| Komponente | Technologie |
+| Component | Technology |
 |---|---|
 | Backend | Python 3.12, Flask 3.x, Gunicorn |
-| Datenbank | SQLite (WAL-Modus), optional SQLCipher |
-| Frontend | Vanilla JS SPA (kein Framework), HTML5, CSS3 |
-| Authentifizierung | Token-basiert (`X-Token`-Header), optional SAML 2.0 |
-| Container | Docker, non-root (UID 1000), Health-Check |
+| Database | SQLite (WAL mode), optional SQLCipher |
+| Frontend | Vanilla JS SPA (no framework), HTML5, CSS3 |
+| Auth | Token-based (`X-Token` header), optional SAML 2.0 |
+| Container | Docker, non-root (UID 1000), health check |
 | CI/CD | GitHub Actions → ghcr.io |
 
 ---
 
-## Lizenz
+## License
 
 MIT License — © 2025 Marcel Capelan · [capelan.de](https://capelan.de)

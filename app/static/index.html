@@ -626,6 +626,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     </div>
     <div id="uarch-liste"><div class="empty">Keine abgeschlossenen Übergaben</div></div>
   </div>
+  <div class="card" style="margin-top:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="stitle" style="margin-bottom:0">Abgeschlossene Übergaben</div>
+      <input id="uarch-search" placeholder="Suchen…" style="width:180px;font-size:12px;padding:5px 8px" oninput="renderAbgeschlosseneUebergaben()">
+    </div>
+    <div id="uarch-liste"><div class="empty">Keine abgeschlossenen Übergaben</div></div>
+  </div>
 </div>
 
 <!-- TEMPLATES -->
@@ -2016,10 +2023,18 @@ function updateS2Info(){const el=document.getElementById('s2-info');if(!activePe
 function renderPendingList(){
   const el=document.getElementById('pending-list');
   if(!pendingUebergaben.length){el.innerHTML='<div class="empty">Keine</div>';return;}
-  el.innerHTML=pendingUebergaben.map(pu=>{const isA=activePendingId===pu.id;return`<div class="pending-card" style="${isA?'border-color:var(--i-brd);background:var(--i-bg)':''}"><div style="display:flex;justify-content:space-between;gap:8px"><div><div style="font-size:13px;font-weight:700">${pu.firma||'?'}</div><div style="font-size:11px;color:var(--mut)">${pu.datum} - ${pu.dt_ids.length} DT</div></div><div style="display:flex;flex-direction:column;gap:4px"><button onclick="selectPending(${pu.id})" style="padding:3px 8px;font-size:11px" ${isA?'class="btn-p"':''}>Wählen</button><button onclick="printHtml(pendingUebergaben.find(p=>p.id===${pu.id})?.html||'','Formular_${pu.id}.pdf')" style="padding:3px 8px;font-size:11px">Formular</button><button onclick="deletePending(${pu.id})" style="padding:3px 8px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);cursor:pointer">🗑</button><button onclick="deletePending(${pu.id})" style="padding:3px 8px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);cursor:pointer">🗑</button></div></div></div>`;}).join('');
+  el.innerHTML=pendingUebergaben.map(pu=>{const isA=activePendingId===pu.id;return`<div class="pending-card" style="${isA?'border-color:var(--i-brd);background:var(--i-bg)':''}"><div style="display:flex;justify-content:space-between;gap:8px"><div><div style="font-size:13px;font-weight:700">${pu.firma||'?'}</div><div style="font-size:11px;color:var(--mut)">${pu.datum} - ${pu.dt_ids.length} DT</div></div><div style="display:flex;flex-direction:column;gap:4px"><button onclick="selectPending(${pu.id})" style="padding:3px 8px;font-size:11px" ${isA?'class="btn-p"':''}>Wählen</button><button onclick="printHtml(pendingUebergaben.find(p=>p.id===${pu.id})?.html||'','Formular_${pu.id}.pdf')" style="padding:3px 8px;font-size:11px">Formular</button><button onclick="deletePending(${pu.id})" style="padding:3px 8px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);cursor:pointer">🗑</button><button onclick="deletePending(${pu.id})" style="padding:3px 8px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);cursor:pointer">🗑</button><button onclick="deletePending(${pu.id})" style="padding:3px 8px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);cursor:pointer">🗑</button></div></div></div>`;}).join('');
 }
 
 function selectPending(id){activePendingId=id;updateS2Info();renderPendingList();}
+async function deletePending(id){
+  if(!confirm('Diese offene Übergabe löschen?'))return;
+  const r=await apiDel(`/api/uebergaben/${id}`);
+  if(!r)return;
+  pendingUebergaben=pendingUebergaben.filter(p=>p.id!==id);
+  if(activePendingId===id)activePendingId=pendingUebergaben.length?pendingUebergaben[0].id:null;
+  renderPendingList();updateS2Info();
+}
 async function deletePending(id){
   if(!confirm('Diese offene Übergabe löschen?'))return;
   const r=await apiDel(`/api/uebergaben/${id}`);
@@ -2057,6 +2072,31 @@ async function uebergabeAbschliessen(weiterImBestand=false){
   document.getElementById('doc-upzone').classList.remove('has-file');
   renderAlles();renderPendingList();updateS2Info();renderAbgeschlosseneUebergaben();
   alert(weiterImBestand?'Abgeschlossen – DTs bleiben im Bestand.':'Übergabe erfolgreich abgeschlossen!');
+}
+
+function renderAbgeschlosseneUebergaben(){
+  const el=document.getElementById('uarch-liste');if(!el)return;
+  const q=(document.getElementById('uarch-search')?.value||'').toLowerCase();
+  const abg=Übergaben.filter(u=>u.abgeschlossen&&(!q||(u.firma||'').toLowerCase().includes(q)||(u.datum||'').includes(q)||(u.protokoll_nr||'').toLowerCase().includes(q)));
+  if(!abg.length){el.innerHTML='<div class="empty">Keine abgeschlossenen Übergaben</div>';return;}
+  el.innerHTML='<table style="table-layout:auto"><thead><tr>'
+    +'<th>Protokoll-Nr.</th><th>Firma</th><th>Datum</th><th>DT</th><th>Grund</th><th>Modus</th><th></th>'
+    +'</tr></thead><tbody>'
+    +abg.map(u=>{
+      const docBtn=u.hat_doc
+        ?`<button onclick="loadAndOpenDoc('/api/uebergaben/${u.id}/doc')" style="padding:2px 8px;font-size:11px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:var(--rad);cursor:pointer">📄 Dok.</button>`
+        :'<span style="font-size:10px;color:var(--mut)">—</span>';
+      const badge=u.weiter_im_bestand
+        ?'<span class="badge ba" style="font-size:10px">Im Bestand</span>'
+        :'<span class="badge br" style="font-size:10px">Übergeben</span>';
+      return`<tr><td style="font-family:monospace;font-size:10px">${u.protokoll_nr||u.id}</td>`
+        +`<td style="font-weight:600">${u.firma||'?'}</td>`
+        +`<td style="font-size:11px">${u.datum||''}</td>`
+        +`<td>${u.dt_ids?.length||'?'}</td>`
+        +`<td style="font-size:11px">${u.grund||'—'}</td>`
+        +`<td>${badge}</td>`
+        +`<td>${docBtn}</td></tr>`;
+    }).join('')+'</tbody></table>';
 }
 
 function renderAbgeschlosseneUebergaben(){
