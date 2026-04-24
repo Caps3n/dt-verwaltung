@@ -460,9 +460,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <label>Bezeichnung / Typ</label><input id="dt-bezeichnung" placeholder="z.B. Festplatte, LTO-Tape">
         <label>Seriennummer</label><input id="dt-serial" placeholder="HDD-2024-001">
         <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="dt-interne_nr" placeholder="z.B. INT-001">
-        <label>Haupt-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional, wenn abweichend von Firma)</span></label><select id="dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
+        <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="dt-modus" id="dt-modus-einfach" value="einfach" checked onchange="dtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="dt-modus" id="dt-modus-escrow" value="escrow" onchange="dtModusWechseln()"> Escrow / 3-Firmen</label></div>
+        <div id="dt-escrow-section" style="display:none"><label>Haupt-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional, wenn abweichend von Firma)</span></label><select id="dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
         <label>Neben-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
-        <label>Rechnungsempfänger <span style="font-weight:400;color:var(--mut)">(optional, wenn abweichend)</span></label><select id="dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select>
+        <label>Rechnungsempfänger <span style="font-weight:400;color:var(--mut)">(optional, wenn abweichend)</span></label><select id="dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
         <label>Preis</label>
         <div class="r2"><input id="dt-preis" type="number" value="1.00" step="0.10" min="0"><select id="dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
         <label>Rabatt (%)</label><input id="dt-rabatt" type="number" value="0" min="0" max="100" step="0.1">
@@ -1110,9 +1111,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <label>Bezeichnung</label><input id="ov-dt-bezeichnung">
     <label>Seriennummer</label><input id="ov-dt-serial">
     <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="ov-dt-interne_nr" placeholder="z.B. INT-001">
-    <label>Haupt-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
+    <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-einfach" value="einfach" checked onchange="ovDtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-escrow" value="escrow" onchange="ovDtModusWechseln()"> Escrow / 3-Firmen</label></div>
+    <div id="ov-dt-escrow-section" style="display:none"><label>Haupt-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
     <label>Neben-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
-    <label>Rechnungsempfänger <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select>
+    <label>Rechnungsempfänger <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
     <label>Preis</label>
     <div class="r2"><input id="ov-dt-preis" type="number" step="0.10" min="0"><select id="ov-dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
     <label>Rabatt (%)</label><input id="ov-dt-rabatt" type="number" min="0" max="100" step="0.1">
@@ -1546,6 +1548,8 @@ function renderKunden() {
 }
 
 // ══ DATENTRAEGER ═════════════════════════════════════
+function dtModusWechseln(){const s=document.getElementById('dt-escrow-section');if(s)s.style.display=document.getElementById('dt-modus-escrow')?.checked?'':'none';}
+function ovDtModusWechseln(){const s=document.getElementById('ov-dt-escrow-section');if(s)s.style.display=document.getElementById('ov-dt-modus-escrow')?.checked?'':'none';}
 async function dtHinzufuegen() {
   if (!can('write')) { alert('Keine Berechtigung.'); return; }
   const kunden_id=parseInt(document.getElementById('dt-kunden_id').value);
@@ -1565,7 +1569,7 @@ async function dtHinzufuegen() {
     document.getElementById('dt-bild-file').value='';pendingDtBild=null;
     document.getElementById('dt-scan-prev').textContent='Scan hochladen';document.getElementById('dt-scan-zone').classList.remove('has-file');
     document.getElementById('dt-scan-file').value='';pendingDtScan=null;
-    renderAlles();dtGotoStep(1);
+    const moEinfach=document.getElementById('dt-modus-einfach');if(moEinfach){moEinfach.checked=true;dtModusWechseln();}renderAlles();dtGotoStep(1);
   }
 }
 
@@ -1580,6 +1584,7 @@ async function dtBearbeiten(id) {
   if(document.getElementById('ov-dt-eigentuemer_id'))document.getElementById('ov-dt-eigentuemer_id').value=d.eigentuemer_id||'';
   if(document.getElementById('ov-dt-neben_eigentuemer_id'))document.getElementById('ov-dt-neben_eigentuemer_id').value=d.neben_eigentuemer_id||'';
   if(document.getElementById('ov-dt-rechnungsempfaenger_id'))document.getElementById('ov-dt-rechnungsempfaenger_id').value=d.rechnungsempfaenger_id||'';
+  const hatEscrow=d.eigentuemer_id||d.neben_eigentuemer_id||d.rechnungsempfaenger_id;const ovMo=document.getElementById('ov-dt-modus-'+(hatEscrow?'escrow':'einfach'));if(ovMo){ovMo.checked=true;ovDtModusWechseln();}
   document.getElementById('ov-dt-preis').value=d.preis;
   document.getElementById('ov-dt-einheit').value=d.einheit;
   document.getElementById('ov-dt-rabatt').value=d.rabatt;
@@ -1667,7 +1672,7 @@ function genRechnungHtml(k){
   // Immer tagesgenau: falls kein Zeitraum angegeben, nutze 01.01.Jahr - Rechnungsdatum
   let zrP=parseZeitraum(zr);
   if(!zrP&&datRaw){const d=new Date(datRaw);zrP={von:new Date(d.getFullYear(),0,1),bis:d};}
-  const allDts=datentraeger.filter(d=>d.kunden_id===k.id);
+  const allDts=datentraeger.filter(d=>(d.rechnungsempfaenger_id||d.kunden_id)===k.id);
   const dts=zrP?allDts.filter(d=>new Date(d.einlagerungs_datum)<=zrP.bis):allDts.filter(d=>d.status==='eingelagert');
   const T=window._T||{};
   const fillPh=(txt,map)=>{let o=txt;Object.entries(map).forEach(([k,v])=>{o=o.split(k).join(v||'');});return o;};
@@ -2061,7 +2066,7 @@ async function uebergabeAbschliessen(weiterImBestand=false){
   if(pu){
     if(!weiterImBestand){pu.dt_ids.forEach(did=>{const dt=datentraeger.find(d=>d.id===did);if(dt)dt.status='uebergeben';});}
     pu.abgeschlossen=true;pu.hat_doc=!!pendingUDoc;pu.weiter_im_bestand=weiterImBestand;
-    Übergaben.push(pu);
+    if(!Übergaben.find(u=>u.id===pu.id))Übergaben.push(pu);
   }
   pendingUebergaben=pendingUebergaben.filter(p=>p.id!==activePendingId);
   activePendingId=pendingUebergaben.length?pendingUebergaben[0].id:null;
@@ -2101,7 +2106,7 @@ function renderAbgeschlosseneUebergaben(){
 function renderArchiv(){
   const filter=parseInt(document.getElementById('archiv-filter')?.value)||0;
   const q=(document.getElementById('archiv-search')?.value||'').toLowerCase();
-  const archivDT=datentraeger.filter(d=>d.status==='übergeben'&&(filter?d.kunden_id===filter:true)&&(!q||(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.kunden_nr||'').toLowerCase().includes(q)));
+  const archivDT=datentraeger.filter(d=>d.status==='uebergeben'&&(filter?d.kunden_id===filter:true)&&(!q||(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.kunden_nr||'').toLowerCase().includes(q)));
   const el=document.getElementById('archiv-inhalt');
   if(!archivDT.length){el.innerHTML='<div class="empty">Keine</div>';return;}
   const gr={};archivDT.forEach(d=>{if(!gr[d.kunden_id])gr[d.kunden_id]=[];gr[d.kunden_id].push(d);});
