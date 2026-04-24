@@ -386,6 +386,10 @@ def init_db():
         admin_pass = os.environ.get('ADMIN_PASSWORD', 'admin123')
     admin_hash = hash_pw(admin_pass)
     db.execute("INSERT OR IGNORE INTO benutzer(username,name,password_hash,rollen_id) VALUES('admin','Administrator',?,1)", (admin_hash,))
+    # If ADMIN_PASSWORD is explicitly configured, always sync it to the DB so a redeploy resets the password
+    if os.environ.get('ADMIN_PASSWORD') or os.environ.get('ADMIN_PASSWORD_FILE'):
+        db.execute("UPDATE benutzer SET password_hash=? WHERE username='admin'", (admin_hash,))
+        print(f"[AUTH] Admin password synced from ADMIN_PASSWORD env var")
     # One-time admin password reset via RESET_ADMIN_PASSWORD env var
     _reset_pw = os.environ.get('RESET_ADMIN_PASSWORD', '').strip()
     if _reset_pw:
@@ -547,6 +551,25 @@ def login():
 @app.route('/api/logout', methods=['POST'])
 def logout():
     session_delete(request.headers.get('X-Token', ''))
+    return jsonify({'ok': True})
+
+@app.route('/api/emergency-pw-reset', methods=['POST'])
+def emergency_pw_reset():
+    """Emergency admin password reset — only works if RESET_ADMIN_PASSWORD env var is set."""
+    _reset_pw = os.environ.get('RESET_ADMIN_PASSWORD', '').strip()
+    if not _reset_pw:
+        return jsonify({'error': 'Not enabled'}), 403
+    data = request.json or {}
+    if data.get('token') != _reset_pw:
+        return jsonify({'error': 'Invalid token'}), 403
+    new_pw = data.get('password', '').strip()
+    if not new_pw:
+        return jsonify({'error': 'password required'}), 400
+    db = get_db()
+    db.execute("UPDATE benutzer SET password_hash=? WHERE username='admin'", (hash_pw(new_pw),))
+    db.commit()
+    db.close()
+    print(f"[AUTH] Admin password reset via emergency endpoint")
     return jsonify({'ok': True})
 
 @app.route('/api/me/password', methods=['PUT'])
