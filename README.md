@@ -1,4 +1,4 @@
-# DT-Verwaltung v1.3.0
+# DT-Verwaltung v1.3.1
 
 Web-based management solution for secure data-carrier storage.
 Built for service providers who store, manage, and document the return of data carriers (HDDs, SSDs, tapes, USB drives, etc.) on behalf of their customers.

@@ -969,33 +969,7 @@ def delete_uebergabe(uid):
     db.close()
     return jsonify({'ok': True})
 
-@app.route('/api/uebergaben/<int:uid>', methods=['DELETE'])
-@require_auth('write')
-def delete_uebergabe(uid):
-    db = get_db()
-    row = db.execute("SELECT id FROM uebergaben WHERE id=?", (uid,)).fetchone()
-    if not row:
-        db.close()
-        return jsonify({'error': 'Nicht gefunden'}), 404
-    db.execute("DELETE FROM uebergabe_positionen WHERE uebergabe_id=?", (uid,))
-    db.execute("DELETE FROM uebergaben WHERE id=?", (uid,))
-    db.commit()
-    db.close()
-    return jsonify({'ok': True})
 
-@app.route('/api/uebergaben/<int:uid>', methods=['DELETE'])
-@require_auth('write')
-def delete_uebergabe(uid):
-    db = get_db()
-    row = db.execute("SELECT id FROM uebergaben WHERE id=?", (uid,)).fetchone()
-    if not row:
-        db.close()
-        return jsonify({'error': 'Nicht gefunden'}), 404
-    db.execute("DELETE FROM uebergabe_positionen WHERE uebergabe_id=?", (uid,))
-    db.execute("DELETE FROM uebergaben WHERE id=?", (uid,))
-    db.commit()
-    db.close()
-    return jsonify({'ok': True})
 
 @app.route('/api/uebergaben/<int:uid>/doc', methods=['GET'])
 @require_auth('read')
