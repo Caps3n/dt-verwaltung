@@ -1,4 +1,4 @@
-# DT-Verwaltung v1.3.1
+# DT-Verwaltung v1.3.2
 
 Web-based management solution for secure data-carrier storage.
 Built for service providers who store, manage, and document the return of data carriers (HDDs, SSDs, tapes, USB drives, etc.) on behalf of their customers.
@@ -44,20 +44,15 @@ Built for service providers who store, manage, and document the return of data c
 - CRUD for physical safes and cabinets: name, manufacturer, model, serial number
 - Location: country / city / building / floor / room
 - Purchase date, purchase price, annual maintenance costs
-- Last and next maintenance date
-- Maintenance contract upload (PDF)
-- Safe detail view accessible by clicking the safe name
+- Last and next maintenance date, maintenance contract upload (PDF)
 
 ### Templates & Letter Layouts
 - Logo upload and accent colour for all documents
 - Templates for: invoice, handover, incoming report, contract
-- Live preview while editing
-- Placeholder system (company, date, amounts, media list, etc.)
+- Live preview while editing, placeholder system
 
 ### Admin Panel
-- Company data: name, address, bank details, tax number, footer text
-- User management: create users, reset passwords, assign roles
-- Roles & permissions: fine-grained tab visibility per role
+- Company data, user management, roles & permissions
 - SAML 2.0 / SSO: Azure AD, Okta, Keycloak, and other IdPs
 
 ### Security
@@ -98,13 +93,12 @@ volumes:
 
 1. Portainer → Stacks → Add Stack
 2. Paste the stack, set `ADMIN_PASSWORD`
-3. Deploy the Stack
-4. Open: `http://<server-ip>:5000`
+3. Deploy the Stack — open `http://<server-ip>:5000`
 
-### Updating to a new version
+### Updating
 
 Portainer → Stack → **Pull and Redeploy**
-(GitHub Actions builds a new image automatically on every push to `main`)
+(GitHub Actions builds automatically on every push to `main`)
 
 ---
 
@@ -117,18 +111,7 @@ pip install flask flask-cors gunicorn pysaml2 cryptography
 python app/server.py
 ```
 
-Open: `http://localhost:5000`
-Default login: `admin` / value of `ADMIN_PASSWORD` (default: `admin`)
-
----
-
-## Database
-
-SQLite database at `/data/dtv.db` (persistent Docker volume).
-Migrations are applied automatically on start — no manual schema management required.
-
-Optional encryption: set `DB_KEY` in the environment **before** the first start.
-⚠️ Enabling encryption on an existing unencrypted database is not supported.
+Open: `http://localhost:5000` — default login: `admin` / value of `ADMIN_PASSWORD`
 
 ---
 

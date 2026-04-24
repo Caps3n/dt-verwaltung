@@ -340,6 +340,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="stitle" id="k-form-title">Neue Firma anlegen</div>
       <input type="hidden" id="k-edit-id">
       <div class="r2"><div><label>Firmenname *</label><input id="k-firma" placeholder="Mustermann GmbH"></div><div><label>Kundennummer *</label><input id="k-nr" placeholder="K-0042"></div></div>
+      <label>Rechnungsempfänger <span style="font-weight:400;color:var(--mut)">(andere Firma – optional)</span></label>
+      <select id="k-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select>
+      <label>Eigentümer der DTs <span style="font-weight:400;color:var(--mut)">(optional)</span></label>
+      <select id="k-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
       <div class="r2"><div><label>Ansprechpartner</label><div style="display:flex;gap:6px"><select id="k-anrede" style="width:110px;flex-shrink:0"><option value="">Anrede</option><option value="Herr">Herr</option><option value="Frau">Frau</option><option value="Dr.">Dr.</option><option value="Prof.">Prof.</option><option value="Divers">Divers</option></select><input id="k-ansprechpartner" placeholder="Max Mustermann" style="flex:1"></div></div><div><label>E-Mail</label><input id="k-email"></div></div>
       <div class="r2"><div><label>Telefon</label><input id="k-tel"></div><div><label>Mobil</label><input id="k-mobil"></div></div>
       <label>Strasse</label><input id="k-strasse">
@@ -459,6 +463,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <label>Firma</label><select id="dt-kunden_id"><option value="">Firma wählen</option></select>
         <label>Bezeichnung / Typ</label><input id="dt-bezeichnung" placeholder="z.B. Festplatte, LTO-Tape">
         <label>Seriennummer</label><input id="dt-serial" placeholder="HDD-2024-001">
+        <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="dt-interne_nr" placeholder="z.B. INT-001">
         <label>Preis</label>
         <div class="r2"><input id="dt-preis" type="number" value="1.00" step="0.10" min="0"><select id="dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
         <label>Rabatt (%)</label><input id="dt-rabatt" type="number" value="0" min="0" max="100" step="0.1">
@@ -619,20 +624,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     </div>
     <div id="uarch-liste"><div class="empty">Keine abgeschlossenen Übergaben</div></div>
   </div>
-  <div class="card" style="margin-top:1rem">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="stitle" style="margin-bottom:0">Abgeschlossene Übergaben</div>
-      <input id="uarch-search" placeholder="Suchen…" style="width:180px;font-size:12px;padding:5px 8px" oninput="renderAbgeschlosseneUebergaben()">
-    </div>
-    <div id="uarch-liste"><div class="empty">Keine abgeschlossenen Übergaben</div></div>
-  </div>
-  <div class="card" style="margin-top:1rem">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="stitle" style="margin-bottom:0">Abgeschlossene Übergaben</div>
-      <input id="uarch-search" placeholder="Suchen…" style="width:180px;font-size:12px;padding:5px 8px" oninput="renderAbgeschlosseneUebergaben()">
-    </div>
-    <div id="uarch-liste"><div class="empty">Keine abgeschlossenen Übergaben</div></div>
-  </div>
+
+
 </div>
 
 <!-- TEMPLATES -->
@@ -1097,7 +1090,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.1
+  &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.2
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1117,6 +1110,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <label>Firma</label><select id="ov-dt-kunden_id"></select>
     <label>Bezeichnung</label><input id="ov-dt-bezeichnung">
     <label>Seriennummer</label><input id="ov-dt-serial">
+    <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="ov-dt-interne_nr" placeholder="z.B. INT-001">
     <label>Preis</label>
     <div class="r2"><input id="ov-dt-preis" type="number" step="0.10" min="0"><select id="ov-dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
     <label>Rabatt (%)</label><input id="ov-dt-rabatt" type="number" min="0" max="100" step="0.1">
@@ -1376,7 +1370,14 @@ async function showApp() {
   renderDashboard();
   checkSamlConfig();
   // Load support contact into footer
-  apiJ('/api/templates').then(tpl=>{if(tpl)updateSupportDisplay(tpl.support_name||'',tpl.support_email||'');});
+  apiJ('/api/templates').then(async d=>{
+    if(!d)return;
+    updateSupportDisplay(d.support_name||'',d.support_email||'');
+    accentColor=d.akzentfarbe||'#0065A4';
+    try{window._T=JSON.parse(d.rechnung_json||'{}')}catch(e){window._T={};}
+    try{window._TU=JSON.parse(d.uebergabe_json||'{}')}catch(e){window._TU={};}
+    if(d.hat_logo){const logo=await apiJ('/api/templates/logo');if(logo&&logo.data)logoData=logo.data;}
+  });
   // Defaults
   document.getElementById('dt-datum').value=today;
   document.getElementById('r-datum').value=today;
@@ -1439,6 +1440,8 @@ function kundeFormData() {
     if(ab>0&&pct>0)mgTiers.push({ab,pct,lbl});
   }
   d.mengenrabatt_json=JSON.stringify(mgTiers);
+  d.rechnungsempfaenger_id=parseInt(document.getElementById('k-rechnungsempfaenger_id')?.value)||null;
+  d.eigentuemer_id=parseInt(document.getElementById('k-eigentuemer_id')?.value)||null;
   return d;
 }
 function kundeFormMgFill(k){
@@ -1481,6 +1484,8 @@ function kundeBearbeiten(id) {
   document.getElementById('k-edit-id').value=id;
   kFields.forEach((fid,i)=>{ const el=document.getElementById(fid); if(el) el.value=k[kKeys[i]]||''; });
   kundeFormMgFill(k);
+  if(document.getElementById('k-rechnungsempfaenger_id'))document.getElementById('k-rechnungsempfaenger_id').value=k.rechnungsempfaenger_id||'';
+  if(document.getElementById('k-eigentuemer_id'))document.getElementById('k-eigentuemer_id').value=k.eigentuemer_id||'';
   document.getElementById('k-form-title').textContent='Firma bearbeiten';
   document.getElementById('k-save-btn').textContent='Aenderungen speichern';
   document.getElementById('k-ebanner').style.display='flex';
@@ -1552,11 +1557,11 @@ async function dtHinzufuegen() {
   const preis=parseFloat(document.getElementById('dt-preis').value)||0;
   const einheit=document.getElementById('dt-einheit').value;
   const preis_jahr=einheit==='monat'?preis*12:preis;
-  const data={kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt:parseFloat(document.getElementById('dt-rabatt').value)||0,einlagerungs_datum:document.getElementById('dt-datum').value,beschreibung:document.getElementById('dt-beschreibung').value.trim(),tresor_id:parseInt(document.getElementById('dt-tresor_id').value)||null,bild:pendingDtBild?.data,bild_type:pendingDtBild?.type,eingang_doc:pendingDtScan?.data,eingang_doc_type:pendingDtScan?.type,eingang_doc_name:pendingDtScan?.name};
+  const data={kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt:parseFloat(document.getElementById('dt-rabatt').value)||0,einlagerungs_datum:document.getElementById('dt-datum').value,beschreibung:document.getElementById('dt-beschreibung').value.trim(),tresor_id:parseInt(document.getElementById('dt-tresor_id').value)||null,interne_nr:document.getElementById('dt-interne_nr')?.value||''  ,bild:pendingDtBild?.data,bild_type:pendingDtBild?.type,eingang_doc:pendingDtScan?.data,eingang_doc_type:pendingDtScan?.type,eingang_doc_name:pendingDtScan?.name};
   const result=await apiPost('/api/datentraeger',data);
   if(result){
     datentraeger.push(result);
-    ['dt-bezeichnung','dt-serial','dt-beschreibung'].forEach(id=>document.getElementById(id).value='');
+    ['dt-bezeichnung','dt-serial','dt-beschreibung','dt-interne_nr'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('dt-preis').value='1.00';document.getElementById('dt-rabatt').value='0';document.getElementById('dt-datum').value=today;
     document.getElementById('dt-bild-prev').textContent='Klicken zum Hochladen';document.getElementById('dt-bild-zone').classList.remove('has-file');
     document.getElementById('dt-bild-file').value='';pendingDtBild=null;
@@ -1573,6 +1578,7 @@ async function dtBearbeiten(id) {
   document.getElementById('ov-dt-kunden_id').innerHTML=opts; document.getElementById('ov-dt-kunden_id').value=d.kunden_id;
   document.getElementById('ov-dt-bezeichnung').value=d.bezeichnung;
   document.getElementById('ov-dt-serial').value=d.serial;
+  if(document.getElementById('ov-dt-interne_nr'))document.getElementById('ov-dt-interne_nr').value=d.interne_nr||'';
   document.getElementById('ov-dt-preis').value=d.preis;
   document.getElementById('ov-dt-einheit').value=d.einheit;
   document.getElementById('ov-dt-rabatt').value=d.rabatt;
@@ -1590,7 +1596,7 @@ async function dtSpeichern() {
   const id=parseInt(document.getElementById('ov-dt-id').value);
   const preis=parseFloat(document.getElementById('ov-dt-preis').value)||0;
   const einheit=document.getElementById('ov-dt-einheit').value;
-  const data={kunden_id:parseInt(document.getElementById('ov-dt-kunden_id').value),bezeichnung:document.getElementById('ov-dt-bezeichnung').value.trim(),serial:document.getElementById('ov-dt-serial').value.trim(),preis,einheit,preis_jahr:einheit==='monat'?preis*12:preis,rabatt:parseFloat(document.getElementById('ov-dt-rabatt').value)||0,einlagerungs_datum:document.getElementById('ov-dt-datum').value,beschreibung:document.getElementById('ov-dt-beschreibung').value.trim(),tresor_id:parseInt(document.getElementById('ov-dt-tresor_id').value)||null};
+  const data={kunden_id:parseInt(document.getElementById('ov-dt-kunden_id').value),bezeichnung:document.getElementById('ov-dt-bezeichnung').value.trim(),serial:document.getElementById('ov-dt-serial').value.trim(),preis,einheit,preis_jahr:einheit==='monat'?preis*12:preis,rabatt:parseFloat(document.getElementById('ov-dt-rabatt').value)||0,einlagerungs_datum:document.getElementById('ov-dt-datum').value,beschreibung:document.getElementById('ov-dt-beschreibung').value.trim(),tresor_id:parseInt(document.getElementById('ov-dt-tresor_id').value)||null,interne_nr:document.getElementById('ov-dt-interne_nr')?.value||''};
   if(pendingOvBild){data.bild=pendingOvBild.data;data.bild_type=pendingOvBild.type;}
   const result=await apiPut(`/api/datentraeger/${id}`,data);
   if(result){const i=datentraeger.findIndex(d=>d.id===id);if(i>=0)datentraeger[i]={...datentraeger[i],...result};document.getElementById('dt-ov').classList.remove('open');renderAlles();}
@@ -1631,6 +1637,11 @@ function renderSelects(){
   if(tsel)tsel.innerHTML=tresorOpts;
   const tselOv=document.getElementById('ov-dt-tresor_id');
   if(tselOv)tselOv.innerHTML=tresorOpts;
+  const kOptsExt='<option value="">— gleiche Firma —</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
+  ['k-rechnungsempfaenger_id','k-eigentuemer_id'].forEach(sid=>{
+    const sel=document.getElementById(sid);
+    if(sel){const cur=sel.value;sel.innerHTML=kOptsExt;sel.value=cur;}
+  });
 }
 
 function renderMetrics(){
@@ -2023,7 +2034,7 @@ function updateS2Info(){const el=document.getElementById('s2-info');if(!activePe
 function renderPendingList(){
   const el=document.getElementById('pending-list');
   if(!pendingUebergaben.length){el.innerHTML='<div class="empty">Keine</div>';return;}
-  el.innerHTML=pendingUebergaben.map(pu=>{const isA=activePendingId===pu.id;return`<div class="pending-card" style="${isA?'border-color:var(--i-brd);background:var(--i-bg)':''}"><div style="display:flex;justify-content:space-between;gap:8px"><div><div style="font-size:13px;font-weight:700">${pu.firma||'?'}</div><div style="font-size:11px;color:var(--mut)">${pu.datum} - ${pu.dt_ids.length} DT</div></div><div style="display:flex;flex-direction:column;gap:4px"><button onclick="selectPending(${pu.id})" style="padding:3px 8px;font-size:11px" ${isA?'class="btn-p"':''}>Wählen</button><button onclick="printHtml(pendingUebergaben.find(p=>p.id===${pu.id})?.html||'','Formular_${pu.id}.pdf')" style="padding:3px 8px;font-size:11px">Formular</button><button onclick="deletePending(${pu.id})" style="padding:3px 8px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);cursor:pointer">🗑</button><button onclick="deletePending(${pu.id})" style="padding:3px 8px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);cursor:pointer">🗑</button><button onclick="deletePending(${pu.id})" style="padding:3px 8px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);cursor:pointer">🗑</button></div></div></div>`;}).join('');
+  el.innerHTML=pendingUebergaben.map(pu=>{const isA=activePendingId===pu.id;return`<div class="pending-card" style="${isA?'border-color:var(--i-brd);background:var(--i-bg)':''}"><div style="display:flex;justify-content:space-between;gap:8px"><div><div style="font-size:13px;font-weight:700">${pu.firma||'?'}</div><div style="font-size:11px;color:var(--mut)">${pu.datum} - ${pu.dt_ids.length} DT</div></div><div style="display:flex;flex-direction:column;gap:4px"><button onclick="selectPending(${pu.id})" style="padding:3px 8px;font-size:11px" ${isA?'class="btn-p"':''}>Wählen</button><button onclick="printHtml(pendingUebergaben.find(p=>p.id===${pu.id})?.html||'','Formular_${pu.id}.pdf')" style="padding:3px 8px;font-size:11px">Formular</button><button onclick="deletePending(${pu.id})" style="padding:3px 8px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);cursor:pointer">🗑</button></div></div></div>`;}).join('');
 }
 
 function selectPending(id){activePendingId=id;updateS2Info();renderPendingList();}
@@ -2035,22 +2046,8 @@ async function deletePending(id){
   if(activePendingId===id)activePendingId=pendingUebergaben.length?pendingUebergaben[0].id:null;
   renderPendingList();updateS2Info();
 }
-async function deletePending(id){
-  if(!confirm('Diese offene Übergabe löschen?'))return;
-  const r=await apiDel(`/api/uebergaben/${id}`);
-  if(!r)return;
-  pendingUebergaben=pendingUebergaben.filter(p=>p.id!==id);
-  if(activePendingId===id)activePendingId=pendingUebergaben.length?pendingUebergaben[0].id:null;
-  renderPendingList();updateS2Info();
-}
-async function deletePending(id){
-  if(!confirm('Diese offene Übergabe löschen?'))return;
-  const r=await apiDel(`/api/uebergaben/${id}`);
-  if(!r)return;
-  pendingUebergaben=pendingUebergaben.filter(p=>p.id!==id);
-  if(activePendingId===id)activePendingId=pendingUebergaben.length?pendingUebergaben[0].id:null;
-  renderPendingList();updateS2Info();
-}
+
+
 
 async function uebergabeAbschliessen(weiterImBestand=false){
   if(!activePendingId){alert('Bitte eine Übergabe auswählen.');return;}
@@ -2072,31 +2069,6 @@ async function uebergabeAbschliessen(weiterImBestand=false){
   document.getElementById('doc-upzone').classList.remove('has-file');
   renderAlles();renderPendingList();updateS2Info();renderAbgeschlosseneUebergaben();
   alert(weiterImBestand?'Abgeschlossen – DTs bleiben im Bestand.':'Übergabe erfolgreich abgeschlossen!');
-}
-
-function renderAbgeschlosseneUebergaben(){
-  const el=document.getElementById('uarch-liste');if(!el)return;
-  const q=(document.getElementById('uarch-search')?.value||'').toLowerCase();
-  const abg=Übergaben.filter(u=>u.abgeschlossen&&(!q||(u.firma||'').toLowerCase().includes(q)||(u.datum||'').includes(q)||(u.protokoll_nr||'').toLowerCase().includes(q)));
-  if(!abg.length){el.innerHTML='<div class="empty">Keine abgeschlossenen Übergaben</div>';return;}
-  el.innerHTML='<table style="table-layout:auto"><thead><tr>'
-    +'<th>Protokoll-Nr.</th><th>Firma</th><th>Datum</th><th>DT</th><th>Grund</th><th>Modus</th><th></th>'
-    +'</tr></thead><tbody>'
-    +abg.map(u=>{
-      const docBtn=u.hat_doc
-        ?`<button onclick="loadAndOpenDoc('/api/uebergaben/${u.id}/doc')" style="padding:2px 8px;font-size:11px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:var(--rad);cursor:pointer">📄 Dok.</button>`
-        :'<span style="font-size:10px;color:var(--mut)">—</span>';
-      const badge=u.weiter_im_bestand
-        ?'<span class="badge ba" style="font-size:10px">Im Bestand</span>'
-        :'<span class="badge br" style="font-size:10px">Übergeben</span>';
-      return`<tr><td style="font-family:monospace;font-size:10px">${u.protokoll_nr||u.id}</td>`
-        +`<td style="font-weight:600">${u.firma||'?'}</td>`
-        +`<td style="font-size:11px">${u.datum||''}</td>`
-        +`<td>${u.dt_ids?.length||'?'}</td>`
-        +`<td style="font-size:11px">${u.grund||'—'}</td>`
-        +`<td>${badge}</td>`
-        +`<td>${docBtn}</td></tr>`;
-    }).join('')+'</tbody></table>';
 }
 
 function renderAbgeschlosseneUebergaben(){
@@ -2400,7 +2372,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.1${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.2${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
