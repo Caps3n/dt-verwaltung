@@ -6,12 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [1.3.4] – 2026-04-24
+## [1.3.5] – 2026-04-24
 
 ### Fixed
 - **Rechnung shows DTs for wrong company** — billing filter now uses `rechnungsempfaenger_id` (falling back to `kunden_id`) so each invoice only lists media records that the selected company actually pays for.
 - **Completed handover appears twice in Übergabe tab** — the push after `uebergabeAbschliessen` now checks for duplicates before inserting, preventing double-display when the handover was already loaded at startup.
 - **Archived DTs never appeared in Datenträger Archiv** — status string mismatch fixed: frontend sets `status='uebergeben'` (no umlaut) but the archive filter compared against `'übergeben'` (with umlaut). Both sides now use `'uebergeben'`.
+- **Login completely broken after v1.3.4 deploy** — a patch was accidentally applied twice, producing a duplicate `const hatEscrow` declaration inside `dtBearbeiten`. JavaScript rejected the script entirely, causing `doLogin is not defined` and making the app unusable.
+- **`ADMIN_PASSWORD` env var now synced to DB on every startup** — previously only applied on first run via `INSERT OR IGNORE`; a redeploy with `ADMIN_PASSWORD` set now always restores that password, enabling password recovery without manual DB access.
 
 ### Added
 - **Szenario A / Szenario B toggle on DT form and edit overlay** — radio buttons let staff choose between *Eigene Einlagerung* (Szenario A: hides the three ownership dropdowns) and *Escrow / 3-Firmen* (Szenario B: reveals Haupt-Eigentümer, Neben-Eigentümer, Rechnungsempfänger). The toggle resets to *Eigene Einlagerung* after a new DT is saved, and auto-detects the correct mode when opening an existing DT for editing.
