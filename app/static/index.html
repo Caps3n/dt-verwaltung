@@ -1585,7 +1585,6 @@ async function dtBearbeiten(id) {
   if(document.getElementById('ov-dt-neben_eigentuemer_id'))document.getElementById('ov-dt-neben_eigentuemer_id').value=d.neben_eigentuemer_id||'';
   if(document.getElementById('ov-dt-rechnungsempfaenger_id'))document.getElementById('ov-dt-rechnungsempfaenger_id').value=d.rechnungsempfaenger_id||'';
   const hatEscrow=d.eigentuemer_id||d.neben_eigentuemer_id||d.rechnungsempfaenger_id;const ovMo=document.getElementById('ov-dt-modus-'+(hatEscrow?'escrow':'einfach'));if(ovMo){ovMo.checked=true;ovDtModusWechseln();}
-  const hatEscrow=d.eigentuemer_id||d.neben_eigentuemer_id||d.rechnungsempfaenger_id;const ovMo=document.getElementById('ov-dt-modus-'+(hatEscrow?'escrow':'einfach'));if(ovMo){ovMo.checked=true;ovDtModusWechseln();}
   document.getElementById('ov-dt-preis').value=d.preis;
   document.getElementById('ov-dt-einheit').value=d.einheit;
   document.getElementById('ov-dt-rabatt').value=d.rabatt;
