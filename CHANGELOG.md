@@ -6,6 +6,35 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.8] – 2026-04-25
+
+### Added
+- **DE / EN language toggle** — 🇩🇪 DE / 🇬🇧 EN button in the top bar switches the entire UI between German and English. Preference is stored in `localStorage` and survives page reloads. All static labels, tab names, status badges, section headings, button captions, and contract labels are translated. Dynamic content (rendered lists, modals) re-renders automatically on language switch via `renderAlles()`.
+
+---
+
+## [1.3.7] – 2026-04-25
+
+### Added
+- **2-party storage contract (Szenario A)** — "Vertrag (2 Parteien) drucken" button in Step 2 of the Übergabe form generates a print-ready storage contract between Firma 1 (operator) and the commissioning party. Sections: §1 Parties, §2 Subject & media table, §3 Return & termination, §4 Remuneration, §5 Special conditions (optional), §6 Liability. Two signature blocks.
+- **3-party escrow contract (Szenario B)** — "Vertrag (3 Parteien) drucken" button generates a full software-escrow contract naming all three parties (operator, depositor / Haupt-Eigentümer, beneficiary / Neben-Eigentümer). Sections: §1–§7 covering parties, escrow purpose, release conditions, IP protection, remuneration, liability, and final provisions.
+- **Freigabebedingungen / Besondere Bedingungen textarea** — free-text field below the contract buttons in Step 2. In Szenario A the label reads "Besondere Bedingungen"; in Szenario B it reads "Freigabebedingungen". Content is printed verbatim in §5 / §6 of the respective contract if filled in.
+- **Contract button visibility** — "Vertrag (2 Parteien) drucken" is only shown in Szenario A; "Vertrag (3 Parteien) drucken" is only shown in Szenario B. Both are hidden in Szenario A without escrow parties.
+
+---
+
+## [1.3.6] – 2026-04-25
+
+### Fixed
+- **Übergabe-Archiv duplicate entry on completion** — `renderAbgeschlosseneUebergaben` now replaces an existing entry by index instead of pushing a new one, preventing a double row when the handover was already loaded at startup and then completed.
+
+### Added
+- **Eingangsprotokoll shows ownership details in Szenario B** — the print-ready incoming-inspection report now includes Haupt-Eigentümer and Auftraggeber / Neben-Eigentümer rows when the media record is configured in Szenario B (Escrow / 3-Firmen mode).
+- **Rechnung per-line Eigentümer / Einlagerer** — invoice line items now include a sub-line showing the Eigentümer and Einlagerer for each DT when the record is in Szenario B.
+- **"Vertrag (3 Parteien) drucken" button** — initial version of the 3-party escrow contract print function, subsequently updated in v1.3.7.
+
+---
+
 ## [1.3.5] – 2026-04-24
 
 ### Fixed

@@ -172,14 +172,14 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div style="background:var(--bg);border:1px solid var(--brd2);border-radius:var(--radl);padding:2rem;width:340px;max-width:95vw">
     <div style="text-align:center;margin-bottom:1.5rem">
       <div style="font-size:22px;font-weight:700;color:var(--txt);margin-bottom:4px">DT-Verwaltung</div>
-      <div style="font-size:13px;color:var(--mut)">Bitte anmelden</div>
+      <div style="font-size:13px;color:var(--mut)" data-i18n="login_subtitle">Bitte anmelden</div>
     </div>
     <div id="login-error" style="display:none;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);padding:8px 12px;font-size:12px;margin-bottom:12px"></div>
-    <label>Benutzername</label>
-    <input id="login-user" type="text" placeholder="Benutzername" onkeydown="if(event.key==='Enter')doLogin()">
-    <label>Passwort</label>
-    <input id="login-pass" type="password" placeholder="Passwort" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="btn-p" onclick="doLogin()" style="width:100%;margin-top:16px;padding:10px">Anmelden</button>
+    <label data-i18n="login_user">Benutzername</label>
+    <input id="login-user" type="text" placeholder="Benutzername" data-i18n-ph="login_user" onkeydown="if(event.key==='Enter')doLogin()">
+    <label data-i18n="login_pass">Passwort</label>
+    <input id="login-pass" type="password" placeholder="Passwort" data-i18n-ph="login_pass" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-p" onclick="doLogin()" data-i18n="login_btn" style="width:100%;margin-top:16px;padding:10px">Anmelden</button>
     <div id="saml-divider" style="display:none;margin:14px 0;display:flex;align-items:center;gap:8px"><div style="flex:1;height:1px;background:var(--brd2)"></div><span style="font-size:11px;color:var(--hint)">oder</span><div style="flex:1;height:1px;background:var(--brd2)"></div></div>
     <button id="saml-login-btn" onclick="doSamlLogin()" style="display:none;width:100%;padding:9px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rad);font-size:13px;font-weight:600;cursor:pointer;color:var(--txt)">
       <span id="saml-btn-label">Single Sign-On</span>
@@ -197,21 +197,22 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div style="display:flex;align-items:center;gap:10px">
     <span id="topbar-user" style="font-size:12px;font-weight:600"></span>
     <span id="topbar-role" class="badge"></span>
-    <button onclick="openPwModal()" style="padding:4px 10px;font-size:11px">🔑 Passwort</button>
-    <button onclick="doLogout()" style="padding:4px 10px;font-size:11px">Abmelden</button>
+    <button onclick="openPwModal()" data-i18n="btn_pw" style="padding:4px 10px;font-size:11px">🔑 Passwort</button>
+    <button onclick="doLogout()" data-i18n="btn_logout" style="padding:4px 10px;font-size:11px">Abmelden</button>
+    <button id="btn-lang" onclick="toggleLang()" title="Sprache / Language" style="padding:4px 8px;font-size:11px;font-weight:700;letter-spacing:.5px">🇩🇪 DE</button>
   </div>
 </div>
 
 <div class="tabs" id="main-tabs">
-  <div class="tab active" data-tab="dashboard" onclick="showTab('dashboard',event)">📊 Übersicht</div>
-  <div class="tab" data-tab="kunden" onclick="showTab('kunden',event)">👥 Kunden &amp; Verträge</div>
-  <div class="tab" data-tab="datentraeger" onclick="showTab('datentraeger',event)">💾 Datenträger</div>
-  <div class="tab" data-tab="uebergabe" onclick="showTab('uebergabe',event)">🔄 Übergabe</div>
-  <div class="tab" data-tab="rechnung" onclick="showTab('rechnung',event)">🧾 Rechnungen</div>
-  <div class="tab" data-tab="tresore" onclick="showTab('tresore',event)">🔒 Tresore</div>
-  <div class="tab" id="tab-templates" data-tab="templates" onclick="showTab('templates',event)">🎨 Templates</div>
-  <div class="tab" id="tab-admin" data-tab="admin" onclick="showTab('admin',event)">⚙️ Admin</div>
-  <div class="tab" data-tab="hilfe" onclick="showTab('hilfe',event)">❓ Hilfe</div>
+  <div class="tab active" data-tab="dashboard" onclick="showTab('dashboard',event)" data-i18n="tab_dashboard">📊 Übersicht</div>
+  <div class="tab" data-tab="kunden" onclick="showTab('kunden',event)" data-i18n="tab_kunden">👥 Kunden &amp; Verträge</div>
+  <div class="tab" data-tab="datentraeger" onclick="showTab('datentraeger',event)" data-i18n="tab_dt">💾 Datenträger</div>
+  <div class="tab" data-tab="uebergabe" onclick="showTab('uebergabe',event)" data-i18n="tab_uebergabe">🔄 Übergabe</div>
+  <div class="tab" data-tab="rechnung" onclick="showTab('rechnung',event)" data-i18n="tab_rechnung">🧾 Rechnungen</div>
+  <div class="tab" data-tab="tresore" onclick="showTab('tresore',event)" data-i18n="tab_tresore">🔒 Tresore</div>
+  <div class="tab" id="tab-templates" data-tab="templates" onclick="showTab('templates',event)" data-i18n="tab_templates">🎨 Templates</div>
+  <div class="tab" id="tab-admin" data-tab="admin" onclick="showTab('admin',event)" data-i18n="tab_admin">⚙️ Admin</div>
+  <div class="tab" data-tab="hilfe" onclick="showTab('hilfe',event)" data-i18n="tab_hilfe">❓ Hilfe</div>
 </div>
 
 <!-- DASHBOARD -->
@@ -219,7 +220,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
     <div class="card" style="text-align:center;padding:1rem">
       <div style="font-size:28px;font-weight:700;color:var(--i-txt)" id="db-dt-count">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px">Eingelagerte DT</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="lbl_eingelagert_dt">Eingelagerte DT</div>
     </div>
     <div class="card" style="text-align:center;padding:1rem">
       <div style="font-size:28px;font-weight:700;color:var(--s-txt)" id="db-kunden-count">-</div>
@@ -240,20 +241,20 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   </div>
   <div class="g2">
     <div class="card">
-      <div class="stitle">Verträge die bald ablaufen</div>
+      <div class="stitle" data-i18n="st_ablaufen">Verträge die bald ablaufen</div>
       <div id="db-ablauf-liste"><div class="empty">Laden...</div></div>
     </div>
     <div class="card">
-      <div class="stitle">Umsatz pro Kunde (Netto/Jahr)</div>
+      <div class="stitle" data-i18n="st_umsatz">Umsatz pro Kunde (Netto/Jahr)</div>
       <div id="db-umsatz-liste"><div class="empty">Laden...</div></div>
     </div>
   </div>
   <div class="card">
-    <div class="stitle">Aktive Verträge</div>
+    <div class="stitle" data-i18n="st_aktive_vt">Aktive Verträge</div>
     <div id="db-vertraege-aktiv-liste"><div class="empty">Laden...</div></div>
   </div>
   <div class="card">
-    <div class="stitle">Datenträger nach Typ</div>
+    <div class="stitle" data-i18n="st_dt_typ">Datenträger nach Typ</div>
     <div id="db-typen-liste" style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0"></div>
   </div>
   <div class="card">
@@ -309,7 +310,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       </div>
     </div>
     <div class="card">
-      <div class="stitle">Tresore &amp; Schränke</div>
+      <div class="stitle" data-i18n="st_tr_liste">Tresore &amp; Schränke</div>
       <input type="search" id="tr-search" placeholder="Suche..." oninput="renderTresore()" style="margin-bottom:10px">
       <div id="tr-liste"><div class="empty">Laden...</div></div>
     </div>
@@ -368,7 +369,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <button class="btn-p btn-full" id="k-save-btn" onclick="kundeSpeichern()">Firma anlegen</button>
     </div>
     <div class="card">
-      <div class="stitle">Firmenliste</div>
+      <div class="stitle" data-i18n="st_k_liste">Firmenliste</div>
       <input type="search" id="k-search" placeholder="Suche Firma, Nr, Ansprechpartner..." oninput="renderKunden()" style="margin-bottom:10px">
       <div id="kunden-liste"><div class="empty">Noch keine Firmen</div></div>
     </div>
@@ -386,7 +387,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   </div>
   <div class="g4" style="margin-top:4px">
     <div class="metric"><div class="val" id="m-kunden">0</div><div class="lbl">Firmen</div></div>
-    <div class="metric"><div class="val" id="m-dt">0</div><div class="lbl">Eingelagert</div></div>
+    <div class="metric"><div class="val" id="m-dt">0</div><div class="lbl" data-i18n="lbl_eingelagert">Eingelagert</div></div>
     <div class="metric"><div class="val" id="m-netto">0.00</div><div class="lbl">Jahresumsatz netto</div></div>
     <div class="metric"><div class="val" id="m-brutto">0.00</div><div class="lbl">Jahresumsatz brutto</div></div>
   </div>
@@ -394,7 +395,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="sub-panel" id="kv-panel-vertraege">
   <div class="g2">
     <div class="card">
-      <div class="stitle">Vertragsvorlage</div>
+      <div class="stitle" data-i18n="st_k_vt">Vertragsvorlage</div>
       <p style="font-size:12px;color:var(--mut);margin-bottom:12px;line-height:1.6">Wähle eine Firma und drucke eine Vertragsvorlage mit Briefkopf. Die Vorlage enthält alle Felder für einen Einlagerungsvertrag.</p>
       <label>Firma</label>
       <select id="vt-v-kunden_id" onchange="vtVorschauUpdate()"><option value="">Firma wählen</option></select>
@@ -424,7 +425,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   </div>
   <div class="card" style="margin-top:0">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="stitle" style="margin:0">Alle Verträge</div>
+      <div class="stitle" style="margin:0" data-i18n="st_k_alle">Alle Verträge</div>
       <div style="display:flex;gap:8px">
         <input type="search" id="vt-v-search" placeholder="Suche..." oninput="renderVertraegeListe()" style="width:200px">
         <select id="vt-v-status-filter" onchange="renderVertraegeListe()" style="width:160px">
@@ -455,7 +456,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="step-panel active" id="dt-step-1">
     <div class="g2">
       <div class="card">
-        <div class="stitle">Datenträger erfassen</div>
+        <div class="stitle" data-i18n="st_dt_erfassen">Datenträger erfassen</div>
         <label>Firma</label><select id="dt-kunden_id"><option value="">Firma wählen</option></select>
         <label>Bezeichnung / Typ</label><input id="dt-bezeichnung" placeholder="z.B. Festplatte, LTO-Tape">
         <label>Seriennummer</label><input id="dt-serial" placeholder="HDD-2024-001">
@@ -471,11 +472,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <label>Beschreibung (optional)</label><input id="dt-beschreibung">
         <label>Tresor / Schrank (optional)</label><select id="dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
         <div style="display:flex;justify-content:flex-end;margin-top:12px">
-          <button class="btn-p" onclick="dtWeiterZuSchritt2()" style="padding:9px 20px">Weiter zu Schritt 2</button>
+          <button class="btn-p" onclick="dtWeiterZuSchritt2()" style="padding:9px 20px" data-i18n="lbl_weiter_s2">Weiter zu Schritt 2</button>
         </div>
       </div>
       <div class="card">
-        <div class="stitle">Eingelagerte Datenträger</div>
+        <div class="stitle" data-i18n="st_dt_eingelagert">Eingelagerte Datenträger</div>
         <select id="dt-filter" onchange="renderDT()"><option value="">Alle Firmen</option></select>
         <input type="search" id="dt-search" placeholder="Typ, Seriennummer..." oninput="renderDT()" style="margin-top:8px">
         <div style="margin-top:10px" id="dt-tabelle"><div class="empty">Keine Datenträger</div></div>
@@ -485,18 +486,18 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="step-panel" id="dt-step-2">
     <div class="g2">
       <div class="card">
-        <div class="stitle">Eingangsprotokoll</div>
+        <div class="stitle" data-i18n="st_eingang">Eingangsprotokoll</div>
         <div style="margin-bottom:12px;padding:10px;background:var(--i-bg);border:1px solid var(--i-brd);border-radius:var(--rad);font-size:12px">
           <strong>Schritt 1:</strong> Formular ausfüllen und ausdrucken, von beiden Seiten unterschreiben lassen.<br>
-          <button onclick="druckeEingangFromForm()" style="margin-top:6px;padding:5px 12px;font-size:12px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer">Eingangsformular drucken</button>
+          <button onclick="druckeEingangFromForm()" style="margin-top:6px;padding:5px 12px;font-size:12px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer" data-i18n="ep_drucken">Eingangsformular drucken</button>
         </div>
         <div style="margin-bottom:12px;padding:10px;background:var(--s-bg);border:1px solid var(--s-brd);border-radius:var(--rad);font-size:12px">
           <strong>Einlagerungsvertrag</strong><br>
           <label id="lbl-vtrag-bed" style="font-size:11px;color:var(--mut);display:block;margin:6px 0 2px">Besondere Bedingungen <span style="font-weight:400">(optional)</span></label>
           <textarea id="dt-vertrag-bedingungen" rows="2" style="width:100%;font-size:11px;padding:4px 6px;border:1px solid var(--i-brd);border-radius:var(--rad);background:var(--i-bg);color:var(--txt);resize:vertical;box-sizing:border-box;margin-bottom:6px" placeholder="z.B. Kündigungsfrist 30 Tage..."></textarea>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button id="btn-2parteien" onclick="drucke2ParteienVertrag()" style="padding:5px 12px;font-size:12px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer">Vertrag (2 Parteien) drucken</button>
-            <button id="btn-3parteien" onclick="drucke3ParteienVertrag()" style="padding:5px 12px;font-size:12px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer;display:none">Vertrag (3 Parteien) drucken</button>
+            <button id="btn-2parteien" onclick="drucke2ParteienVertrag()" style="padding:5px 12px;font-size:12px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer" data-i18n="vtrag2_drucken">Vertrag (2 Parteien) drucken</button>
+            <button id="btn-3parteien" onclick="drucke3ParteienVertrag()" style="padding:5px 12px;font-size:12px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer;display:none" data-i18n="vtrag3_drucken">Vertrag (3 Parteien) drucken</button>
           </div>
         </div>
         <label>Foto des Datenträgers (optional)</label>
@@ -513,12 +514,12 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <div id="dt-scan-prev">Scan hochladen</div>
         </div>
         <div style="display:flex;gap:8px;margin-top:12px">
-          <button onclick="dtGotoStep(1)" style="flex:1">Zurück</button>
-          <button class="btn-p" onclick="dtHinzufuegen()" style="flex:2">Einlagern</button>
+          <button onclick="dtGotoStep(1)" data-i18n="lbl_zurueck" style="flex:1">Zurück</button>
+          <button class="btn-p" onclick="dtHinzufuegen()" data-i18n="lbl_einlagern" style="flex:2">Einlagern</button>
         </div>
       </div>
       <div class="card">
-        <div class="stitle">Zusammenfassung</div>
+        <div class="stitle" data-i18n="st_zusammenfassung">Zusammenfassung</div>
         <div id="dt-zusammenfassung" style="font-size:13px;display:flex;flex-direction:column;gap:10px"></div>
       </div>
     </div>
@@ -527,7 +528,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="sub-panel" id="dt-panel-archiv">
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div class="stitle" style="margin:0">Archiv</div>
+      <div class="stitle" style="margin:0" data-i18n="st_dt_archiv">Archiv</div>
       <div style="display:flex;gap:8px">
         <input type="search" id="archiv-search" placeholder="Suche..." oninput="renderArchiv()" style="width:160px">
         <select id="archiv-filter" onchange="renderArchiv()" style="width:180px"><option value="">Alle Firmen</option></select>
@@ -547,7 +548,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="sub-panel active" id="re-panel-neu">
   <div class="g2">
     <div class="card">
-      <div class="stitle">Rechnung erstellen</div>
+      <div class="stitle" data-i18n="st_rechnung">Rechnung erstellen</div>
       <label>Firma</label><select id="r-kunden_id" onchange="rechnungVorschau()"><option value="">Firma wählen</option></select>
       <label>Rechnungsdatum</label><input id="r-datum" type="date">
       <label>Rechnungsnummer</label><input id="r-nr">
@@ -572,7 +573,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="sub-panel" id="re-panel-historie">
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div class="stitle" style="margin:0">Rechnungshistorie</div>
+      <div class="stitle" style="margin:0" data-i18n="st_re_history">Rechnungshistorie</div>
       <div style="display:flex;gap:8px">
         <input type="search" id="hist-search" placeholder="Suche nach Firma, Nr..." oninput="renderRechnungHistoriePage()" style="width:220px">
         <button onclick="if(confirm('Alle gespeicherten Rechnungen löschen?')){localStorage.removeItem('dtv_re_hist');renderRechnungHistoriePage()}" class="btn-d" style="padding:4px 10px;font-size:11px">Alle löschen</button>
@@ -603,7 +604,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <button class="btn-w" onclick="formularHerunterladen()" style="flex:1">Formular</button>
         </div>
       </div>
-      <div class="card"><div class="stitle">Datenträger auswählen</div><div id="u-liste"><div class="empty">Firma wählen</div></div></div>
+      <div class="card"><div class="stitle" data-i18n="st_ue_dt">Datenträger auswählen</div><div id="u-liste"><div class="empty">Firma wählen</div></div></div>
     </div>
     <div class="card" id="u-vorschau-card" style="display:none;padding:0;overflow:hidden"><div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)">Vorschau</div><div id="u-vorschau" style="font-family:Arial,Helvetica,sans-serif;font-size:12px"></div></div>
     <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn-p" onclick="weiterZuSchritt2()" style="padding:9px 20px">Weiter zu Schritt 2</button></div>
@@ -611,7 +612,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="step-panel" id="step-2">
     <div class="g2">
       <div class="card">
-        <div class="stitle">Dokument hochladen</div>
+        <div class="stitle" data-i18n="st_ue_dok">Dokument hochladen</div>
         <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rad);padding:10px;font-size:12px;margin-bottom:12px"><strong>Ausstehende Übergabe:</strong><br><span id="s2-info" style="color:var(--mut)">-</span></div>
         <div class="upzone" id="doc-upzone" onclick="document.getElementById('u-doc-file').click()">
           <input type="file" id="u-doc-file" accept="image/*,application/pdf" style="display:none" onchange="handleUebergabeDoc(event)">
@@ -623,12 +624,12 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <button class="btn-s" onclick="uebergabeAbschliessen(false)" style="flex:2;min-width:110px">✓ Abschließen</button>
         </div>
       </div>
-      <div class="card"><div class="stitle">Offene Übergaben</div><div id="pending-list"><div class="empty">Keine</div></div></div>
+      <div class="card"><div class="stitle" data-i18n="st_ue_offen">Offene Übergaben</div><div id="pending-list"><div class="empty">Keine</div></div></div>
     </div>
   </div>
   <div class="card" style="margin-top:1rem">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div class="stitle" style="margin-bottom:0">Abgeschlossene Übergaben</div>
+      <div class="stitle" style="margin-bottom:0" data-i18n="st_ue_abg">Abgeschlossene Übergaben</div>
       <input id="uarch-search" placeholder="Suchen…" style="width:180px;font-size:12px;padding:5px 8px" oninput="renderAbgeschlosseneUebergaben()">
     </div>
     <div id="uarch-liste"><div class="empty">Keine abgeschlossenen Übergaben</div></div>
@@ -649,7 +650,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><label style="margin:0;white-space:nowrap">Farbe:</label><input type="color" id="accent-color" value="#0065A4" oninput="syncBrief()" style="width:40px;height:30px;padding:2px;border-radius:4px;cursor:pointer;flex-shrink:0"><button onclick="resetLogo()" class="btn-d" style="padding:4px 8px;font-size:11px">Entfernen</button></div>
         </div>
         <div class="card" style="background:var(--i-bg);border-color:var(--i-brd)">
-          <div class="stitle" style="color:var(--i-txt)">🏢 Unternehmensdaten</div>
+          <div class="stitle" style="color:var(--i-txt)" data-i18n="st_firma">🏢 Unternehmensdaten</div>
           <div style="font-size:12px;color:var(--i-txt);margin-bottom:10px">Firmenname, Adresse, Kontakt, Bankdaten und Logo werden jetzt zentral im <strong>Admin-Bereich</strong> verwaltet.</div>
           <button class="btn-p" onclick="showTab('admin');showAdminSub('unternehmen')" style="font-size:12px">→ Zum Admin-Bereich</button>
           <!-- Hidden fields kept for backward compatibility with syncBrief -->
@@ -863,7 +864,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="g2">
     <div style="overflow-y:auto;max-height:90vh">
       <div class="card">
-        <div class="stitle">Logo &amp; Farbe</div>
+        <div class="stitle" data-i18n="st_logo">Logo &amp; Farbe</div>
         <div class="upzone" id="adm-logo-zone" onclick="document.getElementById('adm-logo-input').click()" style="margin-bottom:8px"><input type="file" id="adm-logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)"><div id="adm-logo-prev">Logo hochladen</div></div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><label style="margin:0;white-space:nowrap">Farbe:</label><input type="color" id="adm-accent-color" value="#0065A4" oninput="syncAdmBrief()" style="width:40px;height:30px;padding:2px;border-radius:4px;cursor:pointer;flex-shrink:0"><button onclick="resetLogo()" class="btn-d" style="padding:4px 8px;font-size:11px">Entfernen</button></div>
       </div>
@@ -901,7 +902,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <!-- BENUTZER -->
     <div>
       <div class="card">
-        <div class="stitle">Benutzer</div>
+        <div class="stitle" data-i18n="st_benutzer">Benutzer</div>
         <div id="user-liste"><div class="empty">Lade...</div></div>
         <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:12px">
           <div class="stitle" style="font-size:12px">Neuen Benutzer</div>
@@ -915,7 +916,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div>
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="stitle" style="margin:0">Rollen & Berechtigungen</div>
+          <div class="stitle" style="margin:0" data-i18n="st_rollen">Rollen & Berechtigungen</div>
           <button class="btn-s" onclick="neueRolleModal()" style="padding:5px 10px;font-size:11px">+ Neue Rolle</button>
         </div>
         <div id="rollen-liste"><div class="empty">Lade...</div></div>
@@ -1099,7 +1100,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.7
+  &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.8
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1235,6 +1236,90 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 </div>
 
 <script>
+// ══ i18n ═══════════════════════════════════════
+const TRANS={
+  tab_dashboard:{de:'📊 Übersicht',en:'📊 Dashboard'},
+  tab_kunden:{de:'👥 Kunden &amp; Verträge',en:'👥 Customers &amp; Contracts'},
+  tab_dt:{de:'💾 Datenträger',en:'💾 Media'},
+  tab_uebergabe:{de:'🔄 Übergabe',en:'🔄 Handover'},
+  tab_rechnung:{de:'🧾 Rechnungen',en:'🧾 Invoices'},
+  tab_tresore:{de:'🔒 Tresore',en:'🔒 Safes'},
+  tab_templates:{de:'🎨 Templates',en:'🎨 Templates'},
+  tab_admin:{de:'⚙️ Admin',en:'⚙️ Admin'},
+  tab_hilfe:{de:'❓ Hilfe',en:'❓ Help'},
+  btn_pw:{de:'🔑 Passwort',en:'🔑 Password'},
+  btn_logout:{de:'Abmelden',en:'Log out'},
+  login_subtitle:{de:'Bitte anmelden',en:'Please log in'},
+  login_user:{de:'Benutzername',en:'Username'},
+  login_pass:{de:'Passwort',en:'Password'},
+  login_btn:{de:'Anmelden',en:'Log In'},
+  st_ablaufen:{de:'Verträge die bald ablaufen',en:'Contracts expiring soon'},
+  st_umsatz:{de:'Umsatz pro Kunde (Netto/Jahr)',en:'Revenue per Customer (Net/Year)'},
+  st_aktive_vt:{de:'Aktive Verträge',en:'Active Contracts'},
+  st_dt_typ:{de:'Datenträger nach Typ',en:'Media by Type'},
+  st_tr_form:{de:'Neuen Tresor anlegen',en:'Add New Safe'},
+  st_tr_liste:{de:'Tresore &amp; Schränke',en:'Safes &amp; Cabinets'},
+  st_k_form:{de:'Neue Firma anlegen',en:'Add New Customer'},
+  st_k_liste:{de:'Firmenliste',en:'Customer List'},
+  st_k_vt:{de:'Vertragsvorlage',en:'Contract Template'},
+  st_k_alle:{de:'Alle Verträge',en:'All Contracts'},
+  st_dt_erfassen:{de:'Datenträger erfassen',en:'Register Media'},
+  st_dt_eingelagert:{de:'Eingelagerte Datenträger',en:'Stored Media'},
+  st_eingang:{de:'Eingangsprotokoll',en:'Incoming Report'},
+  st_zusammenfassung:{de:'Zusammenfassung',en:'Summary'},
+  st_dt_archiv:{de:'Archiv',en:'Archive'},
+  st_rechnung:{de:'Rechnung erstellen',en:'Create Invoice'},
+  st_re_history:{de:'Rechnungshistorie',en:'Invoice History'},
+  st_ue_step1:{de:'Schritt 1',en:'Step 1'},
+  st_ue_dt:{de:'Datenträger auswählen',en:'Select Media'},
+  st_ue_dok:{de:'Dokument hochladen',en:'Upload Document'},
+  st_ue_offen:{de:'Offene Übergaben',en:'Open Handovers'},
+  st_ue_abg:{de:'Abgeschlossene Übergaben',en:'Completed Handovers'},
+  st_logo:{de:'Logo &amp; Farbe',en:'Logo &amp; Colour'},
+  st_firma:{de:'🏢 Unternehmensdaten',en:'🏢 Company Data'},
+  st_texte:{de:'Texte',en:'Texts'},
+  st_benutzer:{de:'Benutzer',en:'Users'},
+  st_rollen:{de:'Rollen & Berechtigungen',en:'Roles & Permissions'},
+  lbl_eingelagert:{de:'Eingelagert',en:'Stored'},
+  lbl_eingelagert_dt:{de:'Eingelagerte DT',en:'Stored Media'},
+  lbl_uebergeben:{de:'Übergeben',en:'Handed Over'},
+  lbl_im_bestand:{de:'Im Bestand',en:'In Stock'},
+  lbl_aktiv:{de:'Aktiv',en:'Active'},
+  lbl_inaktiv:{de:'Inaktiv',en:'Inactive'},
+  lbl_speichern:{de:'Speichern',en:'Save'},
+  lbl_abbrechen:{de:'Abbrechen',en:'Cancel'},
+  lbl_einlagern:{de:'Einlagern',en:'Store'},
+  lbl_zurueck:{de:'Zurück',en:'Back'},
+  lbl_weiter_s2:{de:'Weiter zu Schritt 2',en:'Continue to Step 2'},
+  ep_drucken:{de:'Eingangsformular drucken',en:'Print Incoming Report'},
+  vtrag2_drucken:{de:'Vertrag (2 Parteien) drucken',en:'Print Contract (2 Parties)'},
+  vtrag3_drucken:{de:'Vertrag (3 Parteien) drucken',en:'Print Contract (3 Parties)'},
+  vtrag_bed_a:{de:'Besondere Bedingungen <span style="font-weight:400">(optional)</span>',en:'Special Conditions <span style="font-weight:400">(optional)</span>'},
+  vtrag_bed_b:{de:'Freigabebedingungen <span style="font-weight:400">(z.B. Insolvenz, Betriebsaufgabe)</span>',en:'Release Conditions <span style="font-weight:400">(e.g. insolvency, dissolution)</span>'},
+  vtrag_bed_ph_a:{de:'z.B. Kündigungsfrist 30 Tage, Laufzeit unbegrenzt...',en:'e.g. 30-day notice period, unlimited duration...'},
+  vtrag_bed_ph_b:{de:'z.B. Insolvenz von Firma 2, dauerhafte Einstellung der Softwarewartung...',en:'e.g. insolvency of Party 2, permanent cessation of software maintenance...'},
+};
+let _lang=localStorage.getItem('dtv_lang')||'de';
+function t(key){return TRANS[key]?.[_lang]||TRANS[key]?.de||key;}
+function applyLang(){
+  document.documentElement.lang=_lang;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=TRANS[el.dataset.i18n]?.[_lang];
+    if(v!==undefined)el.innerHTML=v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const v=TRANS[el.dataset.i18nPh]?.[_lang];
+    if(v!==undefined)el.placeholder=v;
+  });
+  const bl=document.getElementById('btn-lang');
+  if(bl)bl.textContent=_lang==='de'?'🇩🇪 DE':'🇬🇧 EN';
+}
+function toggleLang(){
+  _lang=_lang==='de'?'en':'de';
+  localStorage.setItem('dtv_lang',_lang);
+  applyLang();
+  renderAlles();
+}
 // ══ API ═════════════════════════════════════════════
 let TOKEN = sessionStorage.getItem('dtv_token') || '';
 const BASE = '';
@@ -1380,6 +1465,7 @@ async function showApp() {
   rb.className = 'badge ' + (currentUser.farbe||'bg');
   await loadAll();
   applyTabVisibility();
+  applyLang();
   renderDashboard();
   checkSamlConfig();
   // Load support contact into footer
@@ -1557,7 +1643,7 @@ function renderKunden() {
 }
 
 // ══ DATENTRAEGER ═════════════════════════════════════
-function dtModusWechseln(){const esc=document.getElementById('dt-modus-escrow')?.checked||false;const s=document.getElementById('dt-escrow-section');if(s)s.style.display=esc?'':'none';const _b2=document.getElementById('btn-2parteien');if(_b2)_b2.style.display=esc?'none':'';const _b3=document.getElementById('btn-3parteien');if(_b3)_b3.style.display=esc?'':'none';const _lbl=document.getElementById('lbl-vtrag-bed');if(_lbl)_lbl.innerHTML=esc?'Freigabebedingungen <span style="font-weight:400">(z.B. Insolvenz, Betriebsaufgabe)</span>':'Besondere Bedingungen <span style="font-weight:400">(optional)</span>';const _ta=document.getElementById('dt-vertrag-bedingungen');if(_ta)_ta.placeholder=esc?'z.B. Insolvenz von Firma 2, dauerhafte Einstellung der Softwarewartung...':'z.B. Kündigungsfrist 30 Tage, Laufzeit unbegrenzt...';}
+function dtModusWechseln(){const esc=document.getElementById('dt-modus-escrow')?.checked||false;const s=document.getElementById('dt-escrow-section');if(s)s.style.display=esc?'':'none';const _b2=document.getElementById('btn-2parteien');if(_b2)_b2.style.display=esc?'none':'';const _b3=document.getElementById('btn-3parteien');if(_b3)_b3.style.display=esc?'':'none';const _lbl=document.getElementById('lbl-vtrag-bed');if(_lbl)_lbl.innerHTML=esc?t('vtrag_bed_b'):t('vtrag_bed_a');const _ta=document.getElementById('dt-vertrag-bedingungen');if(_ta)_ta.placeholder=esc?t('vtrag_bed_ph_b'):t('vtrag_bed_ph_a');}
 function ovDtModusWechseln(){const s=document.getElementById('ov-dt-escrow-section');if(s)s.style.display=document.getElementById('ov-dt-modus-escrow')?.checked?'':'none';}
 async function dtHinzufuegen() {
   if (!can('write')) { alert('Keine Berechtigung.'); return; }
@@ -2101,8 +2187,8 @@ function renderAbgeschlosseneUebergaben(){
         ?`<button onclick="loadAndOpenDoc('/api/uebergaben/${u.id}/doc')" style="padding:2px 8px;font-size:11px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:var(--rad);cursor:pointer">📄 Dok.</button>`
         :'<span style="font-size:10px;color:var(--mut)">—</span>';
       const badge=u.weiter_im_bestand
-        ?'<span class="badge ba" style="font-size:10px">Im Bestand</span>'
-        :'<span class="badge br" style="font-size:10px">Übergeben</span>';
+        ?`<span class="badge ba" style="font-size:10px">${t('lbl_im_bestand')}</span>`
+        :`<span class="badge br" style="font-size:10px">${t('lbl_uebergeben')}</span>`;
       return`<tr><td style="font-family:monospace;font-size:10px">${u.protokoll_nr||u.id}</td>`
         +`<td style="font-weight:600">${u.firma||'?'}</td>`
         +`<td style="font-size:11px">${u.datum||''}</td>`
@@ -2365,7 +2451,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.7${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.8${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -3784,6 +3870,7 @@ function renderHilfeSync(){
   `).join('');
   document.getElementById('faq-container').innerHTML=html;
 }
+applyLang();
 </script>
 </body>
 </html>

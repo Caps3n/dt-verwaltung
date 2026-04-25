@@ -1,7 +1,9 @@
-# DT-Verwaltung v1.3.3
+# DT-Verwaltung v1.3.8
 
-Web-based management solution for secure data-carrier storage.
-Built for service providers who store, manage, and document the return of data carriers (HDDs, SSDs, tapes, USB drives, etc.) on behalf of their customers.
+Web-based management solution for secure data-carrier storage and software escrow.
+Built for service providers who store, manage, and document the return of data carriers (HDDs, SSDs, tapes, USB drives, etc.) on behalf of their customers — including full support for 3-party software-escrow arrangements.
+
+Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via the language toggle in the top bar.
 
 ---
 
@@ -57,6 +59,24 @@ Built for service providers who store, manage, and document the return of data c
 - Templates for: invoice, handover, incoming report, contract
 - Live preview while editing
 - Placeholder system (company, date, amounts, media list, etc.)
+
+### Software Escrow (3-Party Mode)
+- Toggle between **Szenario A** (2-party: operator + depositor) and **Szenario B** (3-party escrow)
+- In Szenario B each media record stores: Auftraggeber (commissioning party), Haupt-Eigentümer (software owner / depositor), Neben-Eigentümer (beneficiary / licensee), and Rechnungsempfänger (billing recipient)
+- Escrow use-case: software developer (Firma 2) deposits source code; licensee (Firma 3) receives it only if Firma 2 ceases to operate
+- Eingangsprotokoll and invoices display the relevant party names in Szenario B
+
+### Contract Printing
+- **2-party storage contract** — generated from Step 2 of the handover workflow; covers parties, stored media list, return terms, remuneration, special conditions, and liability
+- **3-party escrow contract** — covers all three parties with escrow-specific clauses: release conditions, IP protection, remuneration, and final provisions
+- **Freigabebedingungen / Besondere Bedingungen** — optional free-text field printed verbatim in the contract
+- Button visibility is context-aware: the 2-party button appears in Szenario A, the 3-party button in Szenario B
+
+### Language / i18n
+- 🇩🇪 DE / 🇬🇧 EN toggle button in the top bar
+- All labels, tab names, headings, status badges, and button captions are translated
+- Dynamic content re-renders automatically on language switch
+- Preference is persisted in `localStorage`
 
 ### Admin Panel
 - Company data: name, address, bank details, tax number, footer text
