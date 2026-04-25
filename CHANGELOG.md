@@ -6,6 +6,24 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.2] – 2026-04-25
+
+### Added
+- **100 % DE/EN static HTML coverage** — all remaining German strings in static HTML now switch with the language toggle:
+  - Dashboard KPI labels (Active Customers, Net/Year, Active Contracts, Contracts <60 Days)
+  - Edit-mode banners (`Bearbeitungsmodus` / `Edit Mode`) in Tresor and Customer forms
+  - All modal dialogs fully translated: DT Edit overlay, Change Password, Set Password, Edit User, New Contract, New Role
+  - Admin section: New User labels, + New Role button, Support Contact card
+  - Übergabe step-2 buttons (Back, Keep in Stock, Complete)
+  - Templates and Admin Logo/Colour picker labels
+  - Help page title, subtitle, and Contact & Support heading
+  - SAML configuration hint text
+  - Static footer app name now i18n-aware; version bumped to v1.4.2
+- **Select option translation** — six select elements now rebuild their option text on language switch via `applyLang()`: salutation (k-anrede), contract status (k-vertragsstatus, vt-status, vt-v-status-filter), billing unit (dt-einheit, ov-dt-einheit), user status (ue-aktiv), role colour (rm-farbe)
+- **JS textContent fixes** — upload zone reset messages and the "View" button in read-only customer list now use `t()` / `ta()`; Mahnung row label translated; `tresorAbbrechen()` uses translation keys
+
+---
+
 ## [1.4.1] – 2026-04-25
 
 ### Added

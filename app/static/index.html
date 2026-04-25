@@ -224,19 +224,19 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     </div>
     <div class="card" style="text-align:center;padding:1rem">
       <div style="font-size:28px;font-weight:700;color:var(--s-txt)" id="db-kunden-count">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px">Aktive Kunden</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_aktive_kunden">Aktive Kunden</div>
     </div>
     <div class="card" style="text-align:center;padding:1rem">
       <div style="font-size:28px;font-weight:700;color:var(--txt)" id="db-umsatz-netto">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px">Netto/Jahr (akt.)</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_netto_jahr">Netto/Jahr (akt.)</div>
     </div>
     <div class="card" style="text-align:center;padding:1rem">
       <div style="font-size:28px;font-weight:700;color:var(--s-txt)" id="db-vertraege-aktiv-count">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px">Aktive Verträge</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_aktive_vt_kpi">Aktive Verträge</div>
     </div>
     <div class="card" style="text-align:center;padding:1rem">
       <div style="font-size:28px;font-weight:700;color:var(--w-txt)" id="db-ablauf-count">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px">Verträge &lt;60 Tage</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_ablauf_kpi">Verträge &lt;60 Tage</div>
     </div>
   </div>
   <div class="g2">
@@ -267,7 +267,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <div id="page-tresore" class="page">
   <div class="g2">
     <div class="card">
-      <div id="tr-ebanner" class="ebanner" style="display:none">Bearbeitungsmodus<button onclick="tresorAbbrechen()" style="padding:3px 8px;font-size:11px">Abbrechen</button></div>
+      <div id="tr-ebanner" class="ebanner" style="display:none"><span data-i18n="lbl_bearbmodus">Bearbeitungsmodus</span><button onclick="tresorAbbrechen()" style="padding:3px 8px;font-size:11px" data-i18n="lbl_abbrechen">Abbrechen</button></div>
       <div class="stitle" id="tr-form-title">Neuen Tresor anlegen</div>
       <input type="hidden" id="tr-id">
       <label>Bezeichnung / Name</label><input id="tr-bezeichnung" placeholder="z.B. Tresor A1, Sicherheitsschrank Nord">
@@ -298,7 +298,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <label style="margin-top:12px">Notizen</label>
       <textarea id="tr-notizen" rows="2" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--brd);border-radius:var(--rad);background:var(--surf);color:var(--txt);font-family:inherit;font-size:13px;resize:vertical"></textarea>
       <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:12px">
-        <div class="stitle" style="font-size:12px;margin-bottom:8px">Wartungsvertrag</div>
+        <div class="stitle" style="font-size:12px;margin-bottom:8px" data-i18n="st_wartungsvertrag">Wartungsvertrag</div>
         <div class="upzone" id="tr-wv-zone" onclick="document.getElementById('tr-wv-file').click()">
           <input type="file" id="tr-wv-file" accept="application/pdf,image/*" style="display:none" onchange="handleTresorWV(event)">
           <div id="tr-wv-prev">PDF / Scan hochladen</div>
@@ -319,9 +319,9 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
       <span class="stitle" style="margin:0" id="tr-detail-titel"></span>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn-w" id="tr-detail-bearb-btn" style="padding:5px 11px">✎ Bearbeiten</button>
-        <button id="tr-detail-wv-btn" style="padding:5px 11px;display:none">📄 Wartungsvertrag</button>
-        <button onclick="document.getElementById('tr-detail-card').style.display='none'" style="padding:5px 11px">✕ Schließen</button>
+        <button class="btn-w" id="tr-detail-bearb-btn" style="padding:5px 11px" data-i18n="lbl_bearb_tr">✎ Bearbeiten</button>
+        <button id="tr-detail-wv-btn" style="padding:5px 11px;display:none" data-i18n="lbl_wartungsv">📄 Wartungsvertrag</button>
+        <button onclick="document.getElementById('tr-detail-card').style.display='none'" style="padding:5px 11px" data-i18n="lbl_schliessen">✕ Schließen</button>
       </div>
     </div>
     <div class="g2" id="tr-detail-body"></div>
@@ -337,7 +337,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="sub-panel active" id="kv-panel-kunden">
   <div class="g2">
     <div class="card">
-      <div id="k-ebanner" class="ebanner" style="display:none">Bearbeitungsmodus<button onclick="kundeAbbrechen()" style="padding:3px 8px;font-size:11px">Abbrechen</button></div>
+      <div id="k-ebanner" class="ebanner" style="display:none"><span data-i18n="lbl_bearbmodus">Bearbeitungsmodus</span><button onclick="kundeAbbrechen()" style="padding:3px 8px;font-size:11px" data-i18n="lbl_abbrechen">Abbrechen</button></div>
       <div class="stitle" id="k-form-title">Neue Firma anlegen</div>
       <input type="hidden" id="k-edit-id">
       <div class="r2"><div><label data-i18n="lbl_firma_name">Firmenname *</label><input id="k-firma" placeholder="Mustermann GmbH"></div><div><label data-i18n="lbl_kundennr">Kundennummer *</label><input id="k-nr" placeholder="K-0042"></div></div>
@@ -387,7 +387,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     </div>
     <div class="card">
       <div class="stitle" data-i18n="st_k_liste">Firmenliste</div>
-      <input type="search" id="k-search" placeholder="Suche Firma, Nr, Ansprechpartner..." oninput="renderKunden()" style="margin-bottom:10px">
+      <input type="search" id="k-search" placeholder="Suche Firma, Nr, Ansprechpartner..." data-i18n-ph="ph_k_search" oninput="renderKunden()" style="margin-bottom:10px">
       <div id="kunden-liste"><div class="empty">Noch keine Firmen</div></div>
     </div>
   </div>
@@ -395,18 +395,18 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <span class="stitle" style="margin:0" id="k-detail-title"></span>
       <div style="display:flex;gap:6px">
-        <button class="btn-w" onclick="kundeBearbeiten(currentDetailId)" style="padding:5px 11px">Bearbeiten</button>
-        <button class="btn-s" onclick="neuerVertragModal(currentDetailId)" style="padding:5px 11px">+ Neuer Vertrag</button>
-        <button onclick="document.getElementById('k-detail-card').style.display='none'" style="padding:5px 11px">X</button>
+        <button class="btn-w" onclick="kundeBearbeiten(currentDetailId)" style="padding:5px 11px" data-i18n="lbl_bearb_voll">Bearbeiten</button>
+        <button class="btn-s" onclick="neuerVertragModal(currentDetailId)" style="padding:5px 11px" data-i18n="lbl_neuer_vertrag">+ Neuer Vertrag</button>
+        <button onclick="document.getElementById('k-detail-card').style.display='none'" style="padding:5px 11px" data-i18n="lbl_loeschen_x">X</button>
       </div>
     </div>
     <div class="g2"><div id="k-det-l"></div><div id="k-det-r"></div></div>
   </div>
   <div class="g4" style="margin-top:4px">
-    <div class="metric"><div class="val" id="m-kunden">0</div><div class="lbl">Firmen</div></div>
+    <div class="metric"><div class="val" id="m-kunden">0</div><div class="lbl" data-i18n="m_firmen">Firmen</div></div>
     <div class="metric"><div class="val" id="m-dt">0</div><div class="lbl" data-i18n="lbl_eingelagert">Eingelagert</div></div>
-    <div class="metric"><div class="val" id="m-netto">0.00</div><div class="lbl">Jahresumsatz netto</div></div>
-    <div class="metric"><div class="val" id="m-brutto">0.00</div><div class="lbl">Jahresumsatz brutto</div></div>
+    <div class="metric"><div class="val" id="m-netto">0.00</div><div class="lbl" data-i18n="m_netto">Jahresumsatz netto</div></div>
+    <div class="metric"><div class="val" id="m-brutto">0.00</div><div class="lbl" data-i18n="m_brutto">Jahresumsatz brutto</div></div>
   </div>
   </div><!-- end kv-panel-kunden -->
   <div class="sub-panel" id="kv-panel-vertraege">
@@ -505,7 +505,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="card">
         <div class="stitle" data-i18n="st_eingang">Eingangsprotokoll</div>
         <div style="margin-bottom:12px;padding:10px;background:var(--i-bg);border:1px solid var(--i-brd);border-radius:var(--rad);font-size:12px">
-          <strong>Schritt 1:</strong> Formular ausfüllen und ausdrucken, von beiden Seiten unterschreiben lassen.<br>
+          <span data-i18n="ep_step1"><strong>Schritt 1:</strong> Formular ausfüllen und ausdrucken, von beiden Seiten unterschreiben lassen.</span><br>
           <button onclick="druckeEingangFromForm()" style="margin-top:6px;padding:5px 12px;font-size:12px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer" data-i18n="ep_drucken">Eingangsformular drucken</button>
         </div>
         <div style="margin-bottom:12px;padding:10px;background:var(--s-bg);border:1px solid var(--s-brd);border-radius:var(--rad);font-size:12px">
@@ -520,15 +520,15 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <label data-i18n="lbl_foto_dt">Foto des Datenträgers (optional)</label>
         <div class="upzone" id="dt-bild-zone" onclick="document.getElementById('dt-bild-file').click()">
           <input type="file" id="dt-bild-file" accept="image/*" style="display:none" onchange="handleDtBild(event)">
-          <div id="dt-bild-prev">Klicken zum Hochladen</div>
+          <div id="dt-bild-prev" data-i18n="txt_klicken_hochladen">Klicken zum Hochladen</div>
         </div>
         <div style="margin:10px 0;padding:10px;background:var(--s-bg);border:1px solid var(--s-brd);border-radius:var(--rad);font-size:12px">
-          <strong>Schritt 2:</strong> Scan / Foto des unterschriebenen Eingangsformulars hochladen.
+          <span data-i18n="ep_step2"><strong>Schritt 2:</strong> Scan / Foto des unterschriebenen Eingangsformulars hochladen.</span>
         </div>
         <label><span data-i18n="lbl_scan_eingang">Scan Eingangsformular</span> <span style="color:var(--e-txt);font-size:11px">(unterschrieben)</span></label>
         <div class="upzone" id="dt-scan-zone" onclick="document.getElementById('dt-scan-file').click()">
           <input type="file" id="dt-scan-file" accept="image/*,application/pdf" style="display:none" onchange="handleDtScan(event)">
-          <div id="dt-scan-prev">Scan hochladen</div>
+          <div id="dt-scan-prev" data-i18n="txt_scan_hochladen">Scan hochladen</div>
         </div>
         <div style="display:flex;gap:8px;margin-top:12px">
           <button onclick="dtGotoStep(1)" data-i18n="lbl_zurueck" style="flex:1">Zurück</button>
@@ -633,12 +633,12 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rad);padding:10px;font-size:12px;margin-bottom:12px"><strong>Ausstehende Übergabe:</strong><br><span id="s2-info" style="color:var(--mut)">-</span></div>
         <div class="upzone" id="doc-upzone" onclick="document.getElementById('u-doc-file').click()">
           <input type="file" id="u-doc-file" accept="image/*,application/pdf" style="display:none" onchange="handleUebergabeDoc(event)">
-          <div id="u-doc-prev">Scan / Foto hochladen</div>
+          <div id="u-doc-prev" data-i18n="txt_scan_foto_hochladen">Scan / Foto hochladen</div>
         </div>
         <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
-          <button onclick="gotoStep(1)" style="flex:1;min-width:70px">Zurück</button>
-          <button onclick="uebergabeAbschliessen(true)" style="flex:1;min-width:110px;background:var(--w-bg);color:var(--w-txt);border:1px solid var(--w-brd);border-radius:var(--rad);font-weight:600;font-size:12px;cursor:pointer" title="Abschließen ohne DTs als übergeben zu markieren">📦 Im Bestand</button>
-          <button class="btn-s" onclick="uebergabeAbschliessen(false)" style="flex:2;min-width:110px">✓ Abschließen</button>
+          <button onclick="gotoStep(1)" style="flex:1;min-width:70px" data-i18n="lbl_zurueck">Zurück</button>
+          <button onclick="uebergabeAbschliessen(true)" style="flex:1;min-width:110px;background:var(--w-bg);color:var(--w-txt);border:1px solid var(--w-brd);border-radius:var(--rad);font-weight:600;font-size:12px;cursor:pointer" title="Abschließen ohne DTs als übergeben zu markieren" data-i18n="lbl_im_bestand_btn">📦 Im Bestand</button>
+          <button class="btn-s" onclick="uebergabeAbschliessen(false)" style="flex:2;min-width:110px" data-i18n="lbl_abschliessen_btn">✓ Abschließen</button>
         </div>
       </div>
       <div class="card"><div class="stitle" data-i18n="st_ue_offen">Offene Übergaben</div><div id="pending-list"><div class="empty">Keine</div></div></div>
@@ -662,9 +662,9 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div class="g2">
       <div style="overflow-y:auto;max-height:90vh">
         <div class="card">
-          <div class="stitle">Logo & Farbe</div>
+          <div class="stitle" data-i18n="st_logo">Logo & Farbe</div>
           <div class="upzone" id="logo-zone" onclick="document.getElementById('logo-input').click()" style="margin-bottom:8px"><input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)"><div id="logo-prev">Logo hochladen</div></div>
-          <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><label style="margin:0;white-space:nowrap">Farbe:</label><input type="color" id="accent-color" value="#0065A4" oninput="syncBrief()" style="width:40px;height:30px;padding:2px;border-radius:4px;cursor:pointer;flex-shrink:0"><button onclick="resetLogo()" class="btn-d" style="padding:4px 8px;font-size:11px">Entfernen</button></div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><label style="margin:0;white-space:nowrap" data-i18n="lbl_farbe_colon">Farbe:</label><input type="color" id="accent-color" value="#0065A4" oninput="syncBrief()" style="width:40px;height:30px;padding:2px;border-radius:4px;cursor:pointer;flex-shrink:0"><button onclick="resetLogo()" class="btn-d" style="padding:4px 8px;font-size:11px" data-i18n="lbl_entfernen">Entfernen</button></div>
         </div>
         <div class="card" style="background:var(--i-bg);border-color:var(--i-brd)">
           <div class="stitle" style="color:var(--i-txt)" data-i18n="st_firma">🏢 Unternehmensdaten</div>
@@ -947,7 +947,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="card">
         <div class="stitle" data-i18n="st_logo">Logo &amp; Farbe</div>
         <div class="upzone" id="adm-logo-zone" onclick="document.getElementById('adm-logo-input').click()" style="margin-bottom:8px"><input type="file" id="adm-logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)"><div id="adm-logo-prev">Logo hochladen</div></div>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><label style="margin:0;white-space:nowrap">Farbe:</label><input type="color" id="adm-accent-color" value="#0065A4" oninput="syncAdmBrief()" style="width:40px;height:30px;padding:2px;border-radius:4px;cursor:pointer;flex-shrink:0"><button onclick="resetLogo()" class="btn-d" style="padding:4px 8px;font-size:11px">Entfernen</button></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><label style="margin:0;white-space:nowrap" data-i18n="lbl_farbe_colon">Farbe:</label><input type="color" id="adm-accent-color" value="#0065A4" oninput="syncAdmBrief()" style="width:40px;height:30px;padding:2px;border-radius:4px;cursor:pointer;flex-shrink:0"><button onclick="resetLogo()" class="btn-d" style="padding:4px 8px;font-size:11px" data-i18n="lbl_entfernen">Entfernen</button></div>
       </div>
       <div class="card">
         <div class="stitle">Ihr Unternehmen (Briefkopf)</div>
@@ -986,10 +986,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div class="stitle" data-i18n="st_benutzer">Benutzer</div>
         <div id="user-liste"><div class="empty">Lade...</div></div>
         <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:12px">
-          <div class="stitle" style="font-size:12px">Neuen Benutzer</div>
-          <div class="r2"><div><label>Benutzername</label><input id="new-username" placeholder="benutzername"></div><div><label>Name / Ansprechpartner</label><input id="new-name" placeholder="Vor Nachname"></div></div>
-          <div class="r2"><div><label>Passwort</label><input id="new-pass" type="password"></div><div><label>Rolle</label><select id="new-rolle-id"></select></div></div>
-          <button class="btn-p" onclick="userHinzufuegen()" style="width:100%;margin-top:10px">Benutzer anlegen</button>
+          <div class="stitle" style="font-size:12px" data-i18n="st_neuen_benutzer">Neuen Benutzer</div>
+          <div class="r2"><div><label data-i18n="lbl_benutzername">Benutzername</label><input id="new-username" placeholder="benutzername"></div><div><label data-i18n="lbl_name_ansprechpartner">Name / Ansprechpartner</label><input id="new-name" placeholder="Vor Nachname"></div></div>
+          <div class="r2"><div><label data-i18n="lbl_passwort_lbl">Passwort</label><input id="new-pass" type="password"></div><div><label data-i18n="lbl_rolle_lbl">Rolle</label><select id="new-rolle-id"></select></div></div>
+          <button class="btn-p" onclick="userHinzufuegen()" style="width:100%;margin-top:10px" data-i18n="lbl_benutzer_anlegen">Benutzer anlegen</button>
         </div>
       </div>
     </div>
@@ -998,13 +998,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <div class="stitle" style="margin:0" data-i18n="st_rollen">Rollen & Berechtigungen</div>
-          <button class="btn-s" onclick="neueRolleModal()" style="padding:5px 10px;font-size:11px">+ Neue Rolle</button>
+          <button class="btn-s" onclick="neueRolleModal()" style="padding:5px 10px;font-size:11px" data-i18n="lbl_neue_rolle">+ Neue Rolle</button>
         </div>
         <div id="rollen-liste"><div class="empty">Lade...</div></div>
       </div>
       <div class="card">
-        <div class="stitle">Support-Kontakt (Hilfe-Seite)</div>
-        <div style="font-size:11px;color:var(--mut);margin-bottom:10px">Wird im ❓ Hilfe-Tab und im Copyright-Footer angezeigt.</div>
+        <div class="stitle" data-i18n="st_support_kontakt">Support-Kontakt (Hilfe-Seite)</div>
+        <div style="font-size:11px;color:var(--mut);margin-bottom:10px" data-i18n="lbl_support_desc">Wird im ❓ Hilfe-Tab und im Copyright-Footer angezeigt.</div>
         <label>Name</label><input id="support-name" placeholder="z.B. Marcel Capelan">
         <label>E-Mail</label><input id="support-email" type="email" placeholder="z.B. support@firma.de">
         <button class="btn-p btn-full" onclick="supportSpeichern()">💾 Speichern</button>
@@ -1144,7 +1144,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <button onclick="samlLoadConfig()" style="flex:1;font-size:12px">Zurücksetzen</button>
       <button onclick="samlSaveConfig()" class="btn-p" style="flex:2;font-size:12px">Konfiguration speichern</button>
     </div>
-    <div style="margin-top:10px;font-size:11px;color:var(--mut)">Vollständige SAML-Konfiguration ist auch im Tab Benutzer &amp; Rollen verfügbar.</div>
+    <div style="margin-top:10px;font-size:11px;color:var(--mut)" data-i18n="lbl_saml_hint">Vollständige SAML-Konfiguration ist auch im Tab Benutzer &amp; Rollen verfügbar.</div>
   </div>
   </div><!-- end adm-panel-saml -->
 </div>
@@ -1155,8 +1155,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--brd)">
       <span style="font-size:32px">❓</span>
       <div>
-        <div style="font-size:18px;font-weight:700">Hilfe & Dokumentation</div>
-        <div style="font-size:12px;color:var(--mut);margin-top:3px">Häufige Fragen und Erklärungen zur Datenträger-Verwaltung</div>
+        <div style="font-size:18px;font-weight:700" data-i18n="hilfe_title">Hilfe &amp; Dokumentation</div>
+        <div style="font-size:12px;color:var(--mut);margin-top:3px" data-i18n="hilfe_subtitle">Häufige Fragen und Erklärungen zur Datenträger-Verwaltung</div>
       </div>
     </div>
 
@@ -1167,7 +1167,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div style="margin-top:28px;padding-top:20px;border-top:2px solid var(--brd);display:flex;flex-wrap:wrap;gap:20px;align-items:center;background:var(--surf);border-radius:var(--rad);padding:16px 18px">
       <div style="font-size:20px">📞</div>
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">Kontakt & Support</div>
+        <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px" data-i18n="lbl_kontakt_support">Kontakt &amp; Support</div>
         <div style="font-size:12px;color:var(--mut)">
           <span id="hilfe-contact-name">Support</span>
           &nbsp;·&nbsp;
@@ -1181,7 +1181,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; Datenträger-Verwaltung v1.4.0
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.2
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1196,25 +1196,25 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <div id="dt-ov" class="overlay">
   <div class="overlay-bg" onclick="document.getElementById('dt-ov').classList.remove('open')"></div>
   <div class="overlay-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:14px;font-weight:700">Datenträger bearbeiten</span><button onclick="document.getElementById('dt-ov').classList.remove('open')" style="padding:5px 10px">X</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:14px;font-weight:700" data-i18n="st_dt_bearb">Datenträger bearbeiten</span><button onclick="document.getElementById('dt-ov').classList.remove('open')" style="padding:5px 10px">X</button></div>
     <input type="hidden" id="ov-dt-id">
-    <label>Firma</label><select id="ov-dt-kunden_id"></select>
-    <label>Bezeichnung</label><input id="ov-dt-bezeichnung">
-    <label>Seriennummer</label><input id="ov-dt-serial">
+    <label data-i18n="lbl_k_firma">Firma</label><select id="ov-dt-kunden_id"></select>
+    <label data-i18n="lbl_bezeichnung_short">Bezeichnung</label><input id="ov-dt-bezeichnung">
+    <label data-i18n="lbl_seriennr_short">Seriennummer</label><input id="ov-dt-serial">
     <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="ov-dt-interne_nr" placeholder="z.B. INT-001">
     <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-einfach" value="einfach" checked onchange="ovDtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-escrow" value="escrow" onchange="ovDtModusWechseln()"> Escrow / 3-Firmen</label></div>
     <div id="ov-dt-escrow-section" style="display:none"><label>Haupt-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
     <label>Neben-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
     <label>Rechnungsempfänger <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
-    <label>Preis</label>
+    <label data-i18n="lbl_preis">Preis</label>
     <div class="r2"><input id="ov-dt-preis" type="number" step="0.10" min="0"><select id="ov-dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
-    <label>Rabatt (%)</label><input id="ov-dt-rabatt" type="number" min="0" max="100" step="0.1">
-    <label>Einlagerungsdatum</label><input id="ov-dt-datum" type="date">
-    <label>Beschreibung</label><input id="ov-dt-beschreibung">
-    <label>Tresor / Schrank (optional)</label><select id="ov-dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
-    <label>Bild ersetzen</label>
-    <div class="upzone" id="ov-bild-zone" onclick="document.getElementById('ov-bild-file').click()"><input type="file" id="ov-bild-file" accept="image/*" style="display:none" onchange="handleOvBild(event)"><div id="ov-bild-prev">Klicken</div></div>
-    <div style="margin-top:14px;display:flex;gap:8px"><button onclick="document.getElementById('dt-ov').classList.remove('open')" style="flex:1">Abbrechen</button><button class="btn-p" onclick="dtSpeichern()" style="flex:1">Speichern</button></div>
+    <label data-i18n="lbl_rabatt">Rabatt (%)</label><input id="ov-dt-rabatt" type="number" min="0" max="100" step="0.1">
+    <label data-i18n="lbl_einl_datum">Einlagerungsdatum</label><input id="ov-dt-datum" type="date">
+    <label data-i18n="lbl_beschreibung_short">Beschreibung</label><input id="ov-dt-beschreibung">
+    <label data-i18n="lbl_tresor_select">Tresor / Schrank (optional)</label><select id="ov-dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
+    <label data-i18n="lbl_bild_ersetzen">Bild ersetzen</label>
+    <div class="upzone" id="ov-bild-zone" onclick="document.getElementById('ov-bild-file').click()"><input type="file" id="ov-bild-file" accept="image/*" style="display:none" onchange="handleOvBild(event)"><div id="ov-bild-prev" data-i18n="txt_klicken">Klicken</div></div>
+    <div style="margin-top:14px;display:flex;gap:8px"><button onclick="document.getElementById('dt-ov').classList.remove('open')" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button><button class="btn-p" onclick="dtSpeichern()" style="flex:1" data-i18n="lbl_speichern">Speichern</button></div>
   </div>
 </div>
 
@@ -1222,19 +1222,19 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="overlay-bg" onclick="closePwModal()"></div>
   <div class="overlay-box" style="max-width:360px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <span style="font-size:14px;font-weight:700">Passwort ändern</span>
+      <span style="font-size:14px;font-weight:700" data-i18n="pw_modal_title">Passwort ändern</span>
       <button onclick="closePwModal()" style="padding:5px 10px">✕</button>
     </div>
-    <label>Aktuelles Passwort</label>
+    <label data-i18n="lbl_akt_pw">Aktuelles Passwort</label>
     <input id="pw-alt" type="password" placeholder="••••••••" autocomplete="current-password">
-    <label>Neues Passwort</label>
-    <input id="pw-neu" type="password" placeholder="mind. 4 Zeichen" autocomplete="new-password">
-    <label>Neues Passwort bestätigen</label>
-    <input id="pw-neu2" type="password" placeholder="Wiederholen" autocomplete="new-password">
+    <label data-i18n="lbl_neues_pw">Neues Passwort</label>
+    <input id="pw-neu" type="password" placeholder="mind. 4 Zeichen" data-i18n-ph="ph_pw_min4" autocomplete="new-password">
+    <label data-i18n="lbl_pw_bestaetigen">Neues Passwort bestätigen</label>
+    <input id="pw-neu2" type="password" placeholder="Wiederholen" autocomplete="new-password" data-i18n-ph="ph_pw_repeat">
     <div id="pw-fehler" style="display:none;color:var(--d-txt);background:var(--d-bg);border:1px solid var(--d-brd);border-radius:var(--rad);padding:7px 10px;font-size:12px;margin-top:10px"></div>
     <div style="display:flex;gap:8px;margin-top:16px">
-      <button onclick="closePwModal()" style="flex:1">Abbrechen</button>
-      <button class="btn-p" onclick="pwSpeichern()" style="flex:2">Passwort speichern</button>
+      <button onclick="closePwModal()" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button>
+      <button class="btn-p" onclick="pwSpeichern()" style="flex:2" data-i18n="lbl_pw_speichern">Passwort speichern</button>
     </div>
   </div>
 </div>
@@ -1243,25 +1243,25 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="overlay-bg" onclick="document.getElementById('user-edit-modal').classList.remove('open')"></div>
   <div class="overlay-box" style="max-width:380px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <span style="font-size:14px;font-weight:700">Benutzer bearbeiten</span>
+      <span style="font-size:14px;font-weight:700" data-i18n="ue_modal_title">Benutzer bearbeiten</span>
       <button onclick="document.getElementById('user-edit-modal').classList.remove('open')" style="padding:5px 10px">✕</button>
     </div>
     <input type="hidden" id="ue-uid">
-    <label>Benutzername</label>
+    <label data-i18n="lbl_benutzername">Benutzername</label>
     <input id="ue-username" disabled style="opacity:.6">
-    <label>Name</label>
-    <input id="ue-name" placeholder="Vor Nachname">
-    <label>Rolle</label>
+    <label data-i18n="lbl_name_lbl">Name</label>
+    <input id="ue-name" placeholder="Vor Nachname" data-i18n-ph="ph_name_full">
+    <label data-i18n="lbl_rolle_lbl">Rolle</label>
     <select id="ue-rollen_id"></select>
-    <label>Status</label>
+    <label data-i18n="col_status">Status</label>
     <select id="ue-aktiv">
       <option value="1">Aktiv</option>
       <option value="0">Inaktiv</option>
     </select>
     <div id="ue-err" style="display:none;color:var(--d-txt);background:var(--d-bg);border:1px solid var(--d-brd);border-radius:var(--rad);padding:7px 10px;font-size:12px;margin-top:10px"></div>
     <div style="display:flex;gap:8px;margin-top:16px">
-      <button onclick="document.getElementById('user-edit-modal').classList.remove('open')" style="flex:1">Abbrechen</button>
-      <button class="btn-p" onclick="userEditSpeichern()" style="flex:2">Speichern</button>
+      <button onclick="document.getElementById('user-edit-modal').classList.remove('open')" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button>
+      <button class="btn-p" onclick="userEditSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button>
     </div>
   </div>
 </div>
@@ -1270,19 +1270,19 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="overlay-bg" onclick="document.getElementById('admin-pw-modal').classList.remove('open')"></div>
   <div class="overlay-box" style="max-width:360px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <span style="font-size:14px;font-weight:700">Passwort setzen</span>
+      <span style="font-size:14px;font-weight:700" data-i18n="adm_pw_modal_title">Passwort setzen</span>
       <button onclick="document.getElementById('admin-pw-modal').classList.remove('open')" style="padding:5px 10px">✕</button>
     </div>
     <div id="admin-pw-user-info" style="background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);padding:8px 12px;font-size:12px;margin-bottom:12px"></div>
     <input type="hidden" id="admin-pw-uid">
-    <label>Neues Passwort</label>
-    <input id="admin-pw-neu" type="password" placeholder="mind. 4 Zeichen" autocomplete="new-password">
-    <label>Bestätigen</label>
-    <input id="admin-pw-neu2" type="password" placeholder="Wiederholen" autocomplete="new-password">
+    <label data-i18n="lbl_neues_pw">Neues Passwort</label>
+    <input id="admin-pw-neu" type="password" placeholder="mind. 4 Zeichen" data-i18n-ph="ph_pw_min4" autocomplete="new-password">
+    <label data-i18n="lbl_bestaetigen">Bestätigen</label>
+    <input id="admin-pw-neu2" type="password" placeholder="Wiederholen" autocomplete="new-password" data-i18n-ph="ph_pw_repeat">
     <div id="admin-pw-err" style="display:none;color:var(--d-txt);background:var(--d-bg);border:1px solid var(--d-brd);border-radius:var(--rad);padding:7px 10px;font-size:12px;margin-top:10px"></div>
     <div style="display:flex;gap:8px;margin-top:16px">
-      <button onclick="document.getElementById('admin-pw-modal').classList.remove('open')" style="flex:1">Abbrechen</button>
-      <button class="btn-p" onclick="adminPwSpeichern()" style="flex:2">Passwort setzen</button>
+      <button onclick="document.getElementById('admin-pw-modal').classList.remove('open')" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button>
+      <button class="btn-p" onclick="adminPwSpeichern()" style="flex:2" data-i18n="adm_pw_modal_title">Passwort setzen</button>
     </div>
   </div>
 </div>
@@ -1290,14 +1290,14 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <div id="vt-modal" class="overlay">
   <div class="overlay-bg" onclick="document.getElementById('vt-modal').classList.remove('open')"></div>
   <div class="overlay-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:14px;font-weight:700">Neuen Vertrag</span><button onclick="document.getElementById('vt-modal').classList.remove('open')" style="padding:5px 10px">X</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:14px;font-weight:700" data-i18n="vt_modal_title">Neuen Vertrag</span><button onclick="document.getElementById('vt-modal').classList.remove('open')" style="padding:5px 10px">X</button></div>
     <input type="hidden" id="vt-kunden-id">
-    <div class="r2"><div><label>Neue Vertragsnummer *</label><input id="vt-nr" placeholder="VT-2025-002"></div><div><label>Vertragsbeginn *</label><input id="vt-beginn" type="date"></div></div>
-    <div class="r2"><div><label>Vertragsende</label><input id="vt-ende" type="date"></div><div><label>Status</label><select id="vt-status"><option value="aktiv">Aktiv</option><option value="gekuendigt">Gekuendigt</option><option value="abgelaufen">Abgelaufen</option><option value="pausiert">Pausiert</option></select></div></div>
-    <label>Notiz</label><input id="vt-notiz">
-    <label>Vertragsdokument (PDF)</label>
-    <div class="upzone" id="vt-doc-zone" onclick="document.getElementById('vt-doc-file').click()"><input type="file" id="vt-doc-file" accept="application/pdf,image/*" style="display:none" onchange="handleVtDoc(event)"><div id="vt-doc-prev">PDF oder Bild hochladen</div></div>
-    <div style="margin-top:14px;display:flex;gap:8px"><button onclick="document.getElementById('vt-modal').classList.remove('open')" style="flex:1">Abbrechen</button><button class="btn-p" onclick="vtSpeichern()" style="flex:2">Vertrag speichern</button></div>
+    <div class="r2"><div><label data-i18n="lbl_neue_vt_nr">Neue Vertragsnummer *</label><input id="vt-nr" placeholder="VT-2025-002"></div><div><label data-i18n="lbl_vt_beginn_req">Vertragsbeginn *</label><input id="vt-beginn" type="date"></div></div>
+    <div class="r2"><div><label data-i18n="lbl_vt_ende">Vertragsende</label><input id="vt-ende" type="date"></div><div><label data-i18n="col_status">Status</label><select id="vt-status"><option value="aktiv">Aktiv</option><option value="gekuendigt">Gekuendigt</option><option value="abgelaufen">Abgelaufen</option><option value="pausiert">Pausiert</option></select></div></div>
+    <label data-i18n="lbl_notiz_short">Notiz</label><input id="vt-notiz">
+    <label data-i18n="lbl_vt_doc">Vertragsdokument (PDF)</label>
+    <div class="upzone" id="vt-doc-zone" onclick="document.getElementById('vt-doc-file').click()"><input type="file" id="vt-doc-file" accept="application/pdf,image/*" style="display:none" onchange="handleVtDoc(event)"><div id="vt-doc-prev" data-i18n="txt_pdf_upload">PDF oder Bild hochladen</div></div>
+    <div style="margin-top:14px;display:flex;gap:8px"><button onclick="document.getElementById('vt-modal').classList.remove('open')" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button><button class="btn-p" onclick="vtSpeichern()" style="flex:2" data-i18n="lbl_vt_speichern">Vertrag speichern</button></div>
   </div>
 </div>
 
@@ -1307,12 +1307,12 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:14px;font-weight:700" id="rolle-modal-title">Neue Rolle</span><button onclick="document.getElementById('rolle-modal').classList.remove('open')" style="padding:5px 10px">X</button></div>
     <input type="hidden" id="rm-id">
     <div class="r2">
-      <div><label>Rollenname</label><input id="rm-name" placeholder="z.B. Buchhaltung"></div>
-      <div><label>Farbe</label><select id="rm-farbe"><option value="bg">Gruen</option><option value="bi">Blau</option><option value="ba">Gelb</option><option value="br">Rot</option></select></div>
+      <div><label data-i18n="lbl_rollenname">Rollenname</label><input id="rm-name" placeholder="z.B. Buchhaltung"></div>
+      <div><label data-i18n="lbl_farbe">Farbe</label><select id="rm-farbe"><option value="bg">Gruen</option><option value="bi">Blau</option><option value="ba">Gelb</option><option value="br">Rot</option></select></div>
     </div>
-    <label>Berechtigungen</label>
+    <label data-i18n="perm_section">Berechtigungen</label>
     <div class="perm-grid" id="perm-grid"></div>
-    <div style="margin-top:14px;display:flex;gap:8px"><button onclick="document.getElementById('rolle-modal').classList.remove('open')" style="flex:1">Abbrechen</button><button class="btn-p" onclick="rolleSpeichern()" style="flex:2">Speichern</button></div>
+    <div style="margin-top:14px;display:flex;gap:8px"><button onclick="document.getElementById('rolle-modal').classList.remove('open')" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button><button class="btn-p" onclick="rolleSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
   </div>
 </div>
 
@@ -1602,6 +1602,82 @@ const TRANS={
   hilfe_cat_vt:{de:'📄 Verträge',en:'📄 Contracts'},
   hilfe_cat_tpl:{de:'🎨 Templates',en:'🎨 Templates'},
   hilfe_cat_user:{de:'👤 Benutzer & Rollen',en:'👤 Users & Roles'},
+  // ── v1.4.2 additions ─────────────────────────────────
+  db_aktive_kunden:{de:'Aktive Kunden',en:'Active Customers'},
+  db_netto_jahr:{de:'Netto/Jahr (akt.)',en:'Net/Year (active)'},
+  db_aktive_vt_kpi:{de:'Aktive Verträge',en:'Active Contracts'},
+  db_ablauf_kpi:{de:'Verträge &lt;60 Tage',en:'Contracts &lt;60 Days'},
+  lbl_bearbmodus:{de:'Bearbeitungsmodus',en:'Edit Mode'},
+  st_wartungsvertrag:{de:'Wartungsvertrag',en:'Maintenance Contract'},
+  ph_k_search:{de:'Suche Firma, Nr, Ansprechpartner...',en:'Search company, no., contact...'},
+  m_firmen:{de:'Firmen',en:'Companies'},
+  m_netto:{de:'Jahresumsatz netto',en:'Annual Revenue (net)'},
+  m_brutto:{de:'Jahresumsatz brutto',en:'Annual Revenue (gross)'},
+  ep_step1:{de:'<strong>Schritt 1:</strong> Formular ausfüllen und ausdrucken, von beiden Seiten unterschreiben lassen.',en:'<strong>Step 1:</strong> Fill out and print the form, have both parties sign it.'},
+  ep_step2:{de:'<strong>Schritt 2:</strong> Scan / Foto des unterschriebenen Eingangsformulars hochladen.',en:'<strong>Step 2:</strong> Upload a scan / photo of the signed incoming form.'},
+  txt_klicken_hochladen:{de:'Klicken zum Hochladen',en:'Click to Upload'},
+  txt_scan_hochladen:{de:'Scan hochladen',en:'Upload Scan'},
+  txt_scan_foto_hochladen:{de:'Scan / Foto hochladen',en:'Upload Scan / Photo'},
+  txt_klicken:{de:'Klicken',en:'Click'},
+  lbl_im_bestand_btn:{de:'📦 Im Bestand',en:'📦 Keep in Stock'},
+  lbl_abschliessen_btn:{de:'✓ Abschließen',en:'✓ Complete'},
+  lbl_farbe_colon:{de:'Farbe:',en:'Colour:'},
+  lbl_farbe:{de:'Farbe',en:'Colour'},
+  lbl_entfernen:{de:'Entfernen',en:'Remove'},
+  st_neuen_benutzer:{de:'Neuen Benutzer',en:'New User'},
+  lbl_benutzername:{de:'Benutzername',en:'Username'},
+  lbl_name_ansprechpartner:{de:'Name / Ansprechpartner',en:'Name / Contact'},
+  lbl_passwort_lbl:{de:'Passwort',en:'Password'},
+  lbl_rolle_lbl:{de:'Rolle',en:'Role'},
+  lbl_benutzer_anlegen:{de:'Benutzer anlegen',en:'Create User'},
+  lbl_neue_rolle:{de:'+ Neue Rolle',en:'+ New Role'},
+  st_support_kontakt:{de:'Support-Kontakt (Hilfe-Seite)',en:'Support Contact (Help Page)'},
+  lbl_support_desc:{de:'Wird im ❓ Hilfe-Tab und im Copyright-Footer angezeigt.',en:'Shown in the ❓ Help tab and copyright footer.'},
+  lbl_saml_hint:{de:'Vollständige SAML-Konfiguration ist auch im Tab Benutzer &amp; Rollen verfügbar.',en:'Full SAML configuration is also available in the Users &amp; Roles tab.'},
+  hilfe_title:{de:'Hilfe &amp; Dokumentation',en:'Help &amp; Documentation'},
+  hilfe_subtitle:{de:'Häufige Fragen und Erklärungen zur Datenträger-Verwaltung',en:'Frequently asked questions and explanations for Media Management'},
+  lbl_kontakt_support:{de:'Kontakt &amp; Support',en:'Contact &amp; Support'},
+  st_dt_bearb:{de:'Datenträger bearbeiten',en:'Edit Media Record'},
+  lbl_bezeichnung_short:{de:'Bezeichnung',en:'Type'},
+  lbl_seriennr_short:{de:'Seriennummer',en:'Serial Number'},
+  lbl_beschreibung_short:{de:'Beschreibung',en:'Description'},
+  lbl_bild_ersetzen:{de:'Bild ersetzen',en:'Replace Image'},
+  pw_modal_title:{de:'Passwort ändern',en:'Change Password'},
+  lbl_akt_pw:{de:'Aktuelles Passwort',en:'Current Password'},
+  lbl_neues_pw:{de:'Neues Passwort',en:'New Password'},
+  ph_pw_min4:{de:'mind. 4 Zeichen',en:'min. 4 characters'},
+  lbl_pw_bestaetigen:{de:'Neues Passwort bestätigen',en:'Confirm New Password'},
+  ph_pw_repeat:{de:'Wiederholen',en:'Repeat'},
+  lbl_pw_speichern:{de:'Passwort speichern',en:'Save Password'},
+  ue_modal_title:{de:'Benutzer bearbeiten',en:'Edit User'},
+  lbl_name_lbl:{de:'Name',en:'Name'},
+  ph_name_full:{de:'Vor Nachname',en:'First Last'},
+  adm_pw_modal_title:{de:'Passwort setzen',en:'Set Password'},
+  lbl_bestaetigen:{de:'Bestätigen',en:'Confirm'},
+  vt_modal_title:{de:'Neuen Vertrag',en:'New Contract'},
+  lbl_neue_vt_nr:{de:'Neue Vertragsnummer *',en:'New Contract No. *'},
+  lbl_vt_beginn_req:{de:'Vertragsbeginn *',en:'Contract Start *'},
+  lbl_notiz_short:{de:'Notiz',en:'Note'},
+  lbl_vt_doc:{de:'Vertragsdokument (PDF)',en:'Contract Document (PDF)'},
+  txt_pdf_upload:{de:'PDF oder Bild hochladen',en:'Upload PDF or image'},
+  lbl_vt_speichern:{de:'Vertrag speichern',en:'Save Contract'},
+  lbl_rollenname:{de:'Rollenname',en:'Role Name'},
+  opt_aktiv:{de:'Aktiv',en:'Active'},
+  opt_gekuendigt:{de:'Gekündigt',en:'Cancelled'},
+  opt_abgelaufen:{de:'Abgelaufen',en:'Expired'},
+  opt_pausiert:{de:'Pausiert',en:'Paused'},
+  opt_inaktiv:{de:'Inaktiv',en:'Inactive'},
+  opt_alle_status:{de:'Alle Status',en:'All Statuses'},
+  opt_pro_monat:{de:'pro Monat',en:'per Month'},
+  opt_pro_jahr:{de:'pro Jahr',en:'per Year'},
+  txt_mahnung:{de:'Mahnung',en:'Notice'},
+  txt_ansehen:{de:'Ansehen',en:'View'},
+  lbl_bearb_voll:{de:'Bearbeiten',en:'Edit'},
+  lbl_neuer_vertrag:{de:'+ Neuer Vertrag',en:'+ New Contract'},
+  lbl_schliessen:{de:'✕ Schließen',en:'✕ Close'},
+  lbl_bearb_tr:{de:'✎ Bearbeiten',en:'✎ Edit'},
+  lbl_wartungsv:{de:'📄 Wartungsvertrag',en:'📄 Maintenance Contract'},
+  app_name_footer:{de:'Datenträger-Verwaltung',en:'Media Management'},
 };
 let _lang=localStorage.getItem('dtv_lang')||'de';
 function t(key){return TRANS[key]?.[_lang]||TRANS[key]?.de||key;}
@@ -1624,6 +1700,20 @@ function applyLang(){
   });
   const bl=document.getElementById('btn-lang');
   if(bl)bl.textContent=_lang==='de'?'🇩🇪 DE':'🇬🇧 EN';
+  // Rebuild select options
+  const kAnrede=document.getElementById('k-anrede');
+  if(kAnrede){const v=kAnrede.value;kAnrede.innerHTML=`<option value="">${ta('Anrede','Title')}</option><option value="Herr">${ta('Herr','Mr.')}</option><option value="Frau">${ta('Frau','Ms.')}</option><option value="Dr.">Dr.</option><option value="Prof.">Prof.</option><option value="Divers">${ta('Divers','Other')}</option>`;kAnrede.value=v;}
+  ['k-vertragsstatus','vt-status'].forEach(id=>{const s=document.getElementById(id);if(!s)return;const v=s.value;s.innerHTML=`<option value="aktiv">${t('opt_aktiv')}</option><option value="gekuendigt">${t('opt_gekuendigt')}</option><option value="abgelaufen">${t('opt_abgelaufen')}</option><option value="pausiert">${t('opt_pausiert')}</option>`;s.value=v;});
+  const vtFilter=document.getElementById('vt-v-status-filter');
+  if(vtFilter){const v=vtFilter.value;vtFilter.innerHTML=`<option value="">${t('opt_alle_status')}</option><option value="aktiv">${t('opt_aktiv')}</option><option value="gekuendigt">${t('opt_gekuendigt')}</option><option value="abgelaufen">${t('opt_abgelaufen')}</option><option value="pausiert">${t('opt_pausiert')}</option>`;vtFilter.value=v;}
+  ['dt-einheit','ov-dt-einheit'].forEach(id=>{const s=document.getElementById(id);if(!s)return;const v=s.value;s.innerHTML=`<option value="monat">${t('opt_pro_monat')}</option><option value="jahr">${t('opt_pro_jahr')}</option>`;s.value=v;});
+  const ueAktiv=document.getElementById('ue-aktiv');
+  if(ueAktiv){const v=ueAktiv.value;ueAktiv.innerHTML=`<option value="1">${t('opt_aktiv')}</option><option value="0">${t('opt_inaktiv')}</option>`;ueAktiv.value=v;}
+  const rmFarbe=document.getElementById('rm-farbe');
+  if(rmFarbe){const v=rmFarbe.value;rmFarbe.innerHTML=`<option value="bg">${ta('Grün','Green')}</option><option value="bi">${ta('Blau','Blue')}</option><option value="ba">${ta('Gelb','Yellow')}</option><option value="br">${ta('Rot','Red')}</option>`;rmFarbe.value=v;}
+  // k-save-btn: update label based on form state
+  const kEbanner=document.getElementById('k-ebanner');const kSaveBtn=document.getElementById('k-save-btn');
+  if(kSaveBtn&&kEbanner){kSaveBtn.textContent=kEbanner.style.display==='none'?t('txt_firma_anlegen'):t('txt_aend_speich');}
 }
 function toggleLang(){
   _lang=_lang==='de'?'en':'de';
@@ -1986,7 +2076,7 @@ function renderKunden() {
       const dts=datentraeger.filter(d=>d.kunden_id===k.id&&d.status==='eingelagert');
       const sb=k.vertragsstatus?`<span class="badge ${smap[k.vertragsstatus]||'bg'}" style="font-size:10px">${k.vertragsstatus}</span>  `:'';
       return`<tr><td style="color:var(--mut);font-size:11px">${k.nr}</td><td style="cursor:pointer;color:var(--i-txt);font-weight:600" onclick="zeigeDetail(${k.id})">${k.firma}<br><span style="font-size:10px;color:var(--mut);font-weight:400">${k.vertragsnr||''}</span></td><td><span class="badge bg">${dts.length}</span></td>
-      <td><div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">${sb}<button class="btn-w" onclick="kundeBearbeiten(${k.id})" style="padding:3px 7px;font-size:11px">${can('write')?t('bearb_btn'):'Ansehen'}</button>${can('delete')?`<button class="btn-d" onclick="kundeLoeschen(${k.id})" style="padding:3px 7px;font-size:11px">X</button>`:''}</div></td></tr>`;
+      <td><div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">${sb}<button class="btn-w" onclick="kundeBearbeiten(${k.id})" style="padding:3px 7px;font-size:11px">${can('write')?t('bearb_btn'):ta('Ansehen','View')}</button>${can('delete')?`<button class="btn-d" onclick="kundeLoeschen(${k.id})" style="padding:3px 7px;font-size:11px">X</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
 }
 
@@ -2008,9 +2098,9 @@ async function dtHinzufuegen() {
     datentraeger.push(result);
     ['dt-bezeichnung','dt-serial','dt-beschreibung','dt-interne_nr'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('dt-preis').value='1.00';document.getElementById('dt-rabatt').value='0';document.getElementById('dt-datum').value=today;
-    document.getElementById('dt-bild-prev').textContent='Klicken zum Hochladen';document.getElementById('dt-bild-zone').classList.remove('has-file');
+    document.getElementById('dt-bild-prev').textContent=t('txt_klicken_hochladen');document.getElementById('dt-bild-zone').classList.remove('has-file');
     document.getElementById('dt-bild-file').value='';pendingDtBild=null;
-    document.getElementById('dt-scan-prev').textContent='Scan hochladen';document.getElementById('dt-scan-zone').classList.remove('has-file');
+    document.getElementById('dt-scan-prev').textContent=t('txt_scan_hochladen');document.getElementById('dt-scan-zone').classList.remove('has-file');
     document.getElementById('dt-scan-file').value='';pendingDtScan=null;
     const moEinfach=document.getElementById('dt-modus-einfach');if(moEinfach){moEinfach.checked=true;dtModusWechseln();}const _vtBedEl=document.getElementById('dt-vertrag-bedingungen');if(_vtBedEl)_vtBedEl.value='';renderAlles();dtGotoStep(1);
   }
@@ -2036,7 +2126,7 @@ async function dtBearbeiten(id) {
   renderSelects(); // ensure tresor dropdown is populated
   document.getElementById('ov-dt-tresor_id').value=d.tresor_id||'';
   if(d.hat_bild){const img=await apiJ(`/api/datentraeger/${id}/bild`);if(img)document.getElementById('ov-bild-prev').innerHTML=`<img src="${img.data}" style="max-height:50px;max-width:100%;border-radius:4px;object-fit:contain">`;}
-  else document.getElementById('ov-bild-prev').textContent='Klicken';
+  else document.getElementById('ov-bild-prev').textContent=t('txt_klicken');
   pendingOvBild=null;document.getElementById('ov-bild-file').value='';
   document.getElementById('dt-ov').classList.add('open');
 }
@@ -2353,7 +2443,7 @@ function toggleMahnungenRow(nr){
     if(cell){
       if(!mList.length){cell.innerHTML='<span style="font-size:11px;color:var(--mut)">Keine Mahnungen</span>';return;}
       cell.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px">'+
-        mList.map((m,i)=>`<tr><td style="padding:3px 8px;color:var(--mut);width:100px">${fmtDate(m.dat)}</td><td style="padding:3px 8px">Mahnung ${i+1}</td><td style="padding:3px 8px"><button onclick="printHtml(JSON.parse(localStorage.getItem('dtv_mahnungen_${nr}')||'[]')[${i}]?.html||'','Mahnung_${nr}.pdf')" style="padding:2px 8px;font-size:10px">Drucken</button></td></tr>`).join('')+
+        mList.map((m,i)=>`<tr><td style="padding:3px 8px;color:var(--mut);width:100px">${fmtDate(m.dat)}</td><td style="padding:3px 8px">${ta('Mahnung','Notice')} ${i+1}</td><td style="padding:3px 8px"><button onclick="printHtml(JSON.parse(localStorage.getItem('dtv_mahnungen_${nr}')||'[]')[${i}]?.html||'','Mahnung_${nr}.pdf')" style="padding:2px 8px;font-size:10px">Drucken</button></td></tr>`).join('')+
         '</table>';
     }
   }
@@ -2829,7 +2919,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.1${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.2${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -3498,8 +3588,8 @@ function tresorAbbrechen(){
   document.getElementById('tr-etage').value='';
   document.getElementById('tr-raum').value='';
   document.getElementById('tr-notizen').value='';
-  document.getElementById('tr-wv-prev').textContent='PDF / Scan hochladen';
-  document.getElementById('tr-form-title').textContent='Neuen Tresor anlegen';
+  document.getElementById('tr-wv-prev').textContent=t('txt_wv_hochladen');
+  document.getElementById('tr-form-title').textContent=t('st_tr_form');
   document.getElementById('tr-ebanner').style.display='none';
   _tresorWVData=null;_tresorWVType=null;_tresorWVName=null;
 }
