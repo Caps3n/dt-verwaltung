@@ -489,6 +489,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div style="margin-bottom:12px;padding:10px;background:var(--i-bg);border:1px solid var(--i-brd);border-radius:var(--rad);font-size:12px">
           <strong>Schritt 1:</strong> Formular ausfüllen und ausdrucken, von beiden Seiten unterschreiben lassen.<br>
           <button onclick="druckeEingangFromForm()" style="margin-top:6px;padding:5px 12px;font-size:12px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer">Eingangsformular drucken</button>
+          <button id="btn-3parteien" onclick="drucke3ParteienVertrag()" style="margin-top:4px;padding:5px 12px;font-size:12px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer;display:none">3-Parteien-Vertrag drucken</button>
         </div>
         <label>Foto des Datenträgers (optional)</label>
         <div class="upzone" id="dt-bild-zone" onclick="document.getElementById('dt-bild-file').click()">
@@ -1090,7 +1091,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.3
+  &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.6
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1548,7 +1549,7 @@ function renderKunden() {
 }
 
 // ══ DATENTRAEGER ═════════════════════════════════════
-function dtModusWechseln(){const s=document.getElementById('dt-escrow-section');if(s)s.style.display=document.getElementById('dt-modus-escrow')?.checked?'':'none';}
+function dtModusWechseln(){const s=document.getElementById('dt-escrow-section');if(s)s.style.display=document.getElementById('dt-modus-escrow')?.checked?'':'none';const _b3p=document.getElementById('btn-3parteien');if(_b3p)_b3p.style.display=document.getElementById('dt-modus-escrow')?.checked?'':'none';}
 function ovDtModusWechseln(){const s=document.getElementById('ov-dt-escrow-section');if(s)s.style.display=document.getElementById('ov-dt-modus-escrow')?.checked?'':'none';}
 async function dtHinzufuegen() {
   if (!can('write')) { alert('Keine Berechtigung.'); return; }
@@ -1690,6 +1691,8 @@ function genRechnungHtml(k){
       if(!a.voll)info+=`<br><span style="font-size:9px;color:#888">eingelag. ${fmtDate(d.einlagerungs_datum)}: ${a.tageAnteil} von ${a.tagePeriode} Tagen</span>`;
     }
     if(d.rabatt>0)info+=`<br><span style="font-size:9px;color:#888">Rabatt ${d.rabatt}%</span>`;
+    if(d.rechnungsempfaenger_id&&d.kunden_id!==k.id&&d.firma)info+=`<br><span style="font-size:9px;color:#888">Einlagerer: ${d.firma}</span>`;
+    if(d.eigentuemer_id&&d.eigentuemer_firma)info+=`<br><span style="font-size:9px;color:#888">Eigentümer: ${d.eigentuemer_firma}</span>`;
     gesamtNetto+=betrag;
     const pi=d.einheit==='monat'?`${eur(d.preis)}/Mo`:`${eur(d.preis)}/J`;
     return`<tr><td>${i+1}</td><td>${d.bezeichnung}${info}</td><td style="font-family:monospace;font-size:10px">${d.serial}</td><td class="r">${pi}</td><td class="r">${d.rabatt>0?d.rabatt+'%':'-'}</td><td class="r">${eur(betrag)}</td></tr>`;
@@ -2066,7 +2069,7 @@ async function uebergabeAbschliessen(weiterImBestand=false){
   if(pu){
     if(!weiterImBestand){pu.dt_ids.forEach(did=>{const dt=datentraeger.find(d=>d.id===did);if(dt)dt.status='uebergeben';});}
     pu.abgeschlossen=true;pu.hat_doc=!!pendingUDoc;pu.weiter_im_bestand=weiterImBestand;
-    if(!Übergaben.find(u=>u.id===pu.id))Übergaben.push(pu);
+    const _ui=Übergaben.findIndex(u=>u.id===pu.id);if(_ui>=0){Übergaben[_ui]=pu;}else{Übergaben.push(pu);}
   }
   pendingUebergaben=pendingUebergaben.filter(p=>p.id!==activePendingId);
   activePendingId=pendingUebergaben.length?pendingUebergaben[0].id:null;
@@ -2354,7 +2357,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.3${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.6${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -2543,6 +2546,7 @@ function handleDtBild(e){const f=e.target.files[0];if(!f)return;const r=new File
 let pendingDtScan=null;
 function handleDtScan(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingDtScan={data:ev.target.result,type:f.type,name:f.name};document.getElementById('dt-scan-zone').classList.add('has-file');document.getElementById('dt-scan-prev').innerHTML=`<span style="font-size:12px;color:var(--s-txt)">✓ ${f.name}</span>`;};r.readAsDataURL(f);}
 function druckeEingangFromForm(){
+  const _escV=document.getElementById('dt-modus-escrow')?.checked||false;const _eigIdV=_escV?parseInt(document.getElementById('dt-eigentuemer_id')?.value)||0:0;const _eigKV=_eigIdV?kunden.find(x=>x.id===_eigIdV):null;const _nbEigIdV=_escV?parseInt(document.getElementById('dt-neben_eigentuemer_id')?.value)||0:0;const _nbEigKV=_nbEigIdV?kunden.find(x=>x.id===_nbEigIdV):null;
   const kid=parseInt(document.getElementById('dt-kunden_id').value);
   const k=kunden.find(x=>x.id===kid);
   if(!k){alert('Bitte zuerst Firma auswählen.');return;}
@@ -2591,7 +2595,7 @@ function druckeEingangFromForm(){
         <tr><td>Seriennummer</td><td>${serial}</td></tr>
         <tr><td>Einlagerungsdatum</td><td>${dat}</td></tr>
         <tr><td>Preis</td><td>${pl}</td></tr>
-        <tr><td>Lagerplatz</td><td style="color:#ccc">________________________</td></tr>
+        ${_escV?`<tr><td>Einlagerer</td><td>${k.firma}</td></tr>${_eigKV?`<tr><td>Haupt-Eigentümer</td><td>${_eigKV.firma}</td></tr>`:''}${_nbEigKV?`<tr><td>Neben-Eigentümer</td><td>${_nbEigKV.firma}</td></tr>`:''}`:''}        <tr><td>Lagerplatz</td><td style="color:#ccc">________________________</td></tr>
       </tbody>
     </table>
     ${TE.nach?`<div class="brief-txt">${TE.nach.replace(/\n/g,'<br>')}</div>`:'<div class="brief-txt">Beide Parteien bestätigen die ordnungsgemäße Übergabe und Einlagerung des oben genannten Datenträgers.</div>'}
@@ -2606,6 +2610,86 @@ function druckeEingangFromForm(){
       ${TE.footer?`<div class="brief-foot-col">${TE.footer.replace(/\n/g,'<br>')}</div>`:''}
     </div>`;
   printHtml(html,pnr+'.pdf');
+}
+function drucke3ParteienVertrag(){
+  const kid=parseInt(document.getElementById('dt-kunden_id').value);
+  const k=kunden.find(x=>x.id===kid);
+  if(!k){alert('Bitte zuerst Auftraggeber (Firma 2) auswählen.');return;}
+  const eigId=parseInt(document.getElementById('dt-eigentuemer_id')?.value)||0;
+  const eigK=eigId?kunden.find(x=>x.id===eigId):null;
+  if(!eigK){alert('Bitte Haupt-Eigentümer (Firma 3) auswählen.');return;}
+  const nbEigId=parseInt(document.getElementById('dt-neben_eigentuemer_id')?.value)||0;
+  const nbEigK=nbEigId?kunden.find(x=>x.id===nbEigId):null;
+  const bez=document.getElementById('dt-bezeichnung').value.trim()||'(Bezeichnung)';
+  const serial=document.getElementById('dt-serial').value.trim()||'(Seriennummer)';
+  const dat=fmtDate(document.getElementById('dt-datum').value)||new Date().toLocaleDateString('de-DE');
+  const preis=parseFloat(document.getElementById('dt-preis').value)||0;
+  const einheit=document.getElementById('dt-einheit').value;
+  const pj3=einheit==='monat'?preis*12:preis;
+  const pl3=einheit==='monat'?eur(preis)+'/Monat ('+eur(pj3)+'/Jahr)':eur(preis)+'/Jahr';
+  const T=window._T||{};
+  const pnr3='3P-'+(document.getElementById('dt-datum').value.replace(/-/g,''))+'-'+(serial.replace(/[^A-Za-z0-9]/g,'').substring(0,8));
+  const logoHtml=logoData?`<img src="${logoData}" style="max-height:60px;max-width:160px;object-fit:contain">`:'';
+  const adrL3=(T.firmaAdr||'').split('\n').filter(Boolean);
+  const absK3=(T.firmenname||'')+(adrL3[0]?' | '+adrL3[0]:'');
+  const kAdr3=[k.strasse,k.plz&&k.ort?k.plz+' '+k.ort:k.ort].filter(Boolean).join('<br>');
+  const eigAdr3=[eigK.strasse,eigK.plz&&eigK.ort?eigK.plz+' '+eigK.ort:eigK.ort].filter(Boolean).join('<br>');
+  const fB3=(T.iban?`<strong>IBAN</strong><br>${T.iban}<br>`:'')+( T.bic?`<strong>BIC</strong><br>${T.bic}`:'');
+  const fS3=(T.steuernr?`<strong>Steuernr.</strong><br>${T.steuernr}<br>`:'')+( T.gf?`<strong>GF</strong><br>${T.gf}<br>`:'')+( T.hrb?T.hrb:'');
+  const fA3=T.footerAdr?T.footerAdr.replace(/\n/g,'<br>'):'';
+  const html3V=`
+    <div class="brief-header">
+      <div class="brief-header-left">
+        <div class="brief-firma-name">${T.firmenname||''}</div>
+        ${T.abt?`<div class="brief-firma-abt">${T.abt}</div>`:''}
+        <div class="brief-firma-adr">${(T.firmaAdr||'').replace(/\n/g,'<br>')}</div>
+      </div>
+      <div class="brief-logo-box">${logoHtml}</div>
+    </div>
+    <div class="brief-hr"></div>
+    ${absK3?`<div class="brief-abs-mini">${absK3}</div>`:''}
+    <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
+    <div class="brief-betreff">Dreiseitiger Einlagerungsvertrag</div>
+    <div class="brief-sub">Protokoll-Nr.: ${pnr3}</div>
+    <div class="brief-txt" style="margin-top:16px"><strong>Vertragsparteien</strong></div>
+    <table class="brief-tbl" style="margin-top:8px">
+      <thead><tr><th style="width:18%">Partei</th><th style="width:30%">Rolle</th><th>Firma / Kontakt</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Firma 1</strong></td><td>Einlagerer / Tresor-Betreiber</td><td>${T.firmenname||''}${T.firmaAdr?'<br><small>'+(T.firmaAdr||'').replace(/\n/g,'<br>')+'</small>':''}</td></tr>
+        <tr><td><strong>Firma 2</strong></td><td>Auftraggeber / Einlagerer</td><td><strong>${k.firma}</strong>${k.ansprechpartner?'<br><small>z.Hd. '+k.ansprechpartner+'</small>':''}<br><small>${kAdr3}</small></td></tr>
+        <tr><td><strong>Firma 3</strong></td><td>Haupt-Eigentümer</td><td><strong>${eigK.firma}</strong>${eigK.ansprechpartner?'<br><small>z.Hd. '+eigK.ansprechpartner+'</small>':''}<br><small>${eigAdr3}</small></td></tr>
+        ${nbEigK?`<tr><td><strong>Firma 3b</strong></td><td>Neben-Eigentümer</td><td><strong>${nbEigK.firma}</strong></td></tr>`:''}
+      </tbody>
+    </table>
+    <div class="brief-txt" style="margin-top:16px"><strong>Eingelagerter Datenträger</strong></div>
+    <table class="brief-tbl" style="margin-top:8px">
+      <thead><tr><th style="width:35%">Feld</th><th>Inhalt</th></tr></thead>
+      <tbody>
+        <tr><td>Bezeichnung / Typ</td><td>${bez}</td></tr>
+        <tr><td>Seriennummer</td><td>${serial}</td></tr>
+        <tr><td>Einlagerungsdatum</td><td>${dat}</td></tr>
+        <tr><td>Preis</td><td>${pl3}</td></tr>
+        <tr><td>Lagerplatz</td><td style="color:#ccc">________________________</td></tr>
+      </tbody>
+    </table>
+    <div class="brief-txt" style="margin-top:16px"><strong>Vereinbarung</strong></div>
+    <div class="brief-txt">Firma 1 (<em>${T.firmenname||'Tresor-Betreiber'}</em>) bestätigt, auf Beauftragung von Firma 2 (<em>${k.firma}</em>) den oben genannten Datenträger sicher einzulagern. Dieser Datenträger steht im Eigentum von Firma 3 (<em>${eigK.firma}</em>). Die Einlagerung erfolgt im Auftrag und auf Weisung von Firma 2, welche ihrerseits im Auftrag von Firma 3 handelt.</div>
+    <div class="brief-txt">Der Datenträger verbleibt bis zur ausdrücklichen gemeinsamen Freigabe durch Firma 2 und Firma 3 in der Verwahrung von Firma 1. Eine einseitige Herausgabe ist ausgeschlossen.</div>
+    <div class="brief-sig-row" style="margin-top:28px">
+      <div class="brief-sig-box"><div class="brief-sig-label">Firma 1 – ${T.firmenname||'Tresor-Betreiber'}</div><div class="brief-sig-line">Unterschrift &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datum: ___________</div></div>
+    </div>
+    <div class="brief-sig-row" style="margin-top:16px">
+      <div class="brief-sig-box"><div class="brief-sig-label">Firma 2 – Auftraggeber: ${k.firma}</div><div class="brief-sig-line">Unterschrift &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datum: ___________</div></div>
+    </div>
+    <div class="brief-sig-row" style="margin-top:16px">
+      <div class="brief-sig-box"><div class="brief-sig-label">Firma 3 – Haupt-Eigentümer: ${eigK.firma}</div><div class="brief-sig-line">Unterschrift &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datum: ___________</div></div>
+    </div>
+    <div class="brief-foot">
+      ${fA3?`<div class="brief-foot-col">${fA3}</div>`:''}
+      ${fB3?`<div class="brief-foot-col">${fB3}</div>`:''}
+      ${fS3?`<div class="brief-foot-col">${fS3}</div>`:''}
+    </div>`;
+  printHtml(html3V,pnr3+'.pdf');
 }
 function handleOvBild(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingOvBild={data:ev.target.result,type:f.type};document.getElementById('ov-bild-zone').classList.add('has-file');document.getElementById('ov-bild-prev').innerHTML=`<img src="${ev.target.result}" style="max-height:50px;max-width:100%;border-radius:4px;object-fit:contain">`;};r.readAsDataURL(f);}
 function handleUebergabeDoc(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingUDoc={data:ev.target.result,name:f.name,type:f.type};document.getElementById('doc-upzone').classList.add('has-file');document.getElementById('u-doc-prev').innerHTML=f.type.startsWith('image/')?`<img src="${ev.target.result}" style="max-height:60px;max-width:100%;border-radius:4px;object-fit:contain"><br><span style="font-size:11px;color:var(--s-txt)">${f.name}</span>`:`<div style="font-size:20px">PDF</div><span style="font-size:11px;color:var(--s-txt)">${f.name}</span>`;};r.readAsDataURL(f);}
