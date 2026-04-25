@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.9] – 2026-04-25
+
+### Added
+- **Escrow configuration at customer level** — the customer form now has a *Szenario A / Szenario B* radio toggle. In Szenario B, two new dropdowns appear: *Haupt-Eigentümer* (main owner / software developer) and *Neben-Eigentümer* (beneficiary / licensee). These are stored on the customer record (`szenario`, `escrow_haupt_id`, `escrow_neben_id` columns, auto-migrated). When creating a new media record, selecting an Auftraggeber with Szenario B pre-fills the DT form automatically.
+- **Bilingual print documents** — all four document types follow the active UI language (🇩🇪 / 🇬🇧): Eingangsprotokoll / Incoming Inspection Report, Übergabeprotokoll / Handover Protocol, Einlagerungsvertrag / Storage Agreement (2-party), Dreiseitiger Einlagerungsvertrag / Three-Party Storage Agreement. Table headers, section headings, paragraph text, and signature labels are fully translated.
+
+---
+
 ## [1.3.8] – 2026-04-25
 
 ### Added

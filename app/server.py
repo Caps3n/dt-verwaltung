@@ -467,6 +467,18 @@ def init_db():
         db.execute("ALTER TABLE datentraeger ADD COLUMN rechnungsempfaenger_id INTEGER")
     except Exception:
         pass
+    try:
+        db.execute("ALTER TABLE kunden ADD COLUMN szenario TEXT DEFAULT 'A'")
+    except Exception:
+        pass
+    try:
+        db.execute("ALTER TABLE kunden ADD COLUMN escrow_haupt_id INTEGER")
+    except Exception:
+        pass
+    try:
+        db.execute("ALTER TABLE kunden ADD COLUMN escrow_neben_id INTEGER")
+    except Exception:
+        pass
     db.execute("INSERT OR IGNORE INTO template_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_config(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_settings(id) VALUES(1)")
@@ -743,11 +755,12 @@ def create_kunde():
     db = get_db()
     try:
         db.execute(
-            "INSERT INTO kunden(nr,firma,anrede,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,mengenrabatt_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO kunden(nr,firma,anrede,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,mengenrabatt_json,szenario,escrow_haupt_id,escrow_neben_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (data['nr'], data['firma'], data.get('anrede',''), data.get('ansprechpartner'), data.get('email'), data.get('tel'),
              data.get('mobil'), data.get('strasse'), data.get('plz'), data.get('ort'), data.get('land', 'Deutschland'),
              data.get('sap_nr'), data.get('vertragsnr'), data.get('vertragsbeginn'), data.get('vertragsende'),
-             data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'))
+             data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'),
+             data.get('szenario', 'A'), data.get('escrow_haupt_id') or None, data.get('escrow_neben_id') or None)
         )
         db.commit()
         kid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
@@ -771,11 +784,12 @@ def update_kunde(kid):
              old['vertragsstatus'] or 'abgelaufen', old['vertragsnotiz'] or '')
         )
     db.execute(
-        "UPDATE kunden SET nr=?,firma=?,anrede=?,ansprechpartner=?,email=?,tel=?,mobil=?,strasse=?,plz=?,ort=?,land=?,sap_nr=?,vertragsnr=?,vertragsbeginn=?,vertragsende=?,vertragsstatus=?,vertragsnotiz=?,mengenrabatt_json=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
+        "UPDATE kunden SET nr=?,firma=?,anrede=?,ansprechpartner=?,email=?,tel=?,mobil=?,strasse=?,plz=?,ort=?,land=?,sap_nr=?,vertragsnr=?,vertragsbeginn=?,vertragsende=?,vertragsstatus=?,vertragsnotiz=?,mengenrabatt_json=?,szenario=?,escrow_haupt_id=?,escrow_neben_id=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
         (data['nr'], data['firma'], data.get('anrede',''), data.get('ansprechpartner'), data.get('email'), data.get('tel'),
          data.get('mobil'), data.get('strasse'), data.get('plz'), data.get('ort'), data.get('land', 'Deutschland'),
          data.get('sap_nr'), data.get('vertragsnr'), data.get('vertragsbeginn'), data.get('vertragsende'),
-         data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'), kid)
+         data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'),
+         data.get('szenario', 'A'), data.get('escrow_haupt_id') or None, data.get('escrow_neben_id') or None, kid)
     )
     db.commit()
     row = db.execute("SELECT * FROM kunden WHERE id=?", (kid,)).fetchone()

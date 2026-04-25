@@ -366,6 +366,23 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           </tbody>
         </table>
       </div>
+      <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:10px">
+        <div class="stitle" style="font-size:12px;margin-bottom:8px">Einlagerungsart / Storage Type</div>
+        <div style="display:flex;gap:18px;margin-bottom:10px;font-size:13px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="radio" name="k-szenario" id="k-sz-a" value="A" checked onchange="kSzenarToWechseln()"> Szenario A – Eigene Einlagerung
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="radio" name="k-szenario" id="k-sz-b" value="B" onchange="kSzenarToWechseln()"> Szenario B – Escrow / 3 Firmen
+          </label>
+        </div>
+        <div id="k-escrow-felder" style="display:none">
+          <label>Haupt-Eigentümer <span style="font-weight:400;color:var(--mut)">(Software-Inhaber / Main Owner)</span></label>
+          <select id="k-haupt_eigentuemer_id"><option value="">— keiner / none —</option></select>
+          <label>Neben-Eigentümer <span style="font-weight:400;color:var(--mut)">(Begünstigter / Beneficiary)</span></label>
+          <select id="k-neben_eigentuemer_id"><option value="">— keiner / none —</option></select>
+        </div>
+      </div>
       <button class="btn-p btn-full" id="k-save-btn" onclick="kundeSpeichern()">Firma anlegen</button>
     </div>
     <div class="card">
@@ -457,7 +474,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div class="g2">
       <div class="card">
         <div class="stitle" data-i18n="st_dt_erfassen">Datenträger erfassen</div>
-        <label>Firma</label><select id="dt-kunden_id"><option value="">Firma wählen</option></select>
+        <label>Firma</label><select id="dt-kunden_id" onchange="dtKundeGewaehlt()"><option value="">Firma wählen</option></select>
         <label>Bezeichnung / Typ</label><input id="dt-bezeichnung" placeholder="z.B. Festplatte, LTO-Tape">
         <label>Seriennummer</label><input id="dt-serial" placeholder="HDD-2024-001">
         <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="dt-interne_nr" placeholder="z.B. INT-001">
@@ -1100,7 +1117,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.8
+  &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.9
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1524,6 +1541,24 @@ function checkAblaufwarnungen(){
 }
 
 // ══ KUNDEN ═══════════════════════════════════════════
+function kSzenarToWechseln(){
+  const isB=document.getElementById('k-sz-b')?.checked;
+  const kef=document.getElementById('k-escrow-felder');
+  if(kef)kef.style.display=isB?'block':'none';
+}
+function dtKundeGewaehlt(){
+  const kid=parseInt(document.getElementById('dt-kunden_id').value)||0;
+  if(!kid)return;
+  const k=kunden.find(x=>x.id===kid);
+  if(!k)return;
+  if(k.szenario==='B'){
+    const rb=document.getElementById('dt-modus-escrow');if(rb){rb.checked=true;dtModusWechseln();}
+    if(k.escrow_haupt_id){const s=document.getElementById('dt-eigentuemer_id');if(s)s.value=k.escrow_haupt_id;}
+    if(k.escrow_neben_id){const s=document.getElementById('dt-neben_eigentuemer_id');if(s)s.value=k.escrow_neben_id;}
+  } else {
+    const rb=document.getElementById('dt-modus-einfach');if(rb){rb.checked=true;dtModusWechseln();}
+  }
+}
 const kFields = ['k-firma','k-nr','k-anrede','k-ansprechpartner','k-email','k-tel','k-mobil','k-strasse','k-plz','k-ort','k-land','k-sap_nr','k-vertragsnr','k-vertragsbeginn','k-vertragsende','k-vertragsstatus','k-vertragsnotiz'];
 const kKeys   = ['firma','nr','anrede','ansprechpartner','email','tel','mobil','strasse','plz','ort','land','sap_nr','vertragsnr','vertragsbeginn','vertragsende','vertragsstatus','vertragsnotiz'];
 
@@ -1539,6 +1574,9 @@ function kundeFormData() {
     if(ab>0&&pct>0)mgTiers.push({ab,pct,lbl});
   }
   d.mengenrabatt_json=JSON.stringify(mgTiers);
+  d.szenario=document.querySelector('input[name="k-szenario"]:checked')?.value||'A';
+  d.escrow_haupt_id=parseInt(document.getElementById('k-haupt_eigentuemer_id')?.value)||null;
+  d.escrow_neben_id=parseInt(document.getElementById('k-neben_eigentuemer_id')?.value)||null;
   return d;
 }
 function kundeFormMgFill(k){
@@ -1573,6 +1611,10 @@ function kundeAbbrechen() {
   document.getElementById('k-save-btn').textContent='Firma anlegen';
   document.getElementById('k-ebanner').style.display='none';
   kundeFormMgClear();
+  const szA=document.getElementById('k-sz-a');if(szA)szA.checked=true;
+  const kef=document.getElementById('k-escrow-felder');if(kef)kef.style.display='none';
+  const khId=document.getElementById('k-haupt_eigentuemer_id');if(khId)khId.value='';
+  const knId=document.getElementById('k-neben_eigentuemer_id');if(knId)knId.value='';
 }
 
 function kundeBearbeiten(id) {
@@ -1585,6 +1627,10 @@ function kundeBearbeiten(id) {
   document.getElementById('k-save-btn').textContent='Aenderungen speichern';
   document.getElementById('k-ebanner').style.display='flex';
   document.getElementById('k-firma').scrollIntoView({behavior:'smooth',block:'center'});
+  const szRadio=document.querySelector(`input[name="k-szenario"][value="${k.szenario||'A'}"]`);
+  if(szRadio){szRadio.checked=true;kSzenarToWechseln();}
+  if(k.escrow_haupt_id){const el=document.getElementById('k-haupt_eigentuemer_id');if(el)el.value=k.escrow_haupt_id;}
+  if(k.escrow_neben_id){const el=document.getElementById('k-neben_eigentuemer_id');if(el)el.value=k.escrow_neben_id;}
 }
 
 async function kundeLoeschen(id) {
@@ -1739,7 +1785,7 @@ function renderSelects(){
   const tselOv=document.getElementById('ov-dt-tresor_id');
   if(tselOv)tselOv.innerHTML=tresorOpts;
   const kOptsExt='<option value="">— gleiche Firma —</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
-  ['dt-eigentuemer_id','dt-neben_eigentuemer_id','dt-rechnungsempfaenger_id','ov-dt-eigentuemer_id','ov-dt-neben_eigentuemer_id','ov-dt-rechnungsempfaenger_id'].forEach(sid=>{
+  ['dt-eigentuemer_id','dt-neben_eigentuemer_id','dt-rechnungsempfaenger_id','ov-dt-eigentuemer_id','ov-dt-neben_eigentuemer_id','ov-dt-rechnungsempfaenger_id','k-haupt_eigentuemer_id','k-neben_eigentuemer_id'].forEach(sid=>{
     const sel=document.getElementById(sid);
     if(sel){const cur=sel.value;sel.innerHTML=kOptsExt;sel.value=cur;}
   });
@@ -2084,18 +2130,18 @@ function genUebergabeHtml(k,sel){
   <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${T.tel}<br>`:''}${T.email?`${T.email}<br>`:''}${k.nr?`Kd-Nr. ${k.nr}`:''}</div>
 </div>
 <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
-<div class="brief-betreff">Übergabeprotokoll ${pnr}</div>
-<div class="brief-sub">Übergabe an: <strong>${person}</strong> &nbsp;|&nbsp; Grund: ${grund}</div>
+<div class="brief-betreff">${_lang==='en'?'Handover Protocol':'Übergabeprotokoll'} ${pnr}</div>
+<div class="brief-sub">${_lang==='en'?'Handover to':'Übergabe an'}: <strong>${person}</strong> &nbsp;|&nbsp; ${_lang==='en'?'Reason':'Grund'}: ${grund}</div>
 ${TU.intro?`<div class="brief-txt">${fillPh(TU.intro,map)}</div>`:''}
 <table class="brief-tbl">
-  <thead><tr><th style="width:5%">Pos.</th><th>Bezeichnung</th><th style="width:28%">Seriennummer</th><th style="width:18%">Einlagerung</th></tr></thead>
+  <thead><tr><th style="width:5%">Pos.</th><th>${_lang==='en'?'Description':'Bezeichnung'}</th><th style="width:28%">${_lang==='en'?'Serial Number':'Seriennummer'}</th><th style="width:18%">${_lang==='en'?'Storage Date':'Einlagerung'}</th></tr></thead>
   <tbody>${rows}</tbody>
 </table>
 ${TU.nach?`<div class="brief-txt" style="margin-top:8px">${fillPh(TU.nach,map)}</div>`:''}
 <div class="brief-sig-row" style="display:flex;gap:30px;padding:24px 20px 10px">
-  <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">Unterschrift Übergeber</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${T.sig||T.firmenname||''}</div></div>
-  <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">Unterschrift Empfänger</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${person}</div></div>
-  <div style="flex:0.8"><div style="font-size:11px;color:#555;margin-bottom:28px">Datum</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">&nbsp;</div></div>
+  <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">${_lang==='en'?'Signature (Issuer)':'Unterschrift Übergeber'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${T.sig||T.firmenname||''}</div></div>
+  <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">${_lang==='en'?'Signature (Recipient)':'Unterschrift Empfänger'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${person}</div></div>
+  <div style="flex:0.8"><div style="font-size:11px;color:#555;margin-bottom:28px">${_lang==='en'?'Date':'Datum'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">&nbsp;</div></div>
 </div>
 <div class="brief-foot">
   ${T.footerAdr?`<div class="brief-foot-col">${T.footerAdr.replace(/\n/g,'<br>')}</div>`:''}
@@ -2679,23 +2725,23 @@ function druckeEingangFromForm(){
       <div class="brief-meta-r">${T.bearbeiter?`<strong>${T.bearbeiter}</strong>`:''} ${T.tel?`<div>Tel. ${T.tel}</div>`:''} ${T.email?`<div>Mail ${T.email}</div>`:''}</div>
     </div>
     <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
-    <div class="brief-betreff">Eingangsprotokoll – Datenträger-Einlagerung</div>
-    <div class="brief-sub">Protokoll-Nr.: ${pnr}</div>
+    <div class="brief-betreff">${_lang==='en'?'Incoming Inspection Report – Media Storage':'Eingangsprotokoll – Datenträger-Einlagerung'}</div>
+    <div class="brief-sub">${_lang==='en'?'Protocol No.':'Protokoll-Nr.'}: ${pnr}</div>
     ${TE.intro?`<div class="brief-txt">${TE.intro.replace(/\n/g,'<br>')}</div>`:''}
     <table class="brief-tbl">
-      <thead><tr><th style="width:35%">Feld</th><th>Inhalt</th></tr></thead>
+      <thead><tr><th style="width:35%">${_lang==='en'?'Field':'Feld'}</th><th>${_lang==='en'?'Content':'Inhalt'}</th></tr></thead>
       <tbody>
-        <tr><td>Bezeichnung / Typ</td><td>${bez}</td></tr>
-        <tr><td>Seriennummer</td><td>${serial}</td></tr>
-        <tr><td>Einlagerungsdatum</td><td>${dat}</td></tr>
-        <tr><td>Preis</td><td>${pl}</td></tr>
-        ${_escV?`<tr><td>Einlagerer</td><td>${k.firma}</td></tr>${_eigKV?`<tr><td>Haupt-Eigentümer</td><td>${_eigKV.firma}</td></tr>`:''}${_nbEigKV?`<tr><td>Neben-Eigentümer</td><td>${_nbEigKV.firma}</td></tr>`:''}`:''}        <tr><td>Lagerplatz</td><td style="color:#ccc">________________________</td></tr>
+        <tr><td>${_lang==='en'?'Description / Type':'Bezeichnung / Typ'}</td><td>${bez}</td></tr>
+        <tr><td>${_lang==='en'?'Serial Number':'Seriennummer'}</td><td>${serial}</td></tr>
+        <tr><td>${_lang==='en'?'Storage Date':'Einlagerungsdatum'}</td><td>${dat}</td></tr>
+        <tr><td>${_lang==='en'?'Price':'Preis'}</td><td>${pl}</td></tr>
+        ${_escV?`<tr><td>${_lang==='en'?'Depositor':'Einlagerer'}</td><td>${k.firma}</td></tr>${_eigKV?`<tr><td>${_lang==='en'?'Main Owner':'Haupt-Eigentümer'}</td><td>${_eigKV.firma}</td></tr>`:''}${_nbEigKV?`<tr><td>${_lang==='en'?'Co-Owner':'Neben-Eigentümer'}</td><td>${_nbEigKV.firma}</td></tr>`:''}`:''}        <tr><td>${_lang==='en'?'Storage Location':'Lagerplatz'}</td><td style="color:#ccc">________________________</td></tr>
       </tbody>
     </table>
-    ${TE.nach?`<div class="brief-txt">${TE.nach.replace(/\n/g,'<br>')}</div>`:'<div class="brief-txt">Beide Parteien bestätigen die ordnungsgemäße Übergabe und Einlagerung des oben genannten Datenträgers.</div>'}
+    ${TE.nach?`<div class="brief-txt">${TE.nach.replace(/\n/g,'<br>')}</div>`:`<div class="brief-txt">${_lang==='en'?'Both parties confirm the proper handover and storage of the above-mentioned data carrier.':'Beide Parteien bestätigen die ordnungsgemäße Übergabe und Einlagerung des oben genannten Datenträgers.'}</div>`}
     <div class="brief-sig-row">
-      <div class="brief-sig-box"><div class="brief-sig-label">Übergeben durch Kunde</div><div class="brief-sig-line">Unterschrift &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datum: ___________</div></div>
-      <div class="brief-sig-box"><div class="brief-sig-label">Übernommen durch: ${currentUser?.name||''}</div><div class="brief-sig-line">${currentUser?.name||'___________'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datum: ${dat}</div></div>
+      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Handed over by Customer':'Übergeben durch Kunde'}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
+      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Received by':'Übernommen durch'}: ${currentUser?.name||''}</div><div class="brief-sig-line">${currentUser?.name||'___________'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ${dat}</div></div>
     </div>
     <div class="brief-foot">
       ${footAdr?`<div class="brief-foot-col">${footAdr}</div>`:''}
@@ -2708,10 +2754,10 @@ function druckeEingangFromForm(){
 function drucke3ParteienVertrag(){
   const kid=parseInt(document.getElementById('dt-kunden_id').value);
   const k=kunden.find(x=>x.id===kid);
-  if(!k){alert('Bitte zuerst Auftraggeber (Firma 2) auswählen.');return;}
+  if(!k){alert(_lang==='en'?'Please select the Principal (Party 2) first.':'Bitte zuerst Auftraggeber (Firma 2) auswählen.');return;}
   const eigId=parseInt(document.getElementById('dt-eigentuemer_id')?.value)||0;
   const eigK=eigId?kunden.find(x=>x.id===eigId):null;
-  if(!eigK){alert('Bitte Haupt-Eigentümer (Firma 3) auswählen.');return;}
+  if(!eigK){alert(_lang==='en'?'Please select the Main Owner (Party 3).':'Bitte Haupt-Eigentümer (Firma 3) auswählen.');return;}
   const nbEigId=parseInt(document.getElementById('dt-neben_eigentuemer_id')?.value)||0;
   const nbEigK=nbEigId?kunden.find(x=>x.id===nbEigId):null;
   const bez=document.getElementById('dt-bezeichnung').value.trim()||'(Bezeichnung)';
@@ -2744,41 +2790,47 @@ function drucke3ParteienVertrag(){
     <div class="brief-hr"></div>
     ${absK3?`<div class="brief-abs-mini">${absK3}</div>`:''}
     <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
-    <div class="brief-betreff">Dreiseitiger Einlagerungsvertrag</div>
-    <div class="brief-sub">Protokoll-Nr.: ${pnr3}</div>
-    <div class="brief-txt" style="margin-top:16px"><strong>Vertragsparteien</strong></div>
+    <div class="brief-betreff">${_lang==='en'?'Three-Party Storage Agreement':'Dreiseitiger Einlagerungsvertrag'}</div>
+    <div class="brief-sub">${_lang==='en'?'Document No.':'Protokoll-Nr.'}: ${pnr3}</div>
+    <div class="brief-txt" style="margin-top:16px"><strong>${_lang==='en'?'Contracting Parties':'Vertragsparteien'}</strong></div>
     <table class="brief-tbl" style="margin-top:8px">
-      <thead><tr><th style="width:18%">Partei</th><th style="width:30%">Rolle</th><th>Firma / Kontakt</th></tr></thead>
+      <thead><tr><th style="width:18%">${_lang==='en'?'Party':'Partei'}</th><th style="width:30%">${_lang==='en'?'Role':'Rolle'}</th><th>${_lang==='en'?'Company / Contact':'Firma / Kontakt'}</th></tr></thead>
       <tbody>
-        <tr><td><strong>Firma 1</strong></td><td>Einlagerer / Tresor-Betreiber</td><td>${T.firmenname||''}${T.firmaAdr?'<br><small>'+(T.firmaAdr||'').replace(/\n/g,'<br>')+'</small>':''}</td></tr>
-        <tr><td><strong>Firma 2</strong></td><td>Auftraggeber / Einlagerer</td><td><strong>${k.firma}</strong>${k.ansprechpartner?'<br><small>z.Hd. '+k.ansprechpartner+'</small>':''}<br><small>${kAdr3}</small></td></tr>
-        <tr><td><strong>Firma 3</strong></td><td>Haupt-Eigentümer</td><td><strong>${eigK.firma}</strong>${eigK.ansprechpartner?'<br><small>z.Hd. '+eigK.ansprechpartner+'</small>':''}<br><small>${eigAdr3}</small></td></tr>
-        ${nbEigK?`<tr><td><strong>Firma 3b</strong></td><td>Neben-Eigentümer</td><td><strong>${nbEigK.firma}</strong></td></tr>`:''}
+        <tr><td><strong>${_lang==='en'?'Party 1':'Firma 1'}</strong></td><td>${_lang==='en'?'Custodian / Safe Operator':'Einlagerer / Tresor-Betreiber'}</td><td>${T.firmenname||''}${T.firmaAdr?'<br><small>'+(T.firmaAdr||'').replace(/\n/g,'<br>')+'</small>':''}</td></tr>
+        <tr><td><strong>${_lang==='en'?'Party 2':'Firma 2'}</strong></td><td>${_lang==='en'?'Principal / Depositor':'Auftraggeber / Einlagerer'}</td><td><strong>${k.firma}</strong>${k.ansprechpartner?'<br><small>z.Hd. '+k.ansprechpartner+'</small>':''}<br><small>${kAdr3}</small></td></tr>
+        <tr><td><strong>${_lang==='en'?'Party 3':'Firma 3'}</strong></td><td>${_lang==='en'?'Main Owner':'Haupt-Eigentümer'}</td><td><strong>${eigK.firma}</strong>${eigK.ansprechpartner?'<br><small>z.Hd. '+eigK.ansprechpartner+'</small>':''}<br><small>${eigAdr3}</small></td></tr>
+        ${nbEigK?`<tr><td><strong>${_lang==='en'?'Party 3b':'Firma 3b'}</strong></td><td>${_lang==='en'?'Co-Owner':'Neben-Eigentümer'}</td><td><strong>${nbEigK.firma}</strong></td></tr>`:''}
       </tbody>
     </table>
-    <div class="brief-txt" style="margin-top:16px"><strong>Eingelagerter Datenträger</strong></div>
+    <div class="brief-txt" style="margin-top:16px"><strong>${_lang==='en'?'Stored Data Carrier':'Eingelagerter Datenträger'}</strong></div>
     <table class="brief-tbl" style="margin-top:8px">
-      <thead><tr><th style="width:35%">Feld</th><th>Inhalt</th></tr></thead>
+      <thead><tr><th style="width:35%">${_lang==='en'?'Field':'Feld'}</th><th>${_lang==='en'?'Content':'Inhalt'}</th></tr></thead>
       <tbody>
-        <tr><td>Bezeichnung / Typ</td><td>${bez}</td></tr>
-        <tr><td>Seriennummer</td><td>${serial}</td></tr>
-        <tr><td>Einlagerungsdatum</td><td>${dat}</td></tr>
-        <tr><td>Preis</td><td>${pl3}</td></tr>
-        <tr><td>Lagerplatz</td><td style="color:#ccc">________________________</td></tr>
+        <tr><td>${_lang==='en'?'Description / Type':'Bezeichnung / Typ'}</td><td>${bez}</td></tr>
+        <tr><td>${_lang==='en'?'Serial Number':'Seriennummer'}</td><td>${serial}</td></tr>
+        <tr><td>${_lang==='en'?'Storage Date':'Einlagerungsdatum'}</td><td>${dat}</td></tr>
+        <tr><td>${_lang==='en'?'Fee':'Preis'}</td><td>${pl3}</td></tr>
+        <tr><td>${_lang==='en'?'Storage Location':'Lagerplatz'}</td><td style="color:#ccc">________________________</td></tr>
       </tbody>
     </table>
-    <div class="brief-txt" style="margin-top:16px"><strong>Vereinbarung</strong></div>
-    <div class="brief-txt">Firma 1 (<em>${T.firmenname||'Tresor-Betreiber'}</em>) bestätigt, auf Beauftragung von Firma 2 (<em>${k.firma}</em>) den oben genannten Datenträger sicher einzulagern. Dieser Datenträger steht im Eigentum von Firma 3 (<em>${eigK.firma}</em>). Die Einlagerung erfolgt im Auftrag und auf Weisung von Firma 2, welche ihrerseits im Auftrag von Firma 3 handelt.</div>
-    <div class="brief-txt">Der Datenträger verbleibt bis zur ausdrücklichen gemeinsamen Freigabe durch Firma 2 und Firma 3 in der Verwahrung von Firma 1. Eine einseitige Herausgabe ist ausgeschlossen.</div>
-    ${_vtBed?`<div class="brief-txt" style="margin-top:14px"><strong>Freigabebedingungen</strong></div><div class="brief-txt">${_vtBed.replace(/\n/g,'<br>')}</div>`:''}
+    <div class="brief-txt" style="margin-top:16px"><strong>${_lang==='en'?'Agreement':'Vereinbarung'}</strong></div>
+    <div class="brief-txt">${_lang==='en'
+      ?`Party 1 (<em>${T.firmenname||'Safe Operator'}</em>) confirms, on behalf of Party 2 (<em>${k.firma}</em>), to securely store the above-mentioned data carrier. This data carrier is the property of Party 3 (<em>${eigK.firma}</em>). Storage is carried out on the instruction of Party 2, who in turn acts on behalf of Party 3.`
+      :`Firma 1 (<em>${T.firmenname||'Tresor-Betreiber'}</em>) bestätigt, auf Beauftragung von Firma 2 (<em>${k.firma}</em>) den oben genannten Datenträger sicher einzulagern. Dieser Datenträger steht im Eigentum von Firma 3 (<em>${eigK.firma}</em>). Die Einlagerung erfolgt im Auftrag und auf Weisung von Firma 2, welche ihrerseits im Auftrag von Firma 3 handelt.`
+    }</div>
+    <div class="brief-txt">${_lang==='en'
+      ?`The data carrier remains in the custody of Party 1 until explicit joint release by Party 2 and Party 3. Unilateral release is excluded.`
+      :`Der Datenträger verbleibt bis zur ausdrücklichen gemeinsamen Freigabe durch Firma 2 und Firma 3 in der Verwahrung von Firma 1. Eine einseitige Herausgabe ist ausgeschlossen.`
+    }</div>
+    ${_vtBed?`<div class="brief-txt" style="margin-top:14px"><strong>${_lang==='en'?'Release Conditions':'Freigabebedingungen'}</strong></div><div class="brief-txt">${_vtBed.replace(/\n/g,'<br>')}</div>`:''}
     <div class="brief-sig-row" style="margin-top:28px">
-      <div class="brief-sig-box"><div class="brief-sig-label">Firma 1 – ${T.firmenname||'Tresor-Betreiber'}</div><div class="brief-sig-line">Unterschrift &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datum: ___________</div></div>
+      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 1':'Firma 1'} – ${T.firmenname||(_lang==='en'?'Safe Operator':'Tresor-Betreiber')}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
     </div>
     <div class="brief-sig-row" style="margin-top:16px">
-      <div class="brief-sig-box"><div class="brief-sig-label">Firma 2 – Auftraggeber: ${k.firma}</div><div class="brief-sig-line">Unterschrift &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datum: ___________</div></div>
+      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 2 – Principal':'Firma 2 – Auftraggeber'}: ${k.firma}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
     </div>
     <div class="brief-sig-row" style="margin-top:16px">
-      <div class="brief-sig-box"><div class="brief-sig-label">Firma 3 – Haupt-Eigentümer: ${eigK.firma}</div><div class="brief-sig-line">Unterschrift &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datum: ___________</div></div>
+      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 3 – Main Owner':'Firma 3 – Haupt-Eigentümer'}: ${eigK.firma}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
     </div>
     <div class="brief-foot">
       ${fA3?`<div class="brief-foot-col">${fA3}</div>`:''}
@@ -2824,39 +2876,51 @@ function drucke2ParteienVertrag(){
       <div class="brief-meta-r">${T.bearbeiter?`<strong>${T.bearbeiter}</strong><br>`:''}${T.tel?`Tel. ${T.tel}<br>`:''}${T.email?`${T.email}<br>`:''}${k.nr?`Kd-Nr. ${k.nr}`:''}</div>
     </div>
     <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
-    <div class="brief-betreff">Einlagerungsvertrag</div>
-    <div class="brief-sub">Protokoll-Nr.: ${pnr2}</div>
-    <div class="brief-txt" style="margin-top:14px"><strong>§ 1 Vertragsparteien</strong></div>
+    <div class="brief-betreff">${_lang==='en'?'Storage Agreement':'Einlagerungsvertrag'}</div>
+    <div class="brief-sub">${_lang==='en'?'Document No.':'Protokoll-Nr.'}: ${pnr2}</div>
+    <div class="brief-txt" style="margin-top:14px"><strong>§ 1 ${_lang==='en'?'Contracting Parties':'Vertragsparteien'}</strong></div>
     <table class="brief-tbl" style="margin-top:6px">
       <tbody>
-        <tr><td style="width:35%"><strong>Aufbewahrer (Firma 1)</strong></td><td>${T.firmenname||''}${T.firmaAdr?'<br><small>'+(T.firmaAdr||'').replace(/\n/g,'<br>')+'</small>':''}</td></tr>
-        <tr><td><strong>Einlagerer (Firma 2)</strong></td><td><strong>${k.firma}</strong>${k.ansprechpartner?'<br><small>z.Hd. '+k.ansprechpartner+'</small>':''}<br><small>${kAdr2}</small></td></tr>
+        <tr><td style="width:35%"><strong>${_lang==='en'?'Custodian (Party 1)':'Aufbewahrer (Firma 1)'}</strong></td><td>${T.firmenname||''}${T.firmaAdr?'<br><small>'+(T.firmaAdr||'').replace(/\n/g,'<br>')+'</small>':''}</td></tr>
+        <tr><td><strong>${_lang==='en'?'Depositor (Party 2)':'Einlagerer (Firma 2)'}</strong></td><td><strong>${k.firma}</strong>${k.ansprechpartner?'<br><small>z.Hd. '+k.ansprechpartner+'</small>':''}<br><small>${kAdr2}</small></td></tr>
       </tbody>
     </table>
-    <div class="brief-txt" style="margin-top:14px"><strong>§ 2 Vertragsgegenstand</strong></div>
-    <div class="brief-txt">Firma 1 übernimmt die sichere Einlagerung des unten genannten Datenträgers für Firma 2. Der Datenträger wird in den Räumlichkeiten von Firma 1 aufbewahrt und gegen unbefugten Zugriff gesichert.</div>
+    <div class="brief-txt" style="margin-top:14px"><strong>§ 2 ${_lang==='en'?'Subject Matter':'Vertragsgegenstand'}</strong></div>
+    <div class="brief-txt">${_lang==='en'
+      ?`Party 1 assumes the secure storage of the data carrier listed below on behalf of Party 2. The data carrier is stored in Party 1's premises and protected against unauthorized access.`
+      :`Firma 1 übernimmt die sichere Einlagerung des unten genannten Datenträgers für Firma 2. Der Datenträger wird in den Räumlichkeiten von Firma 1 aufbewahrt und gegen unbefugten Zugriff gesichert.`
+    }</div>
     <table class="brief-tbl" style="margin-top:8px">
-      <thead><tr><th style="width:35%">Feld</th><th>Inhalt</th></tr></thead>
+      <thead><tr><th style="width:35%">${_lang==='en'?'Field':'Feld'}</th><th>${_lang==='en'?'Content':'Inhalt'}</th></tr></thead>
       <tbody>
-        <tr><td>Bezeichnung / Typ</td><td>${bez}</td></tr>
-        <tr><td>Seriennummer</td><td>${serial}</td></tr>
-        <tr><td>Einlagerungsdatum</td><td>${dat}</td></tr>
-        <tr><td>Vergütung</td><td>${pl2}</td></tr>
-        <tr><td>Lagerplatz</td><td style="color:#ccc">________________________</td></tr>
+        <tr><td>${_lang==='en'?'Description / Type':'Bezeichnung / Typ'}</td><td>${bez}</td></tr>
+        <tr><td>${_lang==='en'?'Serial Number':'Seriennummer'}</td><td>${serial}</td></tr>
+        <tr><td>${_lang==='en'?'Storage Date':'Einlagerungsdatum'}</td><td>${dat}</td></tr>
+        <tr><td>${_lang==='en'?'Fee':'Vergütung'}</td><td>${pl2}</td></tr>
+        <tr><td>${_lang==='en'?'Storage Location':'Lagerplatz'}</td><td style="color:#ccc">________________________</td></tr>
       </tbody>
     </table>
-    <div class="brief-txt" style="margin-top:14px"><strong>§ 3 Herausgabe &amp; Kündigung</strong></div>
-    <div class="brief-txt">Der Datenträger wird auf schriftliche Anfrage von Firma 2 zurückgegeben. Der Vertrag kann von beiden Parteien schriftlich mit einer Frist von 30 Tagen gekündigt werden. Im Falle einer Kündigung wird der Datenträger an Firma 2 herausgegeben.</div>
-    <div class="brief-txt" style="margin-top:14px"><strong>§ 4 Vergütung</strong></div>
-    <div class="brief-txt">Firma 2 entrichtet für die Einlagerung eine Gebühr von <strong>${pl2}</strong>. Rechnungsstellung erfolgt gemäß separater Vereinbarung.</div>
-    ${vtBed2?`<div class="brief-txt" style="margin-top:14px"><strong>§ 5 Besondere Bedingungen</strong></div><div class="brief-txt">${vtBed2.replace(/\n/g,'<br>')}</div>`:''}
-    <div class="brief-txt" style="margin-top:14px"><strong>§ ${vtBed2?'6':'5'} Haftung</strong></div>
-    <div class="brief-txt">Firma 1 haftet für Schäden am Datenträger, die auf grobe Fahrlässigkeit oder Vorsatz von Firma 1 zurückzuführen sind. Eine weitergehende Haftung ist ausgeschlossen.</div>
+    <div class="brief-txt" style="margin-top:14px"><strong>§ 3 ${_lang==='en'?'Return &amp; Termination':'Herausgabe &amp; Kündigung'}</strong></div>
+    <div class="brief-txt">${_lang==='en'
+      ?`The data carrier will be returned upon written request by Party 2. Either party may terminate this agreement in writing with 30 days' notice. Upon termination, the data carrier will be returned to Party 2.`
+      :`Der Datenträger wird auf schriftliche Anfrage von Firma 2 zurückgegeben. Der Vertrag kann von beiden Parteien schriftlich mit einer Frist von 30 Tagen gekündigt werden. Im Falle einer Kündigung wird der Datenträger an Firma 2 herausgegeben.`
+    }</div>
+    <div class="brief-txt" style="margin-top:14px"><strong>§ 4 ${_lang==='en'?'Remuneration':'Vergütung'}</strong></div>
+    <div class="brief-txt">${_lang==='en'
+      ?`Party 2 shall pay a storage fee of <strong>${pl2}</strong>. Invoicing shall be in accordance with a separate agreement.`
+      :`Firma 2 entrichtet für die Einlagerung eine Gebühr von <strong>${pl2}</strong>. Rechnungsstellung erfolgt gemäß separater Vereinbarung.`
+    }</div>
+    ${vtBed2?`<div class="brief-txt" style="margin-top:14px"><strong>§ 5 ${_lang==='en'?'Special Conditions':'Besondere Bedingungen'}</strong></div><div class="brief-txt">${vtBed2.replace(/\n/g,'<br>')}</div>`:''}
+    <div class="brief-txt" style="margin-top:14px"><strong>§ ${vtBed2?'6':'5'} ${_lang==='en'?'Liability':'Haftung'}</strong></div>
+    <div class="brief-txt">${_lang==='en'
+      ?`Party 1 shall be liable for damage to the data carrier caused by gross negligence or wilful misconduct of Party 1. Further liability is excluded.`
+      :`Firma 1 haftet für Schäden am Datenträger, die auf grobe Fahrlässigkeit oder Vorsatz von Firma 1 zurückzuführen sind. Eine weitergehende Haftung ist ausgeschlossen.`
+    }</div>
     <div class="brief-sig-row" style="margin-top:28px">
-      <div class="brief-sig-box"><div class="brief-sig-label">Firma 1 – ${T.firmenname||'Aufbewahrer'}</div><div class="brief-sig-line">Unterschrift &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datum: ___________</div></div>
+      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 1':'Firma 1'} – ${T.firmenname||(_lang==='en'?'Custodian':'Aufbewahrer')}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
     </div>
     <div class="brief-sig-row" style="margin-top:16px">
-      <div class="brief-sig-box"><div class="brief-sig-label">Firma 2 – Einlagerer: ${k.firma}</div><div class="brief-sig-line">Unterschrift &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datum: ___________</div></div>
+      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 2 – Depositor':'Firma 2 – Einlagerer'}: ${k.firma}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
     </div>
     <div class="brief-foot">
       ${fA2?`<div class="brief-foot-col">${fA2}</div>`:''}
