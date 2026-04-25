@@ -1493,9 +1493,119 @@ const TRANS={
   grund_vertragsende:{de:'Vertragsende',en:'End of contract'},
   grund_vernichtung:{de:'Vernichtung beauftragt',en:'Destruction ordered'},
   grund_sonstiges:{de:'Sonstiges',en:'Other'},
+  // ── Alerts / confirms / textContent ─────────────────
+  msg_no_perm:{de:'Keine Berechtigung.',en:'No permission.'},
+  msg_no_perm_del:{de:'Keine Berechtigung: Löschen nur für Admins.',en:'No permission: delete is admin-only.'},
+  msg_no_perm_area:{de:'Keine Berechtigung für diesen Bereich.',en:'No permission for this area.'},
+  msg_kunde_pflicht:{de:'Firmenname und Kundennummer sind Pflichtfelder.',en:'Company name and customer number are required.'},
+  msg_firma_dt_del:{de:'Firma und alle Datenträger löschen?',en:'Delete company and all media records?'},
+  msg_dt_pflicht:{de:'Firma, Bezeichnung und Seriennummer sind Pflichtfelder.',en:'Company, description and serial number are required.'},
+  msg_dt_del:{de:'Datenträger löschen?',en:'Delete media record?'},
+  msg_rechnung_del:{de:'Rechnung aus der Historie löschen?',en:'Remove invoice from history?'},
+  msg_ue_firma:{de:'Firma wählen.',en:'Please select a company.'},
+  msg_ue_dt:{de:'Datenträger auswählen.',en:'Please select media.'},
+  msg_ue_del:{de:'Diese offene Übergabe löschen?',en:'Delete this open handover?'},
+  msg_ue_no_doc:{de:'Kein Dokument hochgeladen – trotzdem abschließen?',en:'No document uploaded – complete anyway?'},
+  msg_ue_bestand:{de:'Abgeschlossen – DTs bleiben im Bestand.',en:'Completed – media remain in stock.'},
+  msg_ue_done:{de:'Übergabe erfolgreich abgeschlossen!',en:'Handover completed successfully!'},
+  msg_ue_select:{de:'Bitte eine Übergabe auswählen.',en:'Please select a handover.'},
+  msg_tresor_pflicht:{de:'Bezeichnung ist erforderlich.',en:'Name is required.'},
+  msg_rollen_pflicht:{de:'Rollenname eingeben.',en:'Please enter a role name.'},
+  msg_login_empty:{de:'Bitte Benutzername und Passwort eingeben.',en:'Please enter username and password.'},
+  msg_login_fail:{de:'Anmeldung fehlgeschlagen.',en:'Login failed.'},
+  msg_login_server:{de:'Server nicht erreichbar. Bitte versuche es erneut.',en:'Server unreachable. Please try again.'},
+  msg_pw_alt:{de:'Bitte aktuelles Passwort eingeben.',en:'Please enter your current password.'},
+  msg_pw_kurz:{de:'Neues Passwort muss mindestens 4 Zeichen haben.',en:'New password must be at least 4 characters.'},
+  msg_pw_match:{de:'Die neuen Passwörter stimmen nicht überein.',en:'The new passwords do not match.'},
+  msg_pw_wrong:{de:'Aktuelles Passwort ist falsch.',en:'Current password is incorrect.'},
+  msg_pw_saved:{de:'✓ Gespeichert',en:'✓ Saved'},
+  msg_dt_firma:{de:'Bitte Firma wählen.',en:'Please select a company.'},
+  msg_dt_bez:{de:'Bitte Bezeichnung eingeben.',en:'Please enter a description.'},
+  msg_dt_serial:{de:'Bitte Seriennummer eingeben.',en:'Please enter a serial number.'},
+  msg_dt_datum:{de:'Bitte Einlagerungsdatum eingeben.',en:'Please enter a storage date.'},
+  // ── textContent strings ───────────────────────────────
+  txt_neue_firma:{de:'Neue Firma anlegen',en:'Add New Customer'},
+  txt_firma_anlegen:{de:'Firma anlegen',en:'Add Customer'},
+  txt_firma_bearb:{de:'Firma bearbeiten',en:'Edit Customer'},
+  txt_aend_speich:{de:'Änderungen speichern',en:'Save Changes'},
+  txt_tresor_bearb:{de:'Tresor bearbeiten',en:'Edit Safe'},
+  txt_wv_vorhanden:{de:'📎 Wartungsvertrag vorhanden',en:'📎 Maintenance contract on file'},
+  txt_wv_hochladen:{de:'PDF / Scan hochladen',en:'Upload PDF / scan'},
+  // ── Table headers / empty states ─────────────────────
+  empty_users:{de:'Keine Benutzer',en:'No users'},
+  empty_rollen:{de:'Keine Rollen',en:'No roles'},
+  empty_vertraege:{de:'Keine Verträge gefunden',en:'No contracts found'},
+  empty_tresore:{de:'Keine Tresore angelegt',en:'No safes configured'},
+  empty_db_vertraege:{de:'Keine aktiven Verträge',en:'No active contracts'},
+  empty_db_ablauf:{de:'Keine Verträge laufen in den nächsten 60 Tagen ab',en:'No contracts expiring in the next 60 days'},
+  empty_db_dt:{de:'Keine eingelagerten Datenträger',en:'No media in storage'},
+  empty_db_wartung:{de:'Keine anstehenden Wartungstermine (60 Tage)',en:'No upcoming maintenance (60 days)'},
+  col_user:{de:'User',en:'User'},
+  col_name:{de:'Name',en:'Name'},
+  col_rolle:{de:'Rolle',en:'Role'},
+  col_status:{de:'Status',en:'Status'},
+  col_protokoll_nr:{de:'Protokoll-Nr.',en:'Protocol No.'},
+  col_firma_header:{de:'Firma',en:'Company'},
+  col_vertrag_nr:{de:'Vertrag-Nr.',en:'Contract No.'},
+  col_beginn:{de:'Beginn',en:'Start'},
+  col_ende:{de:'Ende',en:'End'},
+  col_bezeichnung:{de:'Bezeichnung',en:'Name'},
+  col_standort:{de:'Standort',en:'Location'},
+  col_naechste_wartung:{de:'Nächste Wartung',en:'Next Maintenance'},
+  col_vertragsnr:{de:'Vertragsnr.',en:'Contract No.'},
+  col_zeitraum:{de:'Zeitraum',en:'Period'},
+  col_netto:{de:'Netto',en:'Net'},
+  col_tage:{de:'Tage',en:'Days'},
+  col_typ_header:{de:'Typ',en:'Type'},
+  col_serial_header:{de:'Seriennummer',en:'Serial Number'},
+  col_eingelagert:{de:'Eingelagert',en:'Stored'},
+  col_uebergeben_h:{de:'Übergeben',en:'Handed Over'},
+  col_dok:{de:'Dok.',en:'Doc.'},
+  col_modus_h:{de:'Modus',en:'Mode'},
+  // ── perm/tab names in renderPermGrid ─────────────────
+  perm_read:{de:'Lesen',en:'Read'},
+  perm_write:{de:'Schreiben/Bearbeiten',en:'Write/Edit'},
+  perm_delete:{de:'Löschen',en:'Delete'},
+  perm_tpl:{de:'Templates bearbeiten',en:'Edit Templates'},
+  perm_users:{de:'Benutzerverwaltung',en:'User Management'},
+  perm_tab_kunden:{de:'Tab: Kunden',en:'Tab: Customers'},
+  perm_tab_dt:{de:'Tab: Datenträger',en:'Tab: Media'},
+  perm_tab_ue:{de:'Tab: Übergabe',en:'Tab: Handover'},
+  perm_tab_re:{de:'Tab: Rechnungen',en:'Tab: Invoices'},
+  perm_tab_tr:{de:'Tab: Tresore',en:'Tab: Safes'},
+  perm_section:{de:'Berechtigungen',en:'Permissions'},
+  perm_tabs_section:{de:'Sichtbare Tabs',en:'Visible Tabs'},
+  // ── Rechnung history buttons ──────────────────────────
+  btn_drucken:{de:'Drucken',en:'Print'},
+  btn_mahnung:{de:'Mahnung',en:'Reminder'},
+  btn_select:{de:'Wählen',en:'Select'},
+  btn_formular:{de:'Formular',en:'Form'},
+  // ── select options ────────────────────────────────────
+  opt_firma_waehlen:{de:'Firma wählen',en:'Select Company'},
+  opt_alle_firmen:{de:'Alle Firmen',en:'All Companies'},
+  opt_kein_tresor:{de:'— kein Tresor —',en:'— no safe —'},
+  opt_gleiche_firma:{de:'— gleiche Firma —',en:'— same company —'},
+  // ── dtUpdateZusammenfassung labels ────────────────────
+  lbl_monat:{de:'Monat',en:'Month'},
+  lbl_jahr:{de:'Jahr',en:'Year'},
+  lbl_rabatt_suffix:{de:'Rabatt',en:'Discount'},
+  // ── renderDashboard labels ─────────────────────────────
+  lbl_unbefristet:{de:'unbefristet',en:'open-ended'},
+  // ── Archive table labels ──────────────────────────────
+  lbl_archiv_uebergeben:{de:'übergeben',en:'handed over'},
+  // ── renderHilfe categories ───────────────────────────
+  hilfe_cat_start:{de:'🚀 Einstieg',en:'🚀 Getting Started'},
+  hilfe_cat_kunden:{de:'👥 Kunden',en:'👥 Customers'},
+  hilfe_cat_dt:{de:'💾 Datenträger',en:'💾 Media'},
+  hilfe_cat_ue:{de:'📋 Übergabe & Protokoll',en:'📋 Handover & Protocol'},
+  hilfe_cat_re:{de:'🧾 Rechnungen',en:'🧾 Invoices'},
+  hilfe_cat_vt:{de:'📄 Verträge',en:'📄 Contracts'},
+  hilfe_cat_tpl:{de:'🎨 Templates',en:'🎨 Templates'},
+  hilfe_cat_user:{de:'👤 Benutzer & Rollen',en:'👤 Users & Roles'},
 };
 let _lang=localStorage.getItem('dtv_lang')||'de';
 function t(key){return TRANS[key]?.[_lang]||TRANS[key]?.de||key;}
+function ta(de,en){return _lang==='en'?en:de;}
 function applyLang(){
   document.documentElement.lang=_lang;
   const grundSel=document.getElementById('u-grund');
@@ -1571,7 +1681,7 @@ async function doLogin() {
   errEl.style.display = 'none';
 
   if (!username || !password) {
-    errEl.textContent = 'Bitte Benutzername und Passwort eingeben.';
+    errEl.textContent = t('msg_login_empty');
     errEl.style.display = 'block';
     return;
   }
@@ -1585,7 +1695,7 @@ async function doLogin() {
     const data = await r.json();
 
     if (!r.ok) {
-      errEl.textContent = data.error || 'Anmeldung fehlgeschlagen.';
+      errEl.textContent = data.error || t('msg_login_fail');
       errEl.style.display = 'block';
       return;
     }
@@ -1597,7 +1707,7 @@ async function doLogin() {
     showApp();
 
   } catch(e) {
-    errEl.textContent = 'Server nicht erreichbar. Bitte versuche es erneut.';
+    errEl.textContent = t('msg_login_server');
     errEl.style.display = 'block';
   }
 }
@@ -1616,16 +1726,16 @@ async function pwSpeichern(){
   const err=document.getElementById('pw-fehler');
   const zeigeFehler=msg=>{err.textContent=msg;err.style.display='block';};
   err.style.display='none';
-  if(!alt){zeigeFehler('Bitte aktuelles Passwort eingeben.');return;}
-  if(neu.length<4){zeigeFehler('Neues Passwort muss mindestens 4 Zeichen haben.');return;}
-  if(neu!==neu2){zeigeFehler('Die neuen Passwörter stimmen nicht überein.');return;}
+  if(!alt){zeigeFehler(t('msg_pw_alt'));return;}
+  if(neu.length<4){zeigeFehler(t('msg_pw_kurz'));return;}
+  if(neu!==neu2){zeigeFehler(t('msg_pw_match'));return;}
   const r=await apiPut('/api/me/password',{password_alt:alt,password:neu});
   if(r&&r.ok){
     closePwModal();
     const btn=document.querySelector('button[onclick="openPwModal()"]');
-    if(btn){const orig=btn.textContent;btn.textContent='✓ Gespeichert';setTimeout(()=>btn.textContent=orig,2000);}
+    if(btn){const orig=btn.textContent;btn.textContent=t('msg_pw_saved');setTimeout(()=>btn.textContent=orig,2000);}
   } else {
-    zeigeFehler('Aktuelles Passwort ist falsch.');
+    zeigeFehler(t('msg_pw_wrong'));
   }
 }
 
@@ -1778,9 +1888,9 @@ function kundeFormMgFill(k){
 function kundeFormMgClear(){for(let i=1;i<=5;i++){['k-mg-ab-','k-mg-pct-','k-mg-lbl-'].forEach(p=>{const el=document.getElementById(p+i);if(el)el.value='';});}}
 
 async function kundeSpeichern() {
-  if (!can('write')) { alert('Keine Berechtigung.'); return; }
+  if (!can('write')) { alert(t('msg_no_perm')); return; }
   const data = kundeFormData();
-  if (!data.firma||!data.nr) { alert('Firmenname und Kundennummer sind Pflichtfelder.'); return; }
+  if (!data.firma||!data.nr) { alert(t('msg_kunde_pflicht')); return; }
   const editId = parseInt(document.getElementById('k-edit-id').value)||0;
   let result;
   if (editId) {
@@ -1799,8 +1909,8 @@ function kundeAbbrechen() {
   kFields.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('k-vertragsstatus').value='aktiv';
   document.getElementById('k-edit-id').value='';
-  document.getElementById('k-form-title').textContent='Neue Firma anlegen';
-  document.getElementById('k-save-btn').textContent='Firma anlegen';
+  document.getElementById('k-form-title').textContent=t('txt_neue_firma');
+  document.getElementById('k-save-btn').textContent=t('txt_firma_anlegen');
   document.getElementById('k-ebanner').style.display='none';
   kundeFormMgClear();
   const szA=document.getElementById('k-sz-a');if(szA)szA.checked=true;
@@ -1810,13 +1920,13 @@ function kundeAbbrechen() {
 }
 
 function kundeBearbeiten(id) {
-  if (!can('write')) { alert('Keine Berechtigung.'); return; }
+  if (!can('write')) { alert(t('msg_no_perm')); return; }
   const k=kunden.find(k=>k.id===id); if(!k) return;
   document.getElementById('k-edit-id').value=id;
   kFields.forEach((fid,i)=>{ const el=document.getElementById(fid); if(el) el.value=k[kKeys[i]]||''; });
   kundeFormMgFill(k);
-  document.getElementById('k-form-title').textContent='Firma bearbeiten';
-  document.getElementById('k-save-btn').textContent='Aenderungen speichern';
+  document.getElementById('k-form-title').textContent=t('txt_firma_bearb');
+  document.getElementById('k-save-btn').textContent=t('txt_aend_speich');
   document.getElementById('k-ebanner').style.display='flex';
   document.getElementById('k-firma').scrollIntoView({behavior:'smooth',block:'center'});
   const szRadio=document.querySelector(`input[name="k-szenario"][value="${k.szenario||'A'}"]`);
@@ -1826,8 +1936,8 @@ function kundeBearbeiten(id) {
 }
 
 async function kundeLoeschen(id) {
-  if (!can('delete')) { alert('Keine Berechtigung: Loeschen nur fuer Admins.'); return; }
-  if (!confirm('Firma und alle Datenträger loeschen?')) return;
+  if (!can('delete')) { alert(t('msg_no_perm_del')); return; }
+  if (!confirm(t('msg_firma_dt_del'))) return;
   const r = await apiDel(`/api/kunden/${id}`);
   if (r) {
     kunden=kunden.filter(k=>k.id!==id);
@@ -1884,11 +1994,11 @@ function renderKunden() {
 function dtModusWechseln(){const esc=document.getElementById('dt-modus-escrow')?.checked||false;const s=document.getElementById('dt-escrow-section');if(s)s.style.display=esc?'':'none';const _b2=document.getElementById('btn-2parteien');if(_b2)_b2.style.display=esc?'none':'';const _b3=document.getElementById('btn-3parteien');if(_b3)_b3.style.display=esc?'':'none';const _lbl=document.getElementById('lbl-vtrag-bed');if(_lbl)_lbl.innerHTML=esc?t('vtrag_bed_b'):t('vtrag_bed_a');const _ta=document.getElementById('dt-vertrag-bedingungen');if(_ta)_ta.placeholder=esc?t('vtrag_bed_ph_b'):t('vtrag_bed_ph_a');}
 function ovDtModusWechseln(){const s=document.getElementById('ov-dt-escrow-section');if(s)s.style.display=document.getElementById('ov-dt-modus-escrow')?.checked?'':'none';}
 async function dtHinzufuegen() {
-  if (!can('write')) { alert('Keine Berechtigung.'); return; }
+  if (!can('write')) { alert(t('msg_no_perm')); return; }
   const kunden_id=parseInt(document.getElementById('dt-kunden_id').value);
   const bezeichnung=document.getElementById('dt-bezeichnung').value.trim();
   const serial=document.getElementById('dt-serial').value.trim();
-  if (!kunden_id||!bezeichnung||!serial) { alert('Firma, Bezeichnung und Seriennummer sind Pflichtfelder.'); return; }
+  if (!kunden_id||!bezeichnung||!serial) { alert(t('msg_dt_pflicht')); return; }
   const preis=parseFloat(document.getElementById('dt-preis').value)||0;
   const einheit=document.getElementById('dt-einheit').value;
   const preis_jahr=einheit==='monat'?preis*12:preis;
@@ -1942,8 +2052,8 @@ async function dtSpeichern() {
 }
 
 async function dtLoeschen(id) {
-  if(!can('delete')){alert('Keine Berechtigung.');return;}
-  if(!confirm('Datenträger loeschen?'))return;
+  if(!can('delete')){alert(t('msg_no_perm'));return;}
+  if(!confirm(t('msg_dt_del')))return;
   const r=await apiDel(`/api/datentraeger/${id}`);
   if(r){datentraeger=datentraeger.filter(d=>d.id!==id);renderAlles();}
 }
@@ -1966,17 +2076,17 @@ function renderDT(){
 }
 
 function renderSelects(){
-  const opts='<option value="">Firma wählen</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
+  const opts='<option value="">'+t('opt_firma_waehlen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
   ['dt-kunden_id','r-kunden_id','u-kunden_id'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
-  const f=document.getElementById('dt-filter');if(f)f.innerHTML='<option value="">Alle Firmen</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
-  const af=document.getElementById('archiv-filter');if(af)af.innerHTML='<option value="">Alle Firmen</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
+  const f=document.getElementById('dt-filter');if(f)f.innerHTML='<option value="">'+t('opt_alle_firmen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
+  const af=document.getElementById('archiv-filter');if(af)af.innerHTML='<option value="">'+t('opt_alle_firmen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
   // Tresor dropdown in DT form and edit overlay
-  const tresorOpts='<option value="">— kein Tresor —</option>'+tresore.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');return`<option value="${t.id}">${t.bezeichnung}${loc?' ('+loc+')':''}</option>`;}).join('');
+  const tresorOpts='<option value="">'+t('opt_kein_tresor')+'</option>'+tresore.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');return`<option value="${t.id}">${t.bezeichnung}${loc?' ('+loc+')':''}</option>`;}).join('');
   const tsel=document.getElementById('dt-tresor_id');
   if(tsel)tsel.innerHTML=tresorOpts;
   const tselOv=document.getElementById('ov-dt-tresor_id');
   if(tselOv)tselOv.innerHTML=tresorOpts;
-  const kOptsExt='<option value="">— gleiche Firma —</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
+  const kOptsExt='<option value="">'+t('opt_gleiche_firma')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
   ['dt-eigentuemer_id','dt-neben_eigentuemer_id','dt-rechnungsempfaenger_id','ov-dt-eigentuemer_id','ov-dt-neben_eigentuemer_id','ov-dt-rechnungsempfaenger_id','k-haupt_eigentuemer_id','k-neben_eigentuemer_id'].forEach(sid=>{
     const sel=document.getElementById(sid);
     if(sel){const cur=sel.value;sel.innerHTML=kOptsExt;sel.value=cur;}
@@ -2102,9 +2212,9 @@ function rechnungSpeichern(k,nr,html){
 }
 function renderRechnungHistorie(list){
   const el=document.getElementById('r-historie');if(!el)return;
-  if(!list||!list.length){el.innerHTML='<div class="empty">Noch keine gespeicherten Rechnungen</div>';return;}
-  el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Nr.</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Firma</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Zeitraum</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Netto</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Datum</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)"></th></tr></thead><tbody>'+
-    list.map((r,i)=>`<tr><td style="padding:5px 6px;font-weight:600;font-family:monospace;font-size:11px">${r.nr}</td><td style="padding:5px 6px">${r.firma}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${r.zr}</td><td style="padding:5px 6px;font-size:11px">${r.netto?'EUR '+r.netto:'-'}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td><td style="padding:5px 6px"><div style="display:flex;gap:4px"><button onclick="rechnungWiederdrucken(${i})" style="padding:2px 8px;font-size:11px">Drucken</button><button onclick="rechnungMahnung(${i})" class="btn-w" style="padding:2px 8px;font-size:11px">Mahnung</button><button onclick="rechnungHistorieLadenAlle(${i})" class="btn-d" style="padding:2px 6px;font-size:11px">✕</button></div></td></tr>`).join('')+
+  if(!list||!list.length){el.innerHTML='<div class="empty">'+t('empty_rechnungen')+'</div>';return;}
+  el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_nr')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_zeitraum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_netto')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_datum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)"></th></tr></thead><tbody>'+
+    list.map((r,i)=>`<tr><td style="padding:5px 6px;font-weight:600;font-family:monospace;font-size:11px">${r.nr}</td><td style="padding:5px 6px">${r.firma}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${r.zr}</td><td style="padding:5px 6px;font-size:11px">${r.netto?'EUR '+r.netto:'-'}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td><td style="padding:5px 6px"><div style="display:flex;gap:4px"><button onclick="rechnungWiederdrucken(${i})" style="padding:2px 8px;font-size:11px">${t('btn_drucken')}</button><button onclick="rechnungMahnung(${i})" class="btn-w" style="padding:2px 8px;font-size:11px">${t('btn_mahnung')}</button><button onclick="rechnungHistorieLadenAlle(${i})" class="btn-d" style="padding:2px 6px;font-size:11px">✕</button></div></td></tr>`).join('')+
     '</tbody></table>';
 }
 function rechnungHistorieLadenAlle(del){
@@ -2121,13 +2231,13 @@ function renderRechnungHistoriePage(){
   const q=(document.getElementById('hist-search')?.value||'').toLowerCase();
   const filtered=q?hist.filter(r=>(r.firma||'').toLowerCase().includes(q)||(r.nr||'').toLowerCase().includes(q)||(r.zr||'').toLowerCase().includes(q)):hist;
   const el=document.getElementById('r-historie-page');if(!el)return;
-  if(!filtered.length){el.innerHTML='<div class="empty">'+(q?'Keine Treffer':'Noch keine gespeicherten Rechnungen')+'</div>';return;}
+  if(!filtered.length){el.innerHTML='<div class="empty">'+(q?t('empty_kunden_suche'):t('empty_rechnungen'))+'</div>';return;}
   el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr>'+
-    '<th style="text-align:left;font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Nr.</th>'+
-    '<th style="text-align:left;font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Firma</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Zeitraum</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Netto</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Datum</th>'+
+    '<th style="text-align:left;font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_nr')+'</th>'+
+    '<th style="text-align:left;font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_firma_header')+'</th>'+
+    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_zeitraum')+'</th>'+
+    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_netto')+'</th>'+
+    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_datum')+'</th>'+
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)"></th>'+
     '</tr></thead><tbody>'+
     filtered.map((r,i)=>{
@@ -2143,8 +2253,8 @@ function renderRechnungHistoriePage(){
       <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td>
       <td style="padding:7px 8px"><div style="display:flex;gap:4px;flex-wrap:wrap">
         <button onclick="rechnungWiederdrucken(${idx})" style="padding:3px 8px;font-size:11px" title="Rechnung als PDF drucken">PDF</button>
-        <button onclick="rechnungMahnung(${idx})" class="btn-w" style="padding:3px 8px;font-size:11px">Mahnung</button>
-        <button onclick="toggleMahnungenRow('${r.nr}')" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="Mahnungen anzeigen">📋 Mahnungen (${mCount})</button>
+        <button onclick="rechnungMahnung(${idx})" class="btn-w" style="padding:3px 8px;font-size:11px">${t('btn_mahnung')}</button>
+        <button onclick="toggleMahnungenRow('${r.nr}')" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="${ta('Mahnungen anzeigen','Show reminders')}">📋 ${ta('Mahnungen','Reminders')} (${mCount})</button>
         <button onclick="rechnungLoeschen(${idx})" class="btn-d" style="padding:3px 7px;font-size:11px">✕</button>
       </div></td>
     </tr>
@@ -2155,7 +2265,7 @@ function renderRechnungHistoriePage(){
     '</tbody></table>';
 }
 function rechnungLoeschen(idx){
-  if(!confirm('Rechnung aus der Historie löschen?'))return;
+  if(!confirm(t('msg_rechnung_del')))return;
   const hist=JSON.parse(localStorage.getItem('dtv_re_hist')||'[]');
   hist.splice(idx,1);
   localStorage.setItem('dtv_re_hist',JSON.stringify(hist));
@@ -2345,7 +2455,7 @@ ${((_lang==='en'&&TU.nach_en)||TU.nach)?`<div class="brief-txt" style="margin-to
 function formularVorschau(){
   const k=kunden.find(k=>k.id===parseInt(document.getElementById('u-kunden_id').value));
   if(!k){alert('Firma wählen.');return;}
-  const sel=getAusgewaehlte();if(!sel.length){alert('Datenträger auswählen.');return;}
+  const sel=getAusgewaehlte();if(!sel.length){alert(t('msg_ue_dt'));return;}
   const el=document.getElementById('u-vorschau');
   el.innerHTML=genUebergabeHtml(k,sel);
   el.querySelectorAll('.brief-hr').forEach(e=>e.style.background=accentColor||'#0065A4');
@@ -2359,7 +2469,7 @@ function formularHerunterladen(){
 }
 
 async function weiterZuSchritt2(){
-  const k=kunden.find(k=>k.id===parseInt(document.getElementById('u-kunden_id').value));if(!k){alert('Firma wählen.');return;}
+  const k=kunden.find(k=>k.id===parseInt(document.getElementById('u-kunden_id').value));if(!k){alert(t('msg_ue_firma'));return;}
   const sel=getAusgewaehlte();if(!sel.length){alert('Datenträger auswählen.');return;}
   const result=await apiPost('/api/uebergaben',{kunden_id:k.id,datum:document.getElementById('u-datum').value,empfaenger:document.getElementById('u-empfaenger').value,grund:document.getElementById('u-grund').value,kunden_nr:k.nr,dt_ids:sel.map(d=>d.id)});
   if(!result)return;
@@ -2380,7 +2490,7 @@ function renderPendingList(){
 
 function selectPending(id){activePendingId=id;updateS2Info();renderPendingList();}
 async function deletePending(id){
-  if(!confirm('Diese offene Übergabe löschen?'))return;
+  if(!confirm(t('msg_ue_del')))return;
   const r=await apiDel(`/api/uebergaben/${id}`);
   if(!r)return;
   pendingUebergaben=pendingUebergaben.filter(p=>p.id!==id);
@@ -2391,10 +2501,10 @@ async function deletePending(id){
 
 
 async function uebergabeAbschliessen(weiterImBestand=false){
-  if(!activePendingId){alert('Bitte eine Übergabe auswählen.');return;}
+  if(!activePendingId){alert(t('msg_ue_select'));return;}
   const payload={weiter_im_bestand:weiterImBestand};
   if(pendingUDoc){payload.doc=pendingUDoc.data;payload.doc_type=pendingUDoc.type;payload.doc_name=pendingUDoc.name;}
-  else if(!weiterImBestand&&!confirm('Kein Dokument hochgeladen – trotzdem abschließen?')){return;}
+  else if(!weiterImBestand&&!confirm(t('msg_ue_no_doc'))){return;}
   const r=await apiPost(`/api/uebergaben/${activePendingId}/abschliessen`,payload);
   if(!r)return;
   const pu=pendingUebergaben.find(p=>p.id===activePendingId);
@@ -2409,16 +2519,16 @@ async function uebergabeAbschliessen(weiterImBestand=false){
   document.getElementById('u-doc-prev').innerHTML='Scan / Foto hochladen';
   document.getElementById('doc-upzone').classList.remove('has-file');
   renderAlles();renderPendingList();updateS2Info();renderAbgeschlosseneUebergaben();
-  alert(weiterImBestand?'Abgeschlossen – DTs bleiben im Bestand.':'Übergabe erfolgreich abgeschlossen!');
+  alert(weiterImBestand?t('msg_ue_bestand'):t('msg_ue_done'));
 }
 
 function renderAbgeschlosseneUebergaben(){
   const el=document.getElementById('uarch-liste');if(!el)return;
   const q=(document.getElementById('uarch-search')?.value||'').toLowerCase();
   const abg=Übergaben.filter(u=>u.abgeschlossen&&(!q||(u.firma||'').toLowerCase().includes(q)||(u.datum||'').includes(q)||(u.protokoll_nr||'').toLowerCase().includes(q)));
-  if(!abg.length){el.innerHTML='<div class="empty">Keine abgeschlossenen Übergaben</div>';return;}
+  if(!abg.length){el.innerHTML='<div class="empty">'+t('empty_uebergaben')+'</div>';return;}
   el.innerHTML='<table style="table-layout:auto"><thead><tr>'
-    +'<th>Protokoll-Nr.</th><th>Firma</th><th>Datum</th><th>DT</th><th>Grund</th><th>Modus</th><th></th>'
+    +'<th>'+t('col_protokoll_nr')+'</th><th>'+t('col_firma_header')+'</th><th>'+t('col_datum')+'</th><th>DT</th><th>'+t('col_grund')+'</th><th>'+t('col_modus_h')+'</th><th></th>'
     +'</tr></thead><tbody>'
     +abg.map(u=>{
       const docBtn=u.hat_doc
@@ -2453,7 +2563,7 @@ function renderArchiv(){
       const docBtn=ueb?`<button onclick="loadAndOpenDoc('/api/uebergaben/${ueb.id}/doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd)">Dok.</button>`:'-';
       return`<tr><td style="width:18%">${d.bezeichnung}</td><td style="width:20%;font-family:monospace;font-size:11px">${d.serial}</td><td style="width:14%;font-size:11px">${fmtDate(d.einlagerungs_datum)}</td><td style="width:14%;font-size:11px">${ueb?ueb.datum:'-'}</td><td style="width:24%;font-size:11px">${ueb?ueb.grund:'-'}</td><td style="width:10%">${docBtn}</td></tr>`;
     }).join('');
-    return`<div class="archiv-karte"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-weight:700;font-size:13px">${k?k.firma+' ('+k.nr+')':'?'}</span><span class="badge br">${dts.length} übergeben</span></div><table><thead><tr><th>Typ</th><th>Seriennummer</th><th>Eingelagert</th><th>Übergeben</th><th>Grund</th><th>Dok.</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    return`<div class="archiv-karte"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-weight:700;font-size:13px">${k?k.firma+' ('+k.nr+')':'?'}</span><span class="badge br">${dts.length} ${t('lbl_uebergeben')}</span></div><table><thead><tr><th>${t('col_typ_header')}</th><th>${t('col_serial_header')}</th><th>${t('col_eingelagert')}</th><th>${t('col_uebergeben_h')}</th><th>${t('col_grund')}</th><th>${t('col_dok')}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }).join('');
 }
 
@@ -2719,7 +2829,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.8${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.1${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -2729,9 +2839,9 @@ function updateSupportDisplay(name,email){
 
 function renderUserListe(users){
   const el=document.getElementById('user-liste');if(!el)return;
-  if(!users||!users.length){el.innerHTML='<div class="empty">Keine Benutzer</div>';return;}
-  el.innerHTML='<table><thead><tr><th style="width:20%">User</th><th style="width:25%">Name</th><th style="width:20%">Rolle</th><th style="width:15%">Status</th><th style="width:20%"></th></tr></thead><tbody>'+
-    users.map(u=>`<tr data-uid="${u.id}" data-uname="${u.name}" data-uusername="${u.username}" data-urollen="${u.rollen_id}" data-uaktiv="${u.aktiv}"><td style="font-weight:600">${u.username}</td><td>${u.name}</td><td><span class="badge ${u.farbe||'bg'}">${u.rollen_name}</span></td><td>${u.aktiv?'<span class="badge bg">Aktiv</span>':'<span class="badge br">Inaktiv</span>'}</td><td><div style="display:flex;gap:3px">${can('manageUsers')?`<button onclick="userBearbeiten(${u.id})" style="padding:3px 6px;font-size:11px" title="Bearbeiten">✎</button><button onclick="userPwReset(${u.id})" style="padding:3px 6px;font-size:11px" title="Passwort setzen">🔑</button>`:''} ${u.id!==1&&u.id!==currentUser?.id&&can('manageUsers')?`<button class="btn-d" onclick="userLoeschen(${u.id})" style="padding:3px 6px;font-size:11px">✕</button>`:''}</div></td></tr>`).join('')+'</tbody></table>';
+  if(!users||!users.length){el.innerHTML='<div class="empty">'+t('empty_users')+'</div>';return;}
+  el.innerHTML='<table><thead><tr><th style="width:20%">'+t('col_user')+'</th><th style="width:25%">'+t('col_name')+'</th><th style="width:20%">'+t('col_rolle')+'</th><th style="width:15%">'+t('col_status')+'</th><th style="width:20%"></th></tr></thead><tbody>'+
+    users.map(u=>`<tr data-uid="${u.id}" data-uname="${u.name}" data-uusername="${u.username}" data-urollen="${u.rollen_id}" data-uaktiv="${u.aktiv}"><td style="font-weight:600">${u.username}</td><td>${u.name}</td><td><span class="badge ${u.farbe||'bg'}">${u.rollen_name}</span></td><td>${u.aktiv?'<span class="badge bg">'+t('lbl_aktiv')+'</span>':'<span class="badge br">'+t('lbl_inaktiv')+'</span>'}</td><td><div style="display:flex;gap:3px">${can('manageUsers')?`<button onclick="userBearbeiten(${u.id})" style="padding:3px 6px;font-size:11px" title="Bearbeiten">✎</button><button onclick="userPwReset(${u.id})" style="padding:3px 6px;font-size:11px" title="Passwort setzen">🔑</button>`:''} ${u.id!==1&&u.id!==currentUser?.id&&can('manageUsers')?`<button class="btn-d" onclick="userLoeschen(${u.id})" style="padding:3px 6px;font-size:11px">✕</button>`:''}</div></td></tr>`).join('')+'</tbody></table>';
 }
 
 function renderRollenListe(){
@@ -2739,9 +2849,9 @@ function renderRollenListe(){
   if(!rollen.length){el.innerHTML='<div class="empty">Keine Rollen</div>';return;}
   el.innerHTML=rollen.map(r=>{
     const perms=JSON.parse(r.berechtigungen||'{}');
-    const permNames={read:'Lesen',write:'Schreiben',delete:'Loeschen',editTemplate:'Templates',manageUsers:'Benutzer'};
+    const permNames={read:t('perm_read'),write:t('perm_write'),delete:t('perm_delete'),editTemplate:t('perm_tpl'),manageUsers:t('perm_users')};
     const permBadges=Object.entries(permNames).map(([k,label])=>`<span class="badge ${perms[k]?'bg':'br'}" style="font-size:10px;margin-right:2px">${label}</span>`).join('')+
-      ['tab_kunden','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_tresore'].filter(k=>k in perms&&!perms[k]).map(k=>`<span class="badge br" style="font-size:10px;margin-right:2px">Kein ${k.replace('tab_','')}</span>`).join('');
+      ['tab_kunden','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_tresore'].filter(k=>k in perms&&!perms[k]).map(k=>`<span class="badge br" style="font-size:10px;margin-right:2px">${ta('Kein ','No ')}${k.replace('tab_','')}</span>`).join('');
     return`<div style="border:1px solid var(--brd);border-radius:var(--rad);padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
       <div><span class="badge ${r.farbe||'bg'}" style="margin-right:8px">${r.name}</span>${permBadges}</div>
       <button onclick="bearbeiteRolle(${r.id})" style="padding:3px 8px;font-size:11px">Bearbeiten</button>
@@ -2833,13 +2943,13 @@ function bearbeiteRolle(id){
 }
 
 function renderPermGrid(perms){
-  const permNames={read:'Lesen',write:'Schreiben/Bearbeiten',delete:'Loeschen',editTemplate:'Templates bearbeiten',manageUsers:'Benutzerverwaltung'};
-  const tabNames={tab_kunden:'Tab: Kunden',tab_datentraeger:'Tab: Datenträger',tab_uebergabe:'Tab: Übergabe',tab_rechnung:'Tab: Rechnungen',tab_tresore:'Tab: Tresore'};
+  const permNames={read:t('perm_read'),write:t('perm_write'),delete:t('perm_delete'),editTemplate:t('perm_tpl'),manageUsers:t('perm_users')};
+  const tabNames={tab_kunden:t('perm_tab_kunden'),tab_datentraeger:t('perm_tab_dt'),tab_uebergabe:t('perm_tab_ue'),tab_rechnung:t('perm_tab_re'),tab_tresore:t('perm_tab_tr')};
   const mkItem=(key,label,defaultVal)=>`<div class="perm-item"><span>${label}</span><label class="toggle"><input type="checkbox" id="perm-${key}" ${(key in perms?perms[key]:defaultVal)?'checked':''}><span class="toggle-slider"></span></label></div>`;
   document.getElementById('perm-grid').innerHTML=
-    `<div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">Berechtigungen</div>`+
+    `<div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">${t('perm_section')}</div>`+
     Object.entries(permNames).map(([k,l])=>mkItem(k,l,false)).join('')+
-    `<div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:8px">Sichtbare Tabs</div>`+
+    `<div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:8px">${t('perm_tabs_section')}</div>`+
     Object.entries(tabNames).map(([k,l])=>mkItem(k,l,true)).join('');
 }
 
@@ -2853,7 +2963,7 @@ function getPermFromGrid(){
 async function rolleSpeichern(){
   const id=parseInt(document.getElementById('rm-id').value)||0;
   const name=document.getElementById('rm-name').value.trim();
-  if(!name){alert('Rollenname eingeben.');return;}
+  if(!name){alert(t('msg_rollen_pflicht'));return;}
   const perms=getPermFromGrid();
   const data={name,farbe:document.getElementById('rm-farbe').value,berechtigungen:perms};
   let result;
@@ -3169,13 +3279,13 @@ function renderVertraegeListe(){
     if(!a.vertragsende)return 1;if(!b.vertragsende)return -1;
     return new Date(a.vertragsende)-new Date(b.vertragsende);
   });
-  if(!list.length){el.innerHTML='<div class="empty">Keine Verträge gefunden</div>';return;}
+  if(!list.length){el.innerHTML='<div class="empty">'+t('empty_vertraege')+'</div>';return;}
   el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr>'+
-    '<th style="text-align:left;font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Firma</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Vertrag-Nr.</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Beginn</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Ende</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">Status</th>'+
+    '<th style="text-align:left;font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_firma_header')+'</th>'+
+    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_vertrag_nr')+'</th>'+
+    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_beginn')+'</th>'+
+    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_ende')+'</th>'+
+    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_status')+'</th>'+
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">DT</th>'+
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)"></th>'+
     '</tr></thead><tbody>'+
@@ -3315,22 +3425,22 @@ function renderDashboard(){
   const aktiveVertraege=kunden.filter(k=>k.vertragsstatus==='aktiv'&&k.vertragsnr);
   document.getElementById('db-vertraege-aktiv-count').textContent=aktiveVertraege.length;
   const avEl=document.getElementById('db-vertraege-aktiv-liste');
-  if(!aktiveVertraege.length){avEl.innerHTML='<div class="empty">Keine aktiven Verträge</div>';}
-  else{avEl.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Firma</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Vertragsnr.</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Beginn</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Ende</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">DT</th></tr></thead><tbody>'+aktiveVertraege.map(k=>{const dts=datentraeger.filter(d=>d.kunden_id===k.id&&d.status==='eingelagert');return`<tr><td style="padding:5px 6px;font-weight:600">${k.firma}</td><td style="padding:5px 6px;font-family:monospace;font-size:11px">${k.vertragsnr||'-'}</td><td style="padding:5px 6px">${fmtDate2(k.vertragsbeginn)||'-'}</td><td style="padding:5px 6px">${fmtDate2(k.vertragsende)||'unbefristet'}</td><td style="padding:5px 6px;text-align:center"><span class="badge bg">${dts.length}</span></td></tr>`;}).join('')+'</tbody></table>';}
+  if(!aktiveVertraege.length){avEl.innerHTML='<div class="empty">'+t('empty_db_vertraege')+'</div>';}
+  else{avEl.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_vertragsnr')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_beginn')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_ende')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">DT</th></tr></thead><tbody>'+aktiveVertraege.map(k=>{const dts=datentraeger.filter(d=>d.kunden_id===k.id&&d.status==='eingelagert');return`<tr><td style="padding:5px 6px;font-weight:600">${k.firma}</td><td style="padding:5px 6px;font-family:monospace;font-size:11px">${k.vertragsnr||'-'}</td><td style="padding:5px 6px">${fmtDate2(k.vertragsbeginn)||'-'}</td><td style="padding:5px 6px">${fmtDate2(k.vertragsende)||t('lbl_unbefristet')}</td><td style="padding:5px 6px;text-align:center"><span class="badge bg">${dts.length}</span></td></tr>`;}).join('')+'</tbody></table>';}
   // Verträge die bald ablaufen
   const heute=new Date();const d60=new Date(heute);d60.setDate(d60.getDate()+60);
   const ablaufend=kunden.filter(k=>{if(!k.vertragsende)return false;const e=new Date(k.vertragsende);return e>=heute&&e<=d60;}).sort((a,b)=>new Date(a.vertragsende)-new Date(b.vertragsende));
   document.getElementById('db-ablauf-count').textContent=ablaufend.length;
   const smap={aktiv:'bg',gekuendigt:'br',abgelaufen:'ba',pausiert:'ba'};
   const ablEl=document.getElementById('db-ablauf-liste');
-  if(!ablaufend.length){ablEl.innerHTML='<div class="empty">Keine Verträge laufen in den nächsten 60 Tagen ab</div>';}
-  else{ablEl.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Firma</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Ende</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Status</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Tage</th></tr></thead><tbody>'+ablaufend.map(k=>{const tage=Math.ceil((new Date(k.vertragsende)-heute)/(86400000));return`<tr><td style="padding:5px 6px;font-weight:600">${k.firma}</td><td style="padding:5px 6px;text-align:center">${fmtDate2(k.vertragsende)}</td><td style="padding:5px 6px;text-align:center"><span class="badge ${smap[k.vertragsstatus]||'ba'}">${k.vertragsstatus||'-'}</span></td><td style="padding:5px 6px;text-align:center"><span class="badge ${tage<=14?'br':'ba'}">${tage}d</span></td></tr>`;}).join('')+'</tbody></table>';}
+  if(!ablaufend.length){ablEl.innerHTML='<div class="empty">'+t('empty_db_ablauf')+'</div>';}
+  else{ablEl.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_ende')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_status')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_tage')+'</th></tr></thead><tbody>'+ablaufend.map(k=>{const tage=Math.ceil((new Date(k.vertragsende)-heute)/(86400000));return`<tr><td style="padding:5px 6px;font-weight:600">${k.firma}</td><td style="padding:5px 6px;text-align:center">${fmtDate2(k.vertragsende)}</td><td style="padding:5px 6px;text-align:center"><span class="badge ${smap[k.vertragsstatus]||'ba'}">${k.vertragsstatus||'-'}</span></td><td style="padding:5px 6px;text-align:center"><span class="badge ${tage<=14?'br':'ba'}">${tage}d</span></td></tr>`;}).join('')+'</tbody></table>';}
   // Umsatz pro Kunde
   const umsatzMap={};eingelagert.forEach(d=>{if(!umsatzMap[d.kunden_id])umsatzMap[d.kunden_id]={id:d.kunden_id,netto:0,anz:0};umsatzMap[d.kunden_id].netto+=d.preis_jahr*(1-d.rabatt/100);umsatzMap[d.kunden_id].anz++;});
   const sorted=Object.values(umsatzMap).sort((a,b)=>b.netto-a.netto).slice(0,8);
   const maxVal=sorted[0]?.netto||1;
   const uEl=document.getElementById('db-umsatz-liste');
-  if(!sorted.length){uEl.innerHTML='<div class="empty">Keine eingelagerten Datenträger</div>';}
+  if(!sorted.length){uEl.innerHTML='<div class="empty">'+t('empty_db_dt')+'</div>';}
   else{uEl.innerHTML=sorted.map(u=>{const k=kunden.find(x=>x.id===u.id);const pct=Math.round(u.netto/maxVal*100);return`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:600">${k?.firma||'?'}</span><span style="color:var(--mut)">${eur(u.netto)}/J <span style="font-size:10px">(${u.anz} DT)</span></span></div><div style="height:6px;background:var(--surf2);border-radius:3px"><div style="height:6px;background:var(--i-txt);border-radius:3px;width:${pct}%"></div></div>`;}).join('');}
   // Typen
   const typen={};eingelagert.forEach(d=>{const t=d.bezeichnung.split(' ')[0]||'Sonstige';typen[t]=(typen[t]||0)+1;});
@@ -3340,9 +3450,9 @@ function renderDashboard(){
     list=list||[];
     document.getElementById('db-wartung-count').textContent=list.length;
     const el=document.getElementById('db-wartung-liste');
-    if(!list.length){el.innerHTML='<div class="empty">Keine anstehenden Wartungstermine (60 Tage)</div>';return;}
-    el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Tresor</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Standort</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Datum</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Status</th></tr></thead><tbody>'+
-      list.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');const cls=t.ueberfaellig?'br':(t.tage_bis_wartung<=14?'br':'ba');const lbl=t.ueberfaellig?`überfällig (${Math.abs(t.tage_bis_wartung)}d)`:`in ${t.tage_bis_wartung}d`;return`<tr><td style="padding:5px 6px;font-weight:600">${t.bezeichnung}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${loc||'-'}</td><td style="padding:5px 6px">${fmtDate2(t.naechster_wartungstermin)}</td><td style="padding:5px 6px"><span class="badge ${cls}">${lbl}</span></td></tr>`;}).join('')+'</tbody></table>';
+    if(!list.length){el.innerHTML='<div class="empty">'+t('empty_db_wartung')+'</div>';return;}
+    el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_bezeichnung')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_standort')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_datum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_status')+'</th></tr></thead><tbody>'+
+      list.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');const cls=t.ueberfaellig?'br':(t.tage_bis_wartung<=14?'br':'ba');const lbl=t.ueberfaellig?`${ta('überfällig','overdue')} (${Math.abs(t.tage_bis_wartung)}d)`:ta('in ','in ')+`${t.tage_bis_wartung}d`;return`<tr><td style="padding:5px 6px;font-weight:600">${t.bezeichnung}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${loc||'-'}</td><td style="padding:5px 6px">${fmtDate2(t.naechster_wartungstermin)}</td><td style="padding:5px 6px"><span class="badge ${cls}">${lbl}</span></td></tr>`;}).join('')+'</tbody></table>';
   });
 }
 
@@ -3360,8 +3470,8 @@ function renderTresore(){
   const q=(document.getElementById('tr-search')?.value||'').toLowerCase();
   const list=q?tresore.filter(t=>(t.bezeichnung||'').toLowerCase().includes(q)||(t.stadt||'').toLowerCase().includes(q)):tresore;
   const el=document.getElementById('tr-liste');
-  if(!list.length){el.innerHTML='<div class="empty">Keine Tresore angelegt</div>';return;}
-  el.innerHTML='<table><thead><tr><th>Bezeichnung</th><th>Standort</th><th>DT</th><th>Nächste Wartung</th><th></th></tr></thead><tbody>'+
+  if(!list.length){el.innerHTML='<div class="empty">'+t('empty_tresore')+'</div>';return;}
+  el.innerHTML='<table><thead><tr><th>'+t('col_bezeichnung')+'</th><th>'+t('col_standort')+'</th><th>DT</th><th>'+t('col_naechste_wartung')+'</th><th></th></tr></thead><tbody>'+
     list.map(t=>{
       const loc=[t.land!='Deutschland'?t.land:'',t.stadt,t.gebaeude,t.etage?t.etage+'.':'' ,t.raum].filter(Boolean).join(', ');
       const warnCls=t.naechster_wartungstermin&&new Date(t.naechster_wartungstermin)<=new Date(Date.now()+60*86400000)?'br':'bg';
@@ -3412,8 +3522,8 @@ function tresorBearbeiten(id){
   document.getElementById('tr-etage').value=t.etage||'';
   document.getElementById('tr-raum').value=t.raum||'';
   document.getElementById('tr-notizen').value=t.notizen||'';
-  document.getElementById('tr-wv-prev').textContent=t.hat_wartungsvertrag?'📎 Wartungsvertrag vorhanden':'PDF / Scan hochladen';
-  document.getElementById('tr-form-title').textContent='Tresor bearbeiten';
+  document.getElementById('tr-wv-prev').textContent=t.hat_wartungsvertrag?t('txt_wv_vorhanden'):t('txt_wv_hochladen');
+  document.getElementById('tr-form-title').textContent=t('txt_tresor_bearb');
   document.getElementById('tr-ebanner').style.display='flex';
   _tresorWVData=null;
   window.scrollTo(0,0);
@@ -3421,7 +3531,7 @@ function tresorBearbeiten(id){
 
 async function tresorSpeichern(){
   const bez=document.getElementById('tr-bezeichnung').value.trim();
-  if(!bez){alert('Bezeichnung ist erforderlich.');return;}
+  if(!bez){alert(t('msg_tresor_pflicht'));return;}
   const id=document.getElementById('tr-id').value;
   const body={
     bezeichnung:bez,
@@ -3444,7 +3554,7 @@ async function tresorSpeichern(){
   const url=id?`/api/tresore/${id}`:'/api/tresore';
   const method=id?'PUT':'POST';
   const res=await apiJ(url,{method,headers:{'Content-Type':'application/json','X-Token':TOKEN},body:JSON.stringify(body)});
-  if(res?.error){alert('Fehler: '+res.error);return;}
+  if(res?.error){alert(ta('Fehler: ','Error: ')+res.error);return;}
   tresore=await apiJ('/api/tresore')||[];
   renderTresore();
   renderSelects();
@@ -3453,7 +3563,7 @@ async function tresorSpeichern(){
 
 async function tresorLoeschen(id){
   const t=tresore.find(x=>x.id===id);
-  if(!confirm(`Tresor "${t?.bezeichnung}" wirklich löschen? Alle zugeordneten Datenträger werden entsperrt.`))return;
+  if(!confirm(ta(`Tresor "${t?.bezeichnung}" wirklich löschen? Alle zugeordneten Datenträger werden entsperrt.`,`Really delete safe "${t?.bezeichnung}"? All assigned media will be unlinked.`)))return;
   await apiJ(`/api/tresore/${id}`,{method:'DELETE',headers:{'X-Token':TOKEN}});
   tresore=await apiJ('/api/tresore')||[];
   datentraeger=await apiJ('/api/datentraeger')||[];
@@ -3463,10 +3573,10 @@ async function tresorLoeschen(id){
 }
 
 function showTab(t,e){
-  if(t==='templates'&&!can('editTemplate')){alert('Keine Berechtigung.');return;}
-  if(t==='admin'&&!can('manageUsers')){alert('Keine Berechtigung.');return;}
+  if(t==='templates'&&!can('editTemplate')){alert(t('msg_no_perm'));return;}
+  if(t==='admin'&&!can('manageUsers')){alert(t('msg_no_perm'));return;}
   const tabKeyMap={kunden:'tab_kunden',vertraege:'tab_vertraege',datentraeger:'tab_datentraeger',uebergabe:'tab_uebergabe',rechnung:'tab_rechnung',historie:'tab_historie',tresore:'tab_tresore'};
-  if(tabKeyMap[t]&&!can(tabKeyMap[t])){alert('Keine Berechtigung für diesen Bereich.');return;}
+  if(tabKeyMap[t]&&!can(tabKeyMap[t])){alert(t('msg_no_perm_area'));return;}
   document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   const tabEl=document.querySelector(`.tab[data-tab="${t}"]`);if(tabEl)tabEl.classList.add('active');
@@ -3484,8 +3594,8 @@ function showTab(t,e){
 
 function gotoStep(n){document.querySelectorAll('#page-uebergabe .step-panel').forEach(el=>el.classList.remove('active'));document.querySelectorAll('#page-uebergabe .step').forEach(el=>el.classList.remove('active'));document.getElementById('step-'+n).classList.add('active');document.getElementById('step-tab-'+n).classList.add('active');if(n===2){renderPendingList();updateS2Info();}}
 function dtGotoStep(n){[1,2].forEach(i=>{const p=document.getElementById('dt-step-'+i);const t=document.getElementById('dt-step-tab-'+i);if(p)p.classList.toggle('active',i===n);if(t)t.classList.toggle('active',i===n);});if(n===2)dtUpdateZusammenfassung();}
-function dtUpdateZusammenfassung(){const kid=parseInt(document.getElementById('dt-kunden_id').value);const k=kunden.find(x=>x.id===kid);const bez=document.getElementById('dt-bezeichnung').value.trim();const serial=document.getElementById('dt-serial').value.trim();const preis=parseFloat(document.getElementById('dt-preis').value)||0;const einheit=document.getElementById('dt-einheit').value;const rabatt=parseFloat(document.getElementById('dt-rabatt').value)||0;const dat=fmtDate(document.getElementById('dt-datum').value);const el=document.getElementById('dt-zusammenfassung');if(!el)return;el.innerHTML=`<div style="display:flex;gap:8px"><div class="dlbl">Firma</div><div>${k?k.firma+' ('+k.nr+')':'-'}</div></div><div style="display:flex;gap:8px"><div class="dlbl">Bezeichnung</div><div>${bez||'-'}</div></div><div style="display:flex;gap:8px"><div class="dlbl">Seriennummer</div><div style="font-family:monospace">${serial||'-'}</div></div><div style="display:flex;gap:8px"><div class="dlbl">Preis</div><div>${eur(preis)}/${einheit==='monat'?'Monat':'Jahr'}${rabatt>0?' (Rabatt '+rabatt+'%)':''}</div></div><div style="display:flex;gap:8px"><div class="dlbl">Datum</div><div>${dat||'-'}</div></div>`;}
-function dtWeiterZuSchritt2(){const kid=parseInt(document.getElementById('dt-kunden_id').value);if(!kid){alert('Bitte Firma wählen.');return;}const bez=document.getElementById('dt-bezeichnung').value.trim();if(!bez){alert('Bitte Bezeichnung eingeben.');return;}const serial=document.getElementById('dt-serial').value.trim();if(!serial){alert('Bitte Seriennummer eingeben.');return;}if(!document.getElementById('dt-datum').value){alert('Bitte Einlagerungsdatum eingeben.');return;}dtGotoStep(2);}
+function dtUpdateZusammenfassung(){const kid=parseInt(document.getElementById('dt-kunden_id').value);const k=kunden.find(x=>x.id===kid);const bez=document.getElementById('dt-bezeichnung').value.trim();const serial=document.getElementById('dt-serial').value.trim();const preis=parseFloat(document.getElementById('dt-preis').value)||0;const einheit=document.getElementById('dt-einheit').value;const rabatt=parseFloat(document.getElementById('dt-rabatt').value)||0;const dat=fmtDate(document.getElementById('dt-datum').value);const el=document.getElementById('dt-zusammenfassung');if(!el)return;el.innerHTML=`<div style="display:flex;gap:8px"><div class="dlbl">${t('lbl_k_firma')}</div><div>${k?k.firma+' ('+k.nr+')':'-'}</div></div><div style="display:flex;gap:8px"><div class="dlbl">${t('lbl_bezeichnung')}</div><div>${bez||'-'}</div></div><div style="display:flex;gap:8px"><div class="dlbl">${t('lbl_seriennr')}</div><div style="font-family:monospace">${serial||'-'}</div></div><div style="display:flex;gap:8px"><div class="dlbl">${t('lbl_preis')}</div><div>${eur(preis)}/${einheit==='monat'?t('lbl_monat'):t('lbl_jahr')}${rabatt>0?' ('+t('lbl_rabatt_suffix')+' '+rabatt+'%)':''}</div></div><div style="display:flex;gap:8px"><div class="dlbl">${t('col_datum')}</div><div>${dat||'-'}</div></div>`;}
+function dtWeiterZuSchritt2(){const kid=parseInt(document.getElementById('dt-kunden_id').value);if(!kid){alert(t('msg_dt_firma'));return;}const bez=document.getElementById('dt-bezeichnung').value.trim();if(!bez){alert(t('msg_dt_bez'));return;}const serial=document.getElementById('dt-serial').value.trim();if(!serial){alert(t('msg_dt_serial'));return;}if(!document.getElementById('dt-datum').value){alert(t('msg_dt_datum'));return;}dtGotoStep(2);}
 
 
 
@@ -4046,95 +4156,95 @@ function renderHilfe_noop(){}
 function renderHilfeSync(){
   const faqs=[
     {
-      kat:'🚀 Einstieg',
+      kat:t('hilfe_cat_start'),
       items:[
-        {f:'Was ist die Datenträger-Verwaltung?',
-         a:'Die DT-Verwaltung ist eine webbasierte Anwendung zur Verwaltung von eingelagerten Datenträgern (Festplatten, USB-Sticks, Tapes usw.). Sie können Kunden anlegen, Datenträger einlagern, Übergabeprotokolle erstellen, Rechnungen generieren und Verträge verwalten.'},
-        {f:'Wie melde ich mich an?',
-         a:'Öffnen Sie die Anwendung im Browser. Geben Sie Ihren Benutzernamen und Ihr Passwort ein und klicken Sie auf „Anmelden". Bei der ersten Nutzung erhalten Sie die Zugangsdaten vom Administrator. Ihr Passwort können Sie nach dem Login unter „Admin → Eigenes Passwort ändern" jederzeit ändern.'},
-        {f:'Welche Browser werden unterstützt?',
-         a:'Die Anwendung läuft in allen modernen Browsern: Chrome, Firefox, Edge und Safari (jeweils aktuelle Version). Internet Explorer wird nicht unterstützt.'},
+        {f:_lang==='en'?'What is DT-Verwaltung?':'Was ist die Datenträger-Verwaltung?',
+         a:_lang==='en'?'DT-Verwaltung is a web-based application for managing stored media (hard drives, USB drives, tapes, etc.). You can create customers, register media, generate handover protocols, create invoices, and manage contracts.':'Die DT-Verwaltung ist eine webbasierte Anwendung zur Verwaltung von eingelagerten Datenträgern (Festplatten, USB-Sticks, Tapes usw.). Sie können Kunden anlegen, Datenträger einlagern, Übergabeprotokolle erstellen, Rechnungen generieren und Verträge verwalten.'},
+        {f:_lang==='en'?'How do I log in?':'Wie melde ich mich an?',
+         a:_lang==='en'?'Open the application in your browser. Enter your username and password and click "Log In". On first use, you will receive your credentials from the administrator. You can change your password after login under "Admin → Change My Password".':'Öffnen Sie die Anwendung im Browser. Geben Sie Ihren Benutzernamen und Ihr Passwort ein und klicken Sie auf „Anmelden". Bei der ersten Nutzung erhalten Sie die Zugangsdaten vom Administrator. Ihr Passwort können Sie nach dem Login unter „Admin → Eigenes Passwort ändern" jederzeit ändern.'},
+        {f:_lang==='en'?'Which browsers are supported?':'Welche Browser werden unterstützt?',
+         a:_lang==='en'?'The application runs in all modern browsers: Chrome, Firefox, Edge, and Safari (latest version each). Internet Explorer is not supported.':'Die Anwendung läuft in allen modernen Browsern: Chrome, Firefox, Edge und Safari (jeweils aktuelle Version). Internet Explorer wird nicht unterstützt.'},
       ]
     },
     {
-      kat:'👥 Kunden',
+      kat:t('hilfe_cat_kunden'),
       items:[
-        {f:'Wie lege ich einen neuen Kunden an?',
-         a:'Wechseln Sie zum Tab „Kunden" und klicken Sie auf „+ Neuer Kunde". Füllen Sie mindestens Firmennamen, Kundennummer und Kontaktdaten aus. Optional können Sie einen Vertrag und Mengenrabatt-Stufen hinterlegen. Speichern Sie mit „Kunde speichern".'},
-        {f:'Was sind Mengenrabatt-Stufen?',
-         a:'Jedem Kunden können bis zu 5 Rabattstufen zugewiesen werden (z.B. ab 10 DT → 5%, ab 20 DT → 10%). Die Stufe wird automatisch beim Erstellen einer Rechnung anhand der Anzahl der Positionen berechnet und als separate Rabattzeile ausgewiesen.'},
-        {f:'Kann ich Kundendaten nachträglich ändern?',
-         a:'Ja – klicken Sie in der Kundenliste auf den Kunden oder auf das Stift-Symbol. Alle Felder können bearbeitet werden. Änderungen wirken sich nicht rückwirkend auf bereits erstellte Rechnungen aus.'},
+        {f:_lang==='en'?'How do I create a new customer?':'Wie lege ich einen neuen Kunden an?',
+         a:_lang==='en'?'Go to the "Customers" tab and click "+ New Customer". Fill in at least the company name, customer number, and contact details. Optionally you can add a contract and volume discount tiers. Save with "Add Customer".':'Wechseln Sie zum Tab „Kunden" und klicken Sie auf „+ Neuer Kunde". Füllen Sie mindestens Firmennamen, Kundennummer und Kontaktdaten aus. Optional können Sie einen Vertrag und Mengenrabatt-Stufen hinterlegen. Speichern Sie mit „Kunde speichern".'},
+        {f:_lang==='en'?'What are volume discount tiers?':'Was sind Mengenrabatt-Stufen?',
+         a:_lang==='en'?'Each customer can have up to 5 discount tiers (e.g. from 10 items → 5%, from 20 items → 10%). The tier is calculated automatically when creating an invoice based on the number of line items and shown as a separate discount line.':'Jedem Kunden können bis zu 5 Rabattstufen zugewiesen werden (z.B. ab 10 DT → 5%, ab 20 DT → 10%). Die Stufe wird automatisch beim Erstellen einer Rechnung anhand der Anzahl der Positionen berechnet und als separate Rabattzeile ausgewiesen.'},
+        {f:_lang==='en'?'Can I edit customer data later?':'Kann ich Kundendaten nachträglich ändern?',
+         a:_lang==='en'?'Yes – click the customer in the list or on the pencil icon. All fields can be edited. Changes do not affect already-created invoices retroactively.':'Ja – klicken Sie in der Kundenliste auf den Kunden oder auf das Stift-Symbol. Alle Felder können bearbeitet werden. Änderungen wirken sich nicht rückwirkend auf bereits erstellte Rechnungen aus.'},
       ]
     },
     {
-      kat:'💾 Datenträger',
+      kat:t('hilfe_cat_dt'),
       items:[
-        {f:'Wie lagere ich einen Datenträger ein?',
-         a:'Wechseln Sie zum Tab „Datenträger" und klicken Sie auf „+ Neuer Datenträger". Wählen Sie im Schritt 1 den Kunden, geben Sie Bezeichnung, Seriennummer, Preis und Einlagerungsdatum ein. Überprüfen Sie die Zusammenfassung in Schritt 2 und bestätigen Sie die Einlagerung.'},
-        {f:'Was bedeutet „Ausgelagert"?',
-         a:'Ein Datenträger kann über die Übergabe-Funktion an den Kunden zurückgegeben werden. Dabei wird ein Übergabeprotokoll erstellt. Ausgelagerte Datenträger erscheinen im DT-Archiv und nicht mehr auf Rechnungen.'},
-        {f:'Kann ich Preise pro Datenträger individuell festlegen?',
-         a:'Ja. Beim Einlagern eines Datenträgers können Sie einen eigenen Preis und Rabatt (in %) sowie die Abrechnungseinheit (monatlich oder jährlich) festlegen. Diese Angaben werden direkt auf der Rechnung ausgewiesen.'},
+        {f:_lang==='en'?'How do I register a media item?':'Wie lagere ich einen Datenträger ein?',
+         a:_lang==='en'?'Go to the "Media" tab and click "+ New Media". In Step 1 select the customer, enter description, serial number, price, and storage date. Review the summary in Step 2 and confirm the registration.':'Wechseln Sie zum Tab „Datenträger" und klicken Sie auf „+ Neuer Datenträger". Wählen Sie im Schritt 1 den Kunden, geben Sie Bezeichnung, Seriennummer, Preis und Einlagerungsdatum ein. Überprüfen Sie die Zusammenfassung in Schritt 2 und bestätigen Sie die Einlagerung.'},
+        {f:_lang==='en'?'What does "Handed Over" mean?':'Was bedeutet „Ausgelagert"?',
+         a:_lang==='en'?'A media item can be returned to the customer via the Handover function. A handover protocol is created. Handed-over media appear in the Media Archive and no longer appear on invoices.':'Ein Datenträger kann über die Übergabe-Funktion an den Kunden zurückgegeben werden. Dabei wird ein Übergabeprotokoll erstellt. Ausgelagerte Datenträger erscheinen im DT-Archiv und nicht mehr auf Rechnungen.'},
+        {f:_lang==='en'?'Can I set individual prices per media item?':'Kann ich Preise pro Datenträger individuell festlegen?',
+         a:_lang==='en'?'Yes. When registering a media item you can set a custom price, discount (in %), and billing unit (monthly or annually). These values are shown directly on the invoice.':'Ja. Beim Einlagern eines Datenträgers können Sie einen eigenen Preis und Rabatt (in %) sowie die Abrechnungseinheit (monatlich oder jährlich) festlegen. Diese Angaben werden direkt auf der Rechnung ausgewiesen.'},
       ]
     },
     {
-      kat:'📋 Übergabe & Protokoll',
+      kat:t('hilfe_cat_ue'),
       items:[
-        {f:'Wie erstelle ich ein Übergabeprotokoll?',
-         a:'Wechseln Sie zum Tab „Übergabe". Wählen Sie in Schritt 1 den Kunden und die Datenträger aus, die zurückgegeben werden sollen. In Schritt 2 sehen Sie alle ausstehenden Übergaben. Mit „Protokoll drucken" erzeugen Sie ein druckfertiges PDF mit Ihrer Unternehmens-Briefvorlage.'},
-        {f:'Kann ich das Übergabeprotokoll anpassen?',
-         a:'Ja. Unter dem Tab „Templates → Übergabe" können Sie den Briefkopf, Fußzeile, Einleitungstext und Schlusstext individuell gestalten. Alle Änderungen werden sofort in der Vorschau angezeigt.'},
+        {f:_lang==='en'?'How do I create a handover protocol?':'Wie erstelle ich ein Übergabeprotokoll?',
+         a:_lang==='en'?'Go to the "Handover" tab. In Step 1, select the customer and the media to be returned. In Step 2 you see all pending handovers. Click "Print Protocol" to generate a print-ready PDF using your company letterhead template.':'Wechseln Sie zum Tab „Übergabe". Wählen Sie in Schritt 1 den Kunden und die Datenträger aus, die zurückgegeben werden sollen. In Schritt 2 sehen Sie alle ausstehenden Übergaben. Mit „Protokoll drucken" erzeugen Sie ein druckfertiges PDF mit Ihrer Unternehmens-Briefvorlage.'},
+        {f:_lang==='en'?'Can I customise the handover protocol?':'Kann ich das Übergabeprotokoll anpassen?',
+         a:_lang==='en'?'Yes. Under "Templates → Handover" you can customise the letterhead, footer, introduction text, and closing text individually. All changes are reflected immediately in the preview.':'Ja. Unter dem Tab „Templates → Übergabe" können Sie den Briefkopf, Fußzeile, Einleitungstext und Schlusstext individuell gestalten. Alle Änderungen werden sofort in der Vorschau angezeigt.'},
       ]
     },
     {
-      kat:'🧾 Rechnungen',
+      kat:t('hilfe_cat_re'),
       items:[
-        {f:'Wie erstelle ich eine Rechnung?',
-         a:'Wechseln Sie zum Tab „Rechnung". Wählen Sie den Kunden aus – die eingelagerten Datenträger werden automatisch als Positionen geladen. Geben Sie Abrechnungszeitraum, Rechnungsnummer und optional einen allgemeinen Rabatt ein. Klicken Sie auf „Vorschau" und dann auf „Drucken / Speichern".'},
-        {f:'Was ist der allgemeine Rabatt?',
-         a:'Der allgemeine Rabatt (in %) wird nach dem Mengenrabatt auf den verbleibenden Nettobetrag angewendet. Er erscheint als separate Zeile in der Summentabelle der Rechnung und kann pro Rechnung individuell vergeben werden.'},
-        {f:'Wo finde ich frühere Rechnungen?',
-         a:'Alle erzeugten Rechnungen werden unter dem Tab „Rechnungen" (Rechnungshistorie) gespeichert. Dort können Sie jede Rechnung erneut öffnen und drucken. Die Historie wird lokal in Ihrem Browser gespeichert.'},
-        {f:'Wie funktioniert die automatische Rechnungsnummer?',
-         a:'Die Rechnungsnummer wird automatisch hochgezählt (Format: RE-JJJJ-NNNN). Sie können die Nummer bei Bedarf manuell überschreiben. Der aktuelle Zählerstand wird im Browser gespeichert.'},
-        {f:'Wann verschicke ich eine Mahnung?',
-         a:'In der Rechnungshistorie gibt es je Rechnung einen Button „Mahnung". Dieser erzeugt ein separates Mahnungsschreiben mit dem offenen Betrag und einem konfigurierbaren Mahntext aus dem Template-Bereich.'},
+        {f:_lang==='en'?'How do I create an invoice?':'Wie erstelle ich eine Rechnung?',
+         a:_lang==='en'?'Go to the "Invoices" tab. Select the customer – stored media are loaded automatically as line items. Enter the billing period, invoice number, and optionally a general discount. Click "Preview" and then "Print / Save".':'Wechseln Sie zum Tab „Rechnung". Wählen Sie den Kunden aus – die eingelagerten Datenträger werden automatisch als Positionen geladen. Geben Sie Abrechnungszeitraum, Rechnungsnummer und optional einen allgemeinen Rabatt ein. Klicken Sie auf „Vorschau" und dann auf „Drucken / Speichern".'},
+        {f:_lang==='en'?'What is the general discount?':'Was ist der allgemeine Rabatt?',
+         a:_lang==='en'?'The general discount (in %) is applied after the volume discount to the remaining net amount. It appears as a separate line in the invoice totals table and can be set individually per invoice.':'Der allgemeine Rabatt (in %) wird nach dem Mengenrabatt auf den verbleibenden Nettobetrag angewendet. Er erscheint als separate Zeile in der Summentabelle der Rechnung und kann pro Rechnung individuell vergeben werden.'},
+        {f:_lang==='en'?'Where do I find previous invoices?':'Wo finde ich frühere Rechnungen?',
+         a:_lang==='en'?'All generated invoices are stored under the "Invoices" tab (Invoice History). You can reopen and print any invoice there. The history is stored locally in your browser.':'Alle erzeugten Rechnungen werden unter dem Tab „Rechnungen" (Rechnungshistorie) gespeichert. Dort können Sie jede Rechnung erneut öffnen und drucken. Die Historie wird lokal in Ihrem Browser gespeichert.'},
+        {f:_lang==='en'?'How does the automatic invoice number work?':'Wie funktioniert die automatische Rechnungsnummer?',
+         a:_lang==='en'?'The invoice number is incremented automatically (format: RE-YYYY-NNNN). You can override it manually if needed. The current counter is stored in your browser.':'Die Rechnungsnummer wird automatisch hochgezählt (Format: RE-JJJJ-NNNN). Sie können die Nummer bei Bedarf manuell überschreiben. Der aktuelle Zählerstand wird im Browser gespeichert.'},
+        {f:_lang==='en'?'When do I send a reminder?':'Wann verschicke ich eine Mahnung?',
+         a:_lang==='en'?'In the invoice history there is a "Reminder" button for each invoice. This generates a separate reminder letter with the outstanding amount and a configurable reminder text from the Templates area.':'In der Rechnungshistorie gibt es je Rechnung einen Button „Mahnung". Dieser erzeugt ein separates Mahnungsschreiben mit dem offenen Betrag und einem konfigurierbaren Mahntext aus dem Template-Bereich.'},
       ]
     },
     {
-      kat:'📄 Verträge',
+      kat:t('hilfe_cat_vt'),
       items:[
-        {f:'Wie hinterlege ich einen Vertrag für einen Kunden?',
-         a:'Im Kunden-Formular können Sie Vertragsnummer, Vertragsstatus (aktiv/inaktiv/gekündigt), Beginn und Ende des Vertrags erfassen. Verträge mit Status „aktiv" werden auf dem Dashboard als Kennzahl ausgewiesen.'},
-        {f:'Wie drucke ich einen Vertrag aus?',
-         a:'Im Tab „Verträge" wählen Sie den gewünschten Kunden-Vertrag und klicken auf „Vertrag drucken". Der Vertrag wird mit der konfigurierten Vertragsvorlage aus dem Template-Bereich generiert.'},
-        {f:'Werde ich an ablaufende Verträge erinnert?',
-         a:'Ja – die Anwendung zeigt beim Start automatisch eine Warnung an, wenn Verträge in den nächsten 30 Tagen ablaufen. Diese Warnung erscheint als gelbes Banner im Dashboard-Bereich.'},
+        {f:_lang==='en'?'How do I record a contract for a customer?':'Wie hinterlege ich einen Vertrag für einen Kunden?',
+         a:_lang==='en'?'In the customer form you can enter the contract number, contract status (active/inactive/terminated), and contract start and end dates. Contracts with status "active" are shown as a KPI on the dashboard.':'Im Kunden-Formular können Sie Vertragsnummer, Vertragsstatus (aktiv/inaktiv/gekündigt), Beginn und Ende des Vertrags erfassen. Verträge mit Status „aktiv" werden auf dem Dashboard als Kennzahl ausgewiesen.'},
+        {f:_lang==='en'?'How do I print a contract?':'Wie drucke ich einen Vertrag aus?',
+         a:_lang==='en'?'In the "Contracts" tab select the desired customer contract and click "Print Contract". The contract is generated using the configured contract template from the Templates area.':'Im Tab „Verträge" wählen Sie den gewünschten Kunden-Vertrag und klicken auf „Vertrag drucken". Der Vertrag wird mit der konfigurierten Vertragsvorlage aus dem Template-Bereich generiert.'},
+        {f:_lang==='en'?'Will I be reminded of expiring contracts?':'Werde ich an ablaufende Verträge erinnert?',
+         a:_lang==='en'?'Yes – the application automatically shows a warning when contracts expire within the next 60 days. This warning is shown as a colour-coded section in the Dashboard.':'Ja – die Anwendung zeigt beim Start automatisch eine Warnung an, wenn Verträge in den nächsten 30 Tagen ablaufen. Diese Warnung erscheint als gelbes Banner im Dashboard-Bereich.'},
       ]
     },
     {
-      kat:'🎨 Templates',
+      kat:t('hilfe_cat_tpl'),
       items:[
-        {f:'Was kann ich im Template-Bereich einstellen?',
-         a:'Im Tab „Templates" können Sie vier verschiedene Briefvorlagen bearbeiten: Rechnung, Übergabeprotokoll, Eingangsprotokoll und Vertrag. Außerdem können Sie ein Logo hochladen und eine Akzentfarbe für alle Dokumente festlegen.'},
-        {f:'Wie füge ich Platzhalter in Templates ein?',
-         a:'Im Template-Editor sehen Sie oben eine Liste verfügbarer Platzhalter (z.B. {{Firma}}, {{Datum}}). Klicken Sie auf einen Platzhalter, um ihn an der aktuellen Cursorposition in das Textfeld einzufügen. Die Vorschau aktualisiert sich automatisch.'},
-        {f:'Wer darf Templates bearbeiten?',
-         a:'Nur Benutzer mit der Berechtigung „Templates bearbeiten" haben Zugriff auf den Templates-Tab. Diese Berechtigung wird vom Administrator in der Rollenverwaltung vergeben.'},
+        {f:_lang==='en'?'What can I configure in the Templates area?':'Was kann ich im Template-Bereich einstellen?',
+         a:_lang==='en'?'In the "Templates" tab you can edit four different letter templates: Invoice, Handover Protocol, Incoming Report, and Contract. You can also upload a logo and set an accent colour for all documents.':'Im Tab „Templates" können Sie vier verschiedene Briefvorlagen bearbeiten: Rechnung, Übergabeprotokoll, Eingangsprotokoll und Vertrag. Außerdem können Sie ein Logo hochladen und eine Akzentfarbe für alle Dokumente festlegen.'},
+        {f:_lang==='en'?'How do I insert placeholders into templates?':'Wie füge ich Platzhalter in Templates ein?',
+         a:_lang==='en'?'In the template editor you can see a list of available placeholders at the top (e.g. {{Company}}, {{Date}}). Click a placeholder to insert it at the current cursor position in the text field. The preview updates automatically.':'Im Template-Editor sehen Sie oben eine Liste verfügbarer Platzhalter (z.B. {{Firma}}, {{Datum}}). Klicken Sie auf einen Platzhalter, um ihn an der aktuellen Cursorposition in das Textfeld einzufügen. Die Vorschau aktualisiert sich automatisch.'},
+        {f:_lang==='en'?'Who can edit templates?':'Wer darf Templates bearbeiten?',
+         a:_lang==='en'?'Only users with the "Edit Templates" permission have access to the Templates tab. This permission is granted by the administrator in the role management.':'Nur Benutzer mit der Berechtigung „Templates bearbeiten" haben Zugriff auf den Templates-Tab. Diese Berechtigung wird vom Administrator in der Rollenverwaltung vergeben.'},
       ]
     },
     {
-      kat:'👤 Benutzer & Rollen',
+      kat:t('hilfe_cat_user'),
       items:[
-        {f:'Wie lege ich neue Benutzer an?',
-         a:'Als Administrator wechseln Sie zum Tab „Admin → Benutzerverwaltung" und klicken auf „+ Neuer Benutzer". Vergeben Sie Benutzername, Anzeigename und ein temporäres Passwort. Der Benutzer kann sein Passwort nach dem ersten Login selbst ändern.'},
-        {f:'Was sind Rollen und Berechtigungen?',
-         a:'Rollen bündeln Berechtigungen. Jeder Benutzer hat genau eine Rolle. Sie können im Rolleneditor festlegen, welche Aktionen (Lesen, Schreiben, Löschen, Template-Bearbeitung, Benutzerverwaltung) und welche Tabs (z.B. Rechnung, Archiv) für diese Rolle sichtbar und nutzbar sind.'},
-        {f:'Wie ändere ich das eigene Passwort?',
-         a:'Nach dem Login klicken Sie im Tab „Admin" auf „Eigenes Passwort ändern". Geben Sie Ihr aktuelles und zweimal Ihr neues Passwort ein. Das Passwort muss mindestens 6 Zeichen lang sein.'},
-        {f:'Was passiert, wenn ein Benutzer deaktiviert wird?',
-         a:'Deaktivierte Benutzer können sich nicht mehr anmelden. Ihre Daten bleiben erhalten. Ein Administrator kann den Benutzer jederzeit wieder aktivieren.'},
+        {f:_lang==='en'?'How do I create new users?':'Wie lege ich neue Benutzer an?',
+         a:_lang==='en'?'As an administrator, go to "Admin → User Management" and click "+ New User". Enter username, display name, and a temporary password. The user can change their password after the first login.':'Als Administrator wechseln Sie zum Tab „Admin → Benutzerverwaltung" und klicken auf „+ Neuer Benutzer". Vergeben Sie Benutzername, Anzeigename und ein temporäres Passwort. Der Benutzer kann sein Passwort nach dem ersten Login selbst ändern.'},
+        {f:_lang==='en'?'What are roles and permissions?':'Was sind Rollen und Berechtigungen?',
+         a:_lang==='en'?'Roles bundle permissions. Each user has exactly one role. In the role editor you can define which actions (Read, Write, Delete, Edit Templates, User Management) and which tabs (e.g. Invoices, Archive) are visible and usable for this role.':'Rollen bündeln Berechtigungen. Jeder Benutzer hat genau eine Rolle. Sie können im Rolleneditor festlegen, welche Aktionen (Lesen, Schreiben, Löschen, Template-Bearbeitung, Benutzerverwaltung) und welche Tabs (z.B. Rechnung, Archiv) für diese Rolle sichtbar und nutzbar sind.'},
+        {f:_lang==='en'?'How do I change my own password?':'Wie ändere ich das eigene Passwort?',
+         a:_lang==='en'?'After logging in, click "Change Password" in the top bar. Enter your current password and your new password twice. The password must be at least 4 characters long.':'Nach dem Login klicken Sie im Tab „Admin" auf „Eigenes Passwort ändern". Geben Sie Ihr aktuelles und zweimal Ihr neues Passwort ein. Das Passwort muss mindestens 6 Zeichen lang sein.'},
+        {f:_lang==='en'?'What happens when a user is deactivated?':'Was passiert, wenn ein Benutzer deaktiviert wird?',
+         a:_lang==='en'?'Deactivated users can no longer log in. Their data is retained. An administrator can reactivate the user at any time.':'Deaktivierte Benutzer können sich nicht mehr anmelden. Ihre Daten bleiben erhalten. Ein Administrator kann den Benutzer jederzeit wieder aktivieren.'},
       ]
     },
   ];

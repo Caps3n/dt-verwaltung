@@ -6,6 +6,23 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.1] – 2026-04-25
+
+### Added
+- **100 % DE/EN UI coverage** — all remaining hardcoded German strings translated:
+  - All `alert()` and `confirm()` messages in Auth, Customers, Media, Invoices, Handover, Safes, Admin, and tab navigation
+  - All `textContent` assignments (form titles, button labels, save confirmation)
+  - Table headers in Dashboard, Contracts, Safes, Users, Invoice History, and Handover Archive
+  - Select options: "Select Company", "All Companies", "No Safe", "Same Company"
+  - Permission/tab labels in role editor (`renderPermGrid`)
+  - `dtUpdateZusammenfassung` summary labels
+  - `renderArchiv` table headers and status badge
+- **`ta(de, en)` helper** — thin inline function for alert/confirm/textContent strings; automatically uses active language
+- **Full bilingual Help/FAQ** — all 8 categories and 26 Q&A pairs now have DE and EN versions; rendered dynamically on language switch
+- **Footer version string fixed** — was hardcoded `v1.3.8`; now shows `v1.4.1` with dynamic `ta()` label
+
+---
+
 ## [1.4.0] – 2026-04-25
 
 ### Added
