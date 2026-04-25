@@ -6,6 +6,15 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.0] – 2026-04-25
+
+### Added
+- **Full DE/EN UI translation** — all dynamic render functions (`renderKunden`, `renderDT`, `renderArchiv`), form labels, sub-tab labels, step wizard labels, table headers, empty states, and button captions now switch with the 🇩🇪/🇬🇧 toggle. The `TRANS` object extended from ~50 to ~180 keys.
+- **Bilingual template editor** — each of the four print templates (Übergabe, Eingang, Rechnung, Vertrag) now has a 🇩🇪/🇬🇧 toggle inside the "Texte" card. Staff can write German and English versions of introductions, body text, footers, and contract clauses independently. Print functions automatically use the language-matching template text, falling back to German if the English version is not filled in.
+- **Translated Übergabe grund options** — the reason-for-handover dropdown is populated dynamically and switches with the UI language (Rueckgabe auf Wunsch / Return on Request, Vertragsende / Contract End, etc.).
+
+---
+
 ## [1.3.9] – 2026-04-25
 
 ### Added

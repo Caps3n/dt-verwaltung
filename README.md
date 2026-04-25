@@ -1,4 +1,4 @@
-# DT-Verwaltung v1.3.9
+# DT-Verwaltung v1.4.0
 
 Web-based management solution for secure data-carrier storage and software escrow.
 Built for service providers who store, manage, and document the return of data carriers (HDDs, SSDs, tapes, USB drives, etc.) on behalf of their customers — including full support for 3-party software-escrow arrangements.

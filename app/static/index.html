@@ -340,20 +340,20 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div id="k-ebanner" class="ebanner" style="display:none">Bearbeitungsmodus<button onclick="kundeAbbrechen()" style="padding:3px 8px;font-size:11px">Abbrechen</button></div>
       <div class="stitle" id="k-form-title">Neue Firma anlegen</div>
       <input type="hidden" id="k-edit-id">
-      <div class="r2"><div><label>Firmenname *</label><input id="k-firma" placeholder="Mustermann GmbH"></div><div><label>Kundennummer *</label><input id="k-nr" placeholder="K-0042"></div></div>
-      <div class="r2"><div><label>Ansprechpartner</label><div style="display:flex;gap:6px"><select id="k-anrede" style="width:110px;flex-shrink:0"><option value="">Anrede</option><option value="Herr">Herr</option><option value="Frau">Frau</option><option value="Dr.">Dr.</option><option value="Prof.">Prof.</option><option value="Divers">Divers</option></select><input id="k-ansprechpartner" placeholder="Max Mustermann" style="flex:1"></div></div><div><label>E-Mail</label><input id="k-email"></div></div>
-      <div class="r2"><div><label>Telefon</label><input id="k-tel"></div><div><label>Mobil</label><input id="k-mobil"></div></div>
-      <label>Strasse</label><input id="k-strasse">
-      <div class="r2"><div><label>PLZ</label><input id="k-plz"></div><div><label>Ort</label><input id="k-ort"></div></div>
-      <div class="r2"><div><label>Land</label><input id="k-land" placeholder="Deutschland"></div><div><label>SAP-Nummer</label><input id="k-sap_nr" placeholder="1000123456"></div></div>
+      <div class="r2"><div><label data-i18n="lbl_firma_name">Firmenname *</label><input id="k-firma" placeholder="Mustermann GmbH"></div><div><label data-i18n="lbl_kundennr">Kundennummer *</label><input id="k-nr" placeholder="K-0042"></div></div>
+      <div class="r2"><div><label data-i18n="lbl_ansprechpartner">Ansprechpartner</label><div style="display:flex;gap:6px"><select id="k-anrede" style="width:110px;flex-shrink:0"><option value="">Anrede</option><option value="Herr">Herr</option><option value="Frau">Frau</option><option value="Dr.">Dr.</option><option value="Prof.">Prof.</option><option value="Divers">Divers</option></select><input id="k-ansprechpartner" placeholder="Max Mustermann" style="flex:1"></div></div><div><label data-i18n="lbl_email">E-Mail</label><input id="k-email"></div></div>
+      <div class="r2"><div><label data-i18n="lbl_telefon">Telefon</label><input id="k-tel"></div><div><label data-i18n="lbl_mobil">Mobil</label><input id="k-mobil"></div></div>
+      <label data-i18n="lbl_strasse">Strasse</label><input id="k-strasse">
+      <div class="r2"><div><label data-i18n="lbl_plz">PLZ</label><input id="k-plz"></div><div><label data-i18n="lbl_ort">Ort</label><input id="k-ort"></div></div>
+      <div class="r2"><div><label data-i18n="lbl_land">Land</label><input id="k-land" placeholder="Deutschland"></div><div><label data-i18n="lbl_sap_nr">SAP-Nummer</label><input id="k-sap_nr" placeholder="1000123456"></div></div>
       <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:10px">
-        <div class="stitle" style="font-size:12px;margin-bottom:8px">Vertrag</div>
-        <div class="r2"><div><label>Vertragsnummer</label><input id="k-vertragsnr" placeholder="VT-2025-001"></div><div><label>Vertragsbeginn</label><input id="k-vertragsbeginn" type="date"></div></div>
-        <div class="r2"><div><label>Vertragsende</label><input id="k-vertragsende" type="date"></div><div><label>Status</label><select id="k-vertragsstatus"><option value="aktiv">Aktiv</option><option value="gekuendigt">Gekuendigt</option><option value="abgelaufen">Abgelaufen</option><option value="pausiert">Pausiert</option></select></div></div>
-        <label>Vertragsnotiz</label><input id="k-vertragsnotiz" placeholder="z.B. jaehrliche Verlaengerung">
+        <div class="stitle" style="font-size:12px;margin-bottom:8px" data-i18n="lbl_vt_section">Vertrag</div>
+        <div class="r2"><div><label data-i18n="lbl_vertragsnr">Vertragsnummer</label><input id="k-vertragsnr" placeholder="VT-2025-001"></div><div><label data-i18n="lbl_vt_beginn">Vertragsbeginn</label><input id="k-vertragsbeginn" type="date"></div></div>
+        <div class="r2"><div><label data-i18n="lbl_vt_ende">Vertragsende</label><input id="k-vertragsende" type="date"></div><div><label data-i18n="lbl_vt_status">Status</label><select id="k-vertragsstatus"><option value="aktiv">Aktiv</option><option value="gekuendigt">Gekuendigt</option><option value="abgelaufen">Abgelaufen</option><option value="pausiert">Pausiert</option></select></div></div>
+        <label data-i18n="lbl_vt_notiz">Vertragsnotiz</label><input id="k-vertragsnotiz" placeholder="z.B. jaehrliche Verlaengerung">
       </div>
       <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:10px">
-        <div class="stitle" style="font-size:12px;margin-bottom:4px">Mengenrabatt-Stufen (bis 5)</div>
+        <div class="stitle" style="font-size:12px;margin-bottom:4px" data-i18n="lbl_mg_section">Mengenrabatt-Stufen (bis 5)</div>
         <div style="font-size:11px;color:var(--mut);margin-bottom:8px;line-height:1.5">Automatischer Rabatt auf den Nettobetrag je nach Anzahl eingelagerter Datenträger. Leere Zeilen werden ignoriert.</div>
         <table style="width:100%;border-collapse:collapse;font-size:12px">
           <thead><tr><th style="text-align:left;padding:3px 4px;border-bottom:1px solid var(--brd);color:var(--mut)">Ab (Stück)</th><th style="text-align:left;padding:3px 4px;border-bottom:1px solid var(--brd);color:var(--mut)">Rabatt (%)</th><th style="text-align:left;padding:3px 4px;border-bottom:1px solid var(--brd);color:var(--mut)">Bezeichnung</th></tr></thead>
@@ -462,32 +462,32 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- DATENTRAEGER -->
 <div id="page-datentraeger" class="page">
   <div class="sub-tabs">
-    <button class="sub-tab active" id="dt-sub-erfassen" onclick="showDTSub('erfassen')">💾 Erfassen</button>
-    <button class="sub-tab" id="dt-sub-archiv" onclick="showDTSub('archiv')">🗄️ Archiv</button>
+    <button class="sub-tab active" id="dt-sub-erfassen" onclick="showDTSub('erfassen')" data-i18n="sub_dt_erfassen">💾 Erfassen</button>
+    <button class="sub-tab" id="dt-sub-archiv" onclick="showDTSub('archiv')" data-i18n="sub_dt_archiv">🗄️ Archiv</button>
   </div>
   <div class="sub-panel active" id="dt-panel-erfassen">
   <div class="steps">
-    <div class="step active" id="dt-step-tab-1" onclick="dtGotoStep(1)"><span class="step-num">1</span>Erfassen</div>
-    <div class="step" id="dt-step-tab-2" onclick="dtGotoStep(2)"><span class="step-num">2</span>Eingangsprotokoll</div>
+    <div class="step active" id="dt-step-tab-1" onclick="dtGotoStep(1)"><span class="step-num">1</span><span data-i18n="step_erfassen">Erfassen</span></div>
+    <div class="step" id="dt-step-tab-2" onclick="dtGotoStep(2)"><span class="step-num">2</span><span data-i18n="step_eingang_step">Eingangsprotokoll</span></div>
   </div>
   <div class="step-panel active" id="dt-step-1">
     <div class="g2">
       <div class="card">
         <div class="stitle" data-i18n="st_dt_erfassen">Datenträger erfassen</div>
         <label>Firma</label><select id="dt-kunden_id" onchange="dtKundeGewaehlt()"><option value="">Firma wählen</option></select>
-        <label>Bezeichnung / Typ</label><input id="dt-bezeichnung" placeholder="z.B. Festplatte, LTO-Tape">
-        <label>Seriennummer</label><input id="dt-serial" placeholder="HDD-2024-001">
-        <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="dt-interne_nr" placeholder="z.B. INT-001">
+        <label data-i18n="lbl_bezeichnung">Bezeichnung / Typ</label><input id="dt-bezeichnung" placeholder="z.B. Festplatte, LTO-Tape">
+        <label data-i18n="lbl_seriennr">Seriennummer</label><input id="dt-serial" placeholder="HDD-2024-001">
+        <label><span data-i18n="lbl_interne_nr">Interne Nr.</span> <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="dt-interne_nr" placeholder="z.B. INT-001">
         <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="dt-modus" id="dt-modus-einfach" value="einfach" checked onchange="dtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="dt-modus" id="dt-modus-escrow" value="escrow" onchange="dtModusWechseln()"> Escrow / 3-Firmen</label></div>
         <div id="dt-escrow-section" style="display:none"><label>Haupt-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional, wenn abweichend von Firma)</span></label><select id="dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
         <label>Neben-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
         <label>Rechnungsempfänger <span style="font-weight:400;color:var(--mut)">(optional, wenn abweichend)</span></label><select id="dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
-        <label>Preis</label>
+        <label data-i18n="lbl_preis">Preis</label>
         <div class="r2"><input id="dt-preis" type="number" value="1.00" step="0.10" min="0"><select id="dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
-        <label>Rabatt (%)</label><input id="dt-rabatt" type="number" value="0" min="0" max="100" step="0.1">
-        <label>Einlagerungsdatum</label><input id="dt-datum" type="date">
-        <label>Beschreibung (optional)</label><input id="dt-beschreibung">
-        <label>Tresor / Schrank (optional)</label><select id="dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
+        <label data-i18n="lbl_rabatt">Rabatt (%)</label><input id="dt-rabatt" type="number" value="0" min="0" max="100" step="0.1">
+        <label data-i18n="lbl_einl_datum">Einlagerungsdatum</label><input id="dt-datum" type="date">
+        <label data-i18n="lbl_beschreibung">Beschreibung (optional)</label><input id="dt-beschreibung">
+        <label data-i18n="lbl_tresor_select">Tresor / Schrank (optional)</label><select id="dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
         <div style="display:flex;justify-content:flex-end;margin-top:12px">
           <button class="btn-p" onclick="dtWeiterZuSchritt2()" style="padding:9px 20px" data-i18n="lbl_weiter_s2">Weiter zu Schritt 2</button>
         </div>
@@ -517,7 +517,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
             <button id="btn-3parteien" onclick="drucke3ParteienVertrag()" style="padding:5px 12px;font-size:12px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer;display:none" data-i18n="vtrag3_drucken">Vertrag (3 Parteien) drucken</button>
           </div>
         </div>
-        <label>Foto des Datenträgers (optional)</label>
+        <label data-i18n="lbl_foto_dt">Foto des Datenträgers (optional)</label>
         <div class="upzone" id="dt-bild-zone" onclick="document.getElementById('dt-bild-file').click()">
           <input type="file" id="dt-bild-file" accept="image/*" style="display:none" onchange="handleDtBild(event)">
           <div id="dt-bild-prev">Klicken zum Hochladen</div>
@@ -525,7 +525,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div style="margin:10px 0;padding:10px;background:var(--s-bg);border:1px solid var(--s-brd);border-radius:var(--rad);font-size:12px">
           <strong>Schritt 2:</strong> Scan / Foto des unterschriebenen Eingangsformulars hochladen.
         </div>
-        <label>Scan Eingangsformular <span style="color:var(--e-txt);font-size:11px">(unterschrieben)</span></label>
+        <label><span data-i18n="lbl_scan_eingang">Scan Eingangsformular</span> <span style="color:var(--e-txt);font-size:11px">(unterschrieben)</span></label>
         <div class="upzone" id="dt-scan-zone" onclick="document.getElementById('dt-scan-file').click()">
           <input type="file" id="dt-scan-file" accept="image/*,application/pdf" style="display:none" onchange="handleDtScan(event)">
           <div id="dt-scan-prev">Scan hochladen</div>
@@ -559,23 +559,23 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- RECHNUNG -->
 <div id="page-rechnung" class="page">
   <div class="sub-tabs">
-    <button class="sub-tab active" id="re-sub-neu" onclick="showRechnungSub('neu')">🧾 Neue Rechnung</button>
-    <button class="sub-tab" id="re-sub-historie" onclick="showRechnungSub('historie')">📋 Historie</button>
+    <button class="sub-tab active" id="re-sub-neu" onclick="showRechnungSub('neu')" data-i18n="sub_re_neu">🧾 Neue Rechnung</button>
+    <button class="sub-tab" id="re-sub-historie" onclick="showRechnungSub('historie')" data-i18n="sub_re_hist">📋 Historie</button>
   </div>
   <div class="sub-panel active" id="re-panel-neu">
   <div class="g2">
     <div class="card">
       <div class="stitle" data-i18n="st_rechnung">Rechnung erstellen</div>
-      <label>Firma</label><select id="r-kunden_id" onchange="rechnungVorschau()"><option value="">Firma wählen</option></select>
-      <label>Rechnungsdatum</label><input id="r-datum" type="date">
-      <label>Rechnungsnummer</label><input id="r-nr">
-      <label>Abrechnungszeitraum</label>
+      <label data-i18n="lbl_k_firma">Firma</label><select id="r-kunden_id" onchange="rechnungVorschau()"><option value="">Firma wählen</option></select>
+      <label data-i18n="lbl_re_datum">Rechnungsdatum</label><input id="r-datum" type="date">
+      <label data-i18n="lbl_re_nr">Rechnungsnummer</label><input id="r-nr">
+      <label data-i18n="lbl_zeitraum">Abrechnungszeitraum</label>
       <input id="r-zeitraum" placeholder="01.01.2025 - 31.12.2025">
       <div style="font-size:11px;color:var(--mut);margin-top:4px;line-height:1.5">Tagesgenau: DT ab Einlagerungsdatum anteilig. Format: TT.MM.JJJJ - TT.MM.JJJJ</div>
       <div style="margin-top:12px;border-top:1px solid var(--brd);padding-top:10px">
         <div class="stitle" style="font-size:12px;margin-bottom:8px">Rabatt</div>
         <div class="r2">
-          <div><label>Allgemeiner Rabatt (%)</label><input id="r-rabatt-allg" type="number" min="0" max="100" step="0.1" placeholder="0" oninput="rechnungVorschau()"></div>
+          <div><label data-i18n="lbl_allg_rabatt">Allgemeiner Rabatt (%)</label><input id="r-rabatt-allg" type="number" min="0" max="100" step="0.1" placeholder="0" oninput="rechnungVorschau()"></div>
           <div id="r-mengenrabatt-info" style="display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:2px"><div style="font-size:11px;color:var(--mut);line-height:1.6">Mengenrabatt wird automatisch<br>anhand der Stufentabelle (Templates) berechnet.</div></div>
         </div>
       </div>
@@ -604,18 +604,18 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- UEBERGABE -->
 <div id="page-uebergabe" class="page">
   <div class="steps">
-    <div class="step active" id="step-tab-1" onclick="gotoStep(1)"><span class="step-num">1</span>Vorbereiten</div>
-    <div class="step" id="step-tab-2" onclick="gotoStep(2)"><span class="step-num">2</span>Unterschrift</div>
+    <div class="step active" id="step-tab-1" onclick="gotoStep(1)"><span class="step-num">1</span><span data-i18n="step_vorbereiten">Vorbereiten</span></div>
+    <div class="step" id="step-tab-2" onclick="gotoStep(2)"><span class="step-num">2</span><span data-i18n="step_unterschrift">Unterschrift</span></div>
   </div>
   <div class="step-panel active" id="step-1">
     <div class="g2">
       <div class="card">
         <div class="stitle">Schritt 1</div>
         <label>Firma</label><select id="u-kunden_id" onchange="renderUebergabeListe()"><option value="">wählen</option></select>
-        <label>Datum</label><input id="u-datum" type="date">
-        <label>Übergabe an</label><input id="u-empfaenger" placeholder="Name des Empfängers">
-        <label>Grund</label>
-        <select id="u-grund"><option>Rueckgabe auf Wunsch</option><option>Vertragsende</option><option>Vernichtung beauftragt</option><option>Sonstiges</option></select>
+        <label data-i18n="lbl_datum">Datum</label><input id="u-datum" type="date">
+        <label data-i18n="lbl_ue_empfaenger">Übergabe an</label><input id="u-empfaenger" placeholder="Name des Empfängers">
+        <label data-i18n="lbl_ue_grund">Grund</label>
+        <select id="u-grund"></select>
         <div style="margin-top:12px;display:flex;gap:8px">
           <button onclick="formularVorschau()" style="flex:1">Vorschau</button>
           <button class="btn-w" onclick="formularHerunterladen()" style="flex:1">Formular</button>
@@ -657,7 +657,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 
 <!-- TEMPLATES -->
 <div id="page-templates" class="page">
-  <div class="tpl-tabs"><div class="tpl-tab active" id="tpl-tab-r" onclick="showTplTab('r')">Rechnung</div><div class="tpl-tab" id="tpl-tab-u" onclick="showTplTab('u')">Übergabe</div><div class="tpl-tab" id="tpl-tab-e" onclick="showTplTab('e')">Eingang</div><div class="tpl-tab" id="tpl-tab-v" onclick="showTplTab('v')">Vertrag</div></div>
+  <div class="tpl-tabs"><div class="tpl-tab active" id="tpl-tab-r" onclick="showTplTab('r')" data-i18n="tpl_rechnung">Rechnung</div><div class="tpl-tab" id="tpl-tab-u" onclick="showTplTab('u')" data-i18n="tpl_uebergabe">Übergabe</div><div class="tpl-tab" id="tpl-tab-e" onclick="showTplTab('e')" data-i18n="tpl_eingang">Eingang</div><div class="tpl-tab" id="tpl-tab-v" onclick="showTplTab('v')" data-i18n="tpl_vertrag">Vertrag</div></div>
   <div id="tpl-r">
     <div class="g2">
       <div style="overflow-y:auto;max-height:90vh">
@@ -675,13 +675,26 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <input id="f-bearbeiter" type="hidden"><input id="f-kuerzel" type="hidden"><input id="f-tel" type="hidden"><input id="f-fax" type="hidden"><input id="f-email" type="hidden"><input id="f-ort" type="hidden">
         </div>
         <div class="card">
-          <div class="stitle">Texte</div>
-          <label>Platzhalter:</label><div class="ph-bar" id="ph-bar-r"></div>
-          <label>Anrede</label><input id="f-anrede" value="Sehr geehrte Damen und Herren," oninput="syncBrief()">
-          <label>Einleitung</label><textarea id="f-intro" rows="3" oninput="syncBrief()"></textarea>
-          <label>Schluss</label><textarea id="f-schluss" rows="2" oninput="syncBrief()"></textarea>
-          <label>Gruss</label><input id="f-gruss" value="Freundliche Gruesse," oninput="syncBrief()">
-          <label>Unterzeichner</label><input id="f-sig" oninput="syncBrief()">
+          <div class="stitle" data-i18n="st_texte">Texte</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <button id="tpl-r-btn-de" class="btn-p" onclick="tplEditorLang('r','de')" style="padding:3px 9px;font-size:11px" data-i18n="tpl_de_btn">🇩🇪 Deutsch</button>
+            <button id="tpl-r-btn-en" onclick="tplEditorLang('r','en')" style="padding:3px 9px;font-size:11px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);cursor:pointer" data-i18n="tpl_en_btn">🇬🇧 Englisch</button>
+          </div>
+          <label data-i18n="lbl_platzhalter">Platzhalter:</label><div class="ph-bar" id="ph-bar-r"></div>
+          <div id="tpl-r-fields-de">
+            <label data-i18n="lbl_anrede">Anrede</label><input id="f-anrede" value="Sehr geehrte Damen und Herren," oninput="syncBrief()">
+            <label data-i18n="lbl_einleitung">Einleitung</label><textarea id="f-intro" rows="3" oninput="syncBrief()"></textarea>
+            <label data-i18n="lbl_schluss_tpl">Schluss</label><textarea id="f-schluss" rows="2" oninput="syncBrief()"></textarea>
+            <label data-i18n="lbl_gruss">Gruss</label><input id="f-gruss" value="Freundliche Gruesse," oninput="syncBrief()">
+            <label data-i18n="lbl_unterzeichner">Unterzeichner</label><input id="f-sig" oninput="syncBrief()">
+          </div>
+          <div id="tpl-r-fields-en" style="display:none">
+            <label>Salutation (EN)</label><input id="f-anrede-en" value="Dear Sir or Madam," oninput="syncBrief()">
+            <label>Introduction (EN)</label><textarea id="f-intro-en" rows="3" oninput="syncBrief()"></textarea>
+            <label>Closing (EN)</label><textarea id="f-schluss-en" rows="2" oninput="syncBrief()"></textarea>
+            <label>Regards (EN)</label><input id="f-gruss-en" value="Kind regards," oninput="syncBrief()">
+            <label>Signatory (EN)</label><input id="f-sig-en" oninput="syncBrief()">
+          </div>
         </div>
         <div class="card" style="background:var(--i-bg);border-color:var(--i-brd)">
           <div style="font-size:12px;color:var(--i-txt)">Fußzeile, Bankdaten und Steuerinformationen werden im Admin-Bereich unter <strong>Unternehmen</strong> verwaltet.</div>
@@ -723,11 +736,22 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div id="tpl-u" style="display:none">
     <div class="g2">
       <div><div class="card" style="border-color:var(--i-brd);background:var(--i-bg)"><div style="font-size:12px;color:var(--i-txt)">Logo und Firmendaten werden vom Rechnungs-Template uebernommen.</div></div>
-        <div class="card"><div class="stitle">Texte</div>
-          <label>Platzhalter:</label><div class="ph-bar" id="ph-bar-u"></div>
-          <label>Einleitung</label><textarea id="u-intro-tpl" rows="3" oninput="syncUBrief()"></textarea>
-          <label>Text nach Tabelle</label><textarea id="u-nach-tpl" rows="3" oninput="syncUBrief()"></textarea>
-          <label>Fußzeile</label><textarea id="u-footer-tpl" rows="2" oninput="syncUBrief()"></textarea>
+        <div class="card"><div class="stitle" data-i18n="st_texte">Texte</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <button id="tpl-u-btn-de" class="btn-p" onclick="tplEditorLang('u','de')" style="padding:3px 9px;font-size:11px" data-i18n="tpl_de_btn">🇩🇪 Deutsch</button>
+            <button id="tpl-u-btn-en" onclick="tplEditorLang('u','en')" style="padding:3px 9px;font-size:11px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);cursor:pointer" data-i18n="tpl_en_btn">🇬🇧 Englisch</button>
+          </div>
+          <label data-i18n="lbl_platzhalter">Platzhalter:</label><div class="ph-bar" id="ph-bar-u"></div>
+          <div id="tpl-u-fields-de">
+            <label data-i18n="lbl_einleitung">Einleitung</label><textarea id="u-intro-tpl" rows="3" oninput="syncUBrief()"></textarea>
+            <label data-i18n="lbl_nach_tabelle">Text nach Tabelle</label><textarea id="u-nach-tpl" rows="3" oninput="syncUBrief()"></textarea>
+            <label data-i18n="lbl_fusszeile">Fußzeile</label><textarea id="u-footer-tpl" rows="2" oninput="syncUBrief()"></textarea>
+          </div>
+          <div id="tpl-u-fields-en" style="display:none">
+            <label>Introduction (EN)</label><textarea id="u-intro-tpl-en" rows="3" oninput="syncUBrief()"></textarea>
+            <label>Text after Table (EN)</label><textarea id="u-nach-tpl-en" rows="3" oninput="syncUBrief()"></textarea>
+            <label>Footer (EN)</label><textarea id="u-footer-tpl-en" rows="2" oninput="syncUBrief()"></textarea>
+          </div>
         </div>
         <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1">Zurück</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2">Speichern</button></div>
       </div>
@@ -757,10 +781,21 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div class="g2">
       <div>
         <div class="card" style="border-color:var(--i-brd);background:var(--i-bg)"><div style="font-size:12px;color:var(--i-txt)">Logo und Firmendaten werden vom Rechnungs-Template übernommen.</div></div>
-        <div class="card"><div class="stitle">Texte</div>
-          <label>Einleitung</label><textarea id="e-intro" rows="3" oninput="syncEVorschau()" placeholder="Der folgende Datenträger wurde ordnungsgemäß entgegengenommen und eingelagert."></textarea>
-          <label>Text nach Tabelle</label><textarea id="e-nach" rows="3" oninput="syncEVorschau()" placeholder="Beide Parteien bestätigen die korrekte Übergabe des Datenträgers."></textarea>
-          <label>Fußzeile</label><textarea id="e-footer-tpl" rows="2" oninput="syncEVorschau()"></textarea>
+        <div class="card"><div class="stitle" data-i18n="st_texte">Texte</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <button id="tpl-e-btn-de" class="btn-p" onclick="tplEditorLang('e','de')" style="padding:3px 9px;font-size:11px" data-i18n="tpl_de_btn">🇩🇪 Deutsch</button>
+            <button id="tpl-e-btn-en" onclick="tplEditorLang('e','en')" style="padding:3px 9px;font-size:11px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);cursor:pointer" data-i18n="tpl_en_btn">🇬🇧 Englisch</button>
+          </div>
+          <div id="tpl-e-fields-de">
+            <label data-i18n="lbl_einleitung">Einleitung</label><textarea id="e-intro" rows="3" oninput="syncEVorschau()" placeholder="Der folgende Datenträger wurde ordnungsgemäß entgegengenommen und eingelagert."></textarea>
+            <label data-i18n="lbl_nach_tabelle">Text nach Tabelle</label><textarea id="e-nach" rows="3" oninput="syncEVorschau()" placeholder="Beide Parteien bestätigen die korrekte Übergabe des Datenträgers."></textarea>
+            <label data-i18n="lbl_fusszeile">Fußzeile</label><textarea id="e-footer-tpl" rows="2" oninput="syncEVorschau()"></textarea>
+          </div>
+          <div id="tpl-e-fields-en" style="display:none">
+            <label>Introduction (EN)</label><textarea id="e-intro-en" rows="3" oninput="syncEVorschau()" placeholder="The following data carrier has been duly received and stored."></textarea>
+            <label>Text after Table (EN)</label><textarea id="e-nach-en" rows="3" oninput="syncEVorschau()" placeholder="Both parties confirm the correct handover of the data carrier."></textarea>
+            <label>Footer (EN)</label><textarea id="e-footer-tpl-en" rows="2" oninput="syncEVorschau()"></textarea>
+          </div>
         </div>
         <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1">Zurück</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2">Speichern</button></div>
       </div>
@@ -809,6 +844,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div class="g2">
       <div>
         <div class="card" style="border-color:var(--i-brd);background:var(--i-bg)"><div style="font-size:12px;color:var(--i-txt)">Logo und Firmendaten werden vom Rechnungs-Template übernommen. Die §-Texte sind Vorlagen — beim Drucken können sie noch angepasst werden.</div></div>
+        <div class="card" style="padding:10px 14px 8px">
+          <div style="display:flex;gap:6px">
+            <button id="tpl-v-btn-de" class="btn-p" onclick="tplEditorLang('v','de')" style="padding:3px 9px;font-size:11px" data-i18n="tpl_de_btn">🇩🇪 Deutsch</button>
+            <button id="tpl-v-btn-en" onclick="tplEditorLang('v','en')" style="padding:3px 9px;font-size:11px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);cursor:pointer" data-i18n="tpl_en_btn">🇬🇧 Englisch</button>
+          </div>
+        </div>
+        <div id="tpl-v-fields-de">
         <div class="card"><div class="stitle">§ 1 Vertragsgegenstand</div>
           <textarea id="tv-par1" rows="4" oninput="syncVBrief()" placeholder="Der Lagerbetreiber übernimmt für den Auftraggeber die sichere Einlagerung von Datenträgern..."></textarea>
         </div>
@@ -828,7 +870,29 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div class="card"><div class="stitle">Schlussformel</div>
           <textarea id="tv-schluss" rows="2" oninput="syncVBrief()" placeholder="Änderungen und Ergänzungen dieses Vertrages bedürfen der Schriftform."></textarea>
         </div>
-        <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1">Zurück</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2">Speichern</button></div>
+        </div><!-- end tpl-v-fields-de -->
+        <div id="tpl-v-fields-en" style="display:none">
+        <div class="card"><div class="stitle">§ 1 Subject Matter (EN)</div>
+          <textarea id="tv-par1-en" rows="4" oninput="syncVBrief()" placeholder="The storage operator takes over the secure storage of data carriers on behalf of the client..."></textarea>
+        </div>
+        <div class="card"><div class="stitle">§ 2 Duration &amp; Termination (EN)</div>
+          <label>Default Duration (EN)</label><input id="tv-laufzeit-en" oninput="syncVBrief()" placeholder="e.g. 12 months, automatic renewal">
+          <label>Notice Period (EN)</label><input id="tv-kfrist-en" oninput="syncVBrief()" placeholder="e.g. 4 weeks to end of month">
+        </div>
+        <div class="card"><div class="stitle">§ 3 Remuneration (EN)</div>
+          <textarea id="tv-par-entgelt-en" rows="3" oninput="syncVBrief()" placeholder="Remuneration is based on the current price list. Invoices are issued annually and are payable within 14 days of receipt."></textarea>
+        </div>
+        <div class="card"><div class="stitle">§ 4 Liability (EN)</div>
+          <textarea id="tv-par-haftung-en" rows="3" oninput="syncVBrief()" placeholder="The storage operator is liable for careful handling of stored data carriers. Liability for the content of data carriers is excluded."></textarea>
+        </div>
+        <div class="card"><div class="stitle">§ 5 Data Protection (EN)</div>
+          <textarea id="tv-par-dsgvo-en" rows="3" oninput="syncVBrief()" placeholder="All personal data is processed in accordance with GDPR and used only within the scope of the contractual purpose."></textarea>
+        </div>
+        <div class="card"><div class="stitle">Final Clause (EN)</div>
+          <textarea id="tv-schluss-en" rows="2" oninput="syncVBrief()" placeholder="Amendments and additions to this contract require written form."></textarea>
+        </div>
+        </div><!-- end tpl-v-fields-en -->
+        <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1" data-i18n="lbl_zuruecksetzen">Zurücksetzen</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
       </div>
       <div><div class="stitle" style="margin-bottom:8px">Vorschau</div>
         <div class="brief" id="v-brief-preview">
@@ -1117,7 +1181,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; Datenträger-Verwaltung v1.3.9
+  &nbsp;·&nbsp; Datenträger-Verwaltung v1.4.0
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1255,6 +1319,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <script>
 // ══ i18n ═══════════════════════════════════════
 const TRANS={
+  // ── Tabs ─────────────────────────────────────────────
   tab_dashboard:{de:'📊 Übersicht',en:'📊 Dashboard'},
   tab_kunden:{de:'👥 Kunden &amp; Verträge',en:'👥 Customers &amp; Contracts'},
   tab_dt:{de:'💾 Datenträger',en:'💾 Media'},
@@ -1264,12 +1329,15 @@ const TRANS={
   tab_templates:{de:'🎨 Templates',en:'🎨 Templates'},
   tab_admin:{de:'⚙️ Admin',en:'⚙️ Admin'},
   tab_hilfe:{de:'❓ Hilfe',en:'❓ Help'},
+  // ── Top bar ──────────────────────────────────────────
   btn_pw:{de:'🔑 Passwort',en:'🔑 Password'},
   btn_logout:{de:'Abmelden',en:'Log out'},
+  // ── Login ────────────────────────────────────────────
   login_subtitle:{de:'Bitte anmelden',en:'Please log in'},
   login_user:{de:'Benutzername',en:'Username'},
   login_pass:{de:'Passwort',en:'Password'},
   login_btn:{de:'Anmelden',en:'Log In'},
+  // ── Section headings ─────────────────────────────────
   st_ablaufen:{de:'Verträge die bald ablaufen',en:'Contracts expiring soon'},
   st_umsatz:{de:'Umsatz pro Kunde (Netto/Jahr)',en:'Revenue per Customer (Net/Year)'},
   st_aktive_vt:{de:'Aktive Verträge',en:'Active Contracts'},
@@ -1297,17 +1365,26 @@ const TRANS={
   st_texte:{de:'Texte',en:'Texts'},
   st_benutzer:{de:'Benutzer',en:'Users'},
   st_rollen:{de:'Rollen & Berechtigungen',en:'Roles & Permissions'},
+  // ── Status labels ─────────────────────────────────────
   lbl_eingelagert:{de:'Eingelagert',en:'Stored'},
   lbl_eingelagert_dt:{de:'Eingelagerte DT',en:'Stored Media'},
   lbl_uebergeben:{de:'Übergeben',en:'Handed Over'},
   lbl_im_bestand:{de:'Im Bestand',en:'In Stock'},
   lbl_aktiv:{de:'Aktiv',en:'Active'},
   lbl_inaktiv:{de:'Inaktiv',en:'Inactive'},
+  // ── Common buttons ────────────────────────────────────
   lbl_speichern:{de:'Speichern',en:'Save'},
   lbl_abbrechen:{de:'Abbrechen',en:'Cancel'},
   lbl_einlagern:{de:'Einlagern',en:'Store'},
   lbl_zurueck:{de:'Zurück',en:'Back'},
   lbl_weiter_s2:{de:'Weiter zu Schritt 2',en:'Continue to Step 2'},
+  lbl_vorschau:{de:'Vorschau',en:'Preview'},
+  lbl_formular:{de:'Formular',en:'Form'},
+  lbl_bearbeiten:{de:'Bearb.',en:'Edit'},
+  lbl_loeschen_x:{de:'X',en:'X'},
+  lbl_drucken_speichern:{de:'Drucken &amp; Speichern',en:'Print &amp; Save'},
+  lbl_zuruecksetzen:{de:'Zurücksetzen',en:'Reset'},
+  // ── Print buttons ─────────────────────────────────────
   ep_drucken:{de:'Eingangsformular drucken',en:'Print Incoming Report'},
   vtrag2_drucken:{de:'Vertrag (2 Parteien) drucken',en:'Print Contract (2 Parties)'},
   vtrag3_drucken:{de:'Vertrag (3 Parteien) drucken',en:'Print Contract (3 Parties)'},
@@ -1315,11 +1392,118 @@ const TRANS={
   vtrag_bed_b:{de:'Freigabebedingungen <span style="font-weight:400">(z.B. Insolvenz, Betriebsaufgabe)</span>',en:'Release Conditions <span style="font-weight:400">(e.g. insolvency, dissolution)</span>'},
   vtrag_bed_ph_a:{de:'z.B. Kündigungsfrist 30 Tage, Laufzeit unbegrenzt...',en:'e.g. 30-day notice period, unlimited duration...'},
   vtrag_bed_ph_b:{de:'z.B. Insolvenz von Firma 2, dauerhafte Einstellung der Softwarewartung...',en:'e.g. insolvency of Party 2, permanent cessation of software maintenance...'},
+  // ── Sub-tabs ──────────────────────────────────────────
+  sub_dt_erfassen:{de:'💾 Erfassen',en:'💾 Register'},
+  sub_dt_archiv:{de:'🗄️ Archiv',en:'🗄️ Archive'},
+  sub_re_neu:{de:'🧾 Neue Rechnung',en:'🧾 New Invoice'},
+  sub_re_hist:{de:'📋 Historie',en:'📋 History'},
+  // ── Step labels ───────────────────────────────────────
+  step_vorbereiten:{de:'Vorbereiten',en:'Prepare'},
+  step_unterschrift:{de:'Unterschrift',en:'Signature'},
+  step_erfassen:{de:'Erfassen',en:'Register'},
+  step_eingang_step:{de:'Eingangsprotokoll',en:'Incoming Report'},
+  // ── Template tabs ─────────────────────────────────────
+  tpl_rechnung:{de:'Rechnung',en:'Invoice'},
+  tpl_uebergabe:{de:'Übergabe',en:'Handover'},
+  tpl_eingang:{de:'Eingang',en:'Incoming'},
+  tpl_vertrag:{de:'Vertrag',en:'Contract'},
+  tpl_de_btn:{de:'🇩🇪 Deutsch',en:'🇩🇪 German'},
+  tpl_en_btn:{de:'🇬🇧 Englisch',en:'🇬🇧 English'},
+  // ── Kunden form labels ────────────────────────────────
+  lbl_firma_name:{de:'Firmenname *',en:'Company Name *'},
+  lbl_kundennr:{de:'Kundennummer *',en:'Customer No. *'},
+  lbl_ansprechpartner:{de:'Ansprechpartner',en:'Contact Person'},
+  lbl_email:{de:'E-Mail',en:'E-Mail'},
+  lbl_telefon:{de:'Telefon',en:'Phone'},
+  lbl_mobil:{de:'Mobil',en:'Mobile'},
+  lbl_strasse:{de:'Strasse',en:'Street'},
+  lbl_plz:{de:'PLZ',en:'ZIP'},
+  lbl_ort:{de:'Ort',en:'City'},
+  lbl_land:{de:'Land',en:'Country'},
+  lbl_sap_nr:{de:'SAP-Nummer',en:'SAP Number'},
+  lbl_vt_section:{de:'Vertrag',en:'Contract'},
+  lbl_vertragsnr:{de:'Vertragsnummer',en:'Contract No.'},
+  lbl_vt_beginn:{de:'Vertragsbeginn',en:'Contract Start'},
+  lbl_vt_ende:{de:'Vertragsende',en:'Contract End'},
+  lbl_vt_status:{de:'Status',en:'Status'},
+  lbl_vt_notiz:{de:'Vertragsnotiz',en:'Contract Note'},
+  lbl_mg_section:{de:'Mengenrabatt-Stufen (bis 5)',en:'Volume Discount Tiers (up to 5)'},
+  lbl_mg_ab:{de:'Ab (Stück)',en:'From (units)'},
+  lbl_mg_pct:{de:'Rabatt (%)',en:'Discount (%)'},
+  lbl_mg_bez:{de:'Bezeichnung',en:'Label'},
+  // ── DT form labels ────────────────────────────────────
+  lbl_k_firma:{de:'Firma',en:'Company'},
+  lbl_bezeichnung:{de:'Bezeichnung / Typ',en:'Description / Type'},
+  lbl_seriennr:{de:'Seriennummer',en:'Serial Number'},
+  lbl_interne_nr:{de:'Interne Nr.',en:'Internal No.'},
+  lbl_preis:{de:'Preis',en:'Price'},
+  lbl_rabatt:{de:'Rabatt (%)',en:'Discount (%)'},
+  lbl_einl_datum:{de:'Einlagerungsdatum',en:'Storage Date'},
+  lbl_beschreibung:{de:'Beschreibung (optional)',en:'Description (optional)'},
+  lbl_tresor_select:{de:'Tresor / Schrank (optional)',en:'Safe / Cabinet (optional)'},
+  lbl_foto_dt:{de:'Foto des Datenträgers (optional)',en:'Photo of Media (optional)'},
+  lbl_scan_eingang:{de:'Scan Eingangsformular',en:'Scan Incoming Form'},
+  // ── Rechnung form labels ──────────────────────────────
+  lbl_re_datum:{de:'Rechnungsdatum',en:'Invoice Date'},
+  lbl_re_nr:{de:'Rechnungsnummer',en:'Invoice No.'},
+  lbl_zeitraum:{de:'Abrechnungszeitraum',en:'Billing Period'},
+  lbl_rabatt_section:{de:'Rabatt',en:'Discount'},
+  lbl_allg_rabatt:{de:'Allgemeiner Rabatt (%)',en:'General Discount (%)'},
+  // ── Übergabe form labels ──────────────────────────────
+  lbl_datum:{de:'Datum',en:'Date'},
+  lbl_ue_empfaenger:{de:'Übergabe an',en:'Handover To'},
+  lbl_ue_grund:{de:'Grund',en:'Reason'},
+  lbl_ue_weiter:{de:'Weiter zu Schritt 2',en:'Continue to Step 2'},
+  // ── Template editor labels ────────────────────────────
+  lbl_anrede:{de:'Anrede',en:'Salutation'},
+  lbl_einleitung:{de:'Einleitung',en:'Introduction'},
+  lbl_schluss_tpl:{de:'Schluss',en:'Closing'},
+  lbl_gruss:{de:'Gruss',en:'Regards'},
+  lbl_unterzeichner:{de:'Unterzeichner',en:'Signatory'},
+  lbl_nach_tabelle:{de:'Text nach Tabelle',en:'Text after Table'},
+  lbl_fusszeile:{de:'Fußzeile',en:'Footer'},
+  lbl_platzhalter:{de:'Platzhalter:',en:'Placeholders:'},
+  lbl_standardlaufzeit:{de:'Standardlaufzeit',en:'Default Duration'},
+  lbl_kuendigungsfrist:{de:'Kündigungsfrist',en:'Notice Period'},
+  // ── Dynamic render strings ────────────────────────────
+  empty_kunden:{de:'Noch keine Firmen',en:'No companies yet'},
+  empty_kunden_suche:{de:'Keine Ergebnisse',en:'No results'},
+  empty_dt:{de:'Keine Datenträger',en:'No media records'},
+  empty_archiv:{de:'Noch keine archivierten Datenträger',en:'No archived media yet'},
+  empty_uebergaben:{de:'Keine abgeschlossenen Übergaben',en:'No completed handovers'},
+  empty_rechnungen:{de:'Noch keine gespeicherten Rechnungen',en:'No invoices saved yet'},
+  col_nr:{de:'Nr.',en:'No.'},
+  col_firma_vt:{de:'Firma / Vertrag',en:'Company / Contract'},
+  col_dt:{de:'DT',en:'DT'},
+  col_bild:{de:'Bild',en:'Photo'},
+  col_firma:{de:'Firma',en:'Company'},
+  col_typ:{de:'Typ',en:'Type'},
+  col_serial:{de:'Serial',en:'Serial'},
+  col_preis:{de:'Preis',en:'Price'},
+  col_rabatt:{de:'Rabatt',en:'Discount'},
+  col_datum:{de:'Datum',en:'Date'},
+  col_anzahl:{de:'Anzahl',en:'Count'},
+  col_grund:{de:'Grund',en:'Reason'},
+  col_protokoll:{de:'Protokoll',en:'Protocol'},
+  col_modus:{de:'Modus',en:'Mode'},
+  bearb_btn:{de:'Bearb.',en:'Edit'},
+  kein_scan:{de:'kein Scan',en:'no scan'},
+  // ── Übergabe grund options ────────────────────────────
+  grund_rueckgabe:{de:'Rückgabe auf Wunsch',en:'Return on request'},
+  grund_vertragsende:{de:'Vertragsende',en:'End of contract'},
+  grund_vernichtung:{de:'Vernichtung beauftragt',en:'Destruction ordered'},
+  grund_sonstiges:{de:'Sonstiges',en:'Other'},
 };
 let _lang=localStorage.getItem('dtv_lang')||'de';
 function t(key){return TRANS[key]?.[_lang]||TRANS[key]?.de||key;}
 function applyLang(){
   document.documentElement.lang=_lang;
+  const grundSel=document.getElementById('u-grund');
+  if(grundSel){
+    const cur=grundSel.value;
+    grundSel.innerHTML=`<option>${t('grund_rueckgabe')}</option><option>${t('grund_vertragsende')}</option><option>${t('grund_vernichtung')}</option><option>${t('grund_sonstiges')}</option>`;
+    if(cur)grundSel.value=cur;
+  }
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const v=TRANS[el.dataset.i18n]?.[_lang];
     if(v!==undefined)el.innerHTML=v;
@@ -1336,6 +1520,14 @@ function toggleLang(){
   localStorage.setItem('dtv_lang',_lang);
   applyLang();
   renderAlles();
+}
+function tplEditorLang(tab,lang){
+  ['de','en'].forEach(l=>{
+    const d=document.getElementById(`tpl-${tab}-fields-${l}`);
+    if(d)d.style.display=l===lang?'block':'none';
+    const b=document.getElementById(`tpl-${tab}-btn-${l}`);
+    if(b){b.className=l===lang?'btn-p':'';b.style.cssText=l===lang?'padding:3px 9px;font-size:11px':'padding:3px 9px;font-size:11px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);cursor:pointer;color:var(--txt)';}
+  });
 }
 // ══ API ═════════════════════════════════════════════
 let TOKEN = sessionStorage.getItem('dtv_token') || '';
@@ -1677,14 +1869,14 @@ function renderKunden() {
   const q=(document.getElementById('k-search')?.value||'').toLowerCase();
   let list=kunden;
   if(q) list=kunden.filter(k=>(k.firma||'').toLowerCase().includes(q)||(k.nr||'').toLowerCase().includes(q)||(k.ansprechpartner||'').toLowerCase().includes(q));
-  if(!list.length){el.innerHTML='<div class="empty">'+(q?'Keine Ergebnisse':'Noch keine Firmen')+'</div>';return;}
+  if(!list.length){el.innerHTML='<div class="empty">'+(q?t('empty_kunden_suche'):t('empty_kunden'))+'</div>';return;}
   const smap={aktiv:'bg',gekuendigt:'br',abgelaufen:'ba',pausiert:'ba'};
-  el.innerHTML='<table><thead><tr><th style="width:18%">Nr.</th><th style="width:34%">Firma / Vertrag</th><th style="width:10%">DT</th><th style="width:38%"></th></tr></thead><tbody>'+
+  el.innerHTML=`<table><thead><tr><th style="width:18%">${t('col_nr')}</th><th style="width:34%">${t('col_firma_vt')}</th><th style="width:10%">${t('col_dt')}</th><th style="width:38%"></th></tr></thead><tbody>`+
     list.map(k=>{
       const dts=datentraeger.filter(d=>d.kunden_id===k.id&&d.status==='eingelagert');
       const sb=k.vertragsstatus?`<span class="badge ${smap[k.vertragsstatus]||'bg'}" style="font-size:10px">${k.vertragsstatus}</span>  `:'';
       return`<tr><td style="color:var(--mut);font-size:11px">${k.nr}</td><td style="cursor:pointer;color:var(--i-txt);font-weight:600" onclick="zeigeDetail(${k.id})">${k.firma}<br><span style="font-size:10px;color:var(--mut);font-weight:400">${k.vertragsnr||''}</span></td><td><span class="badge bg">${dts.length}</span></td>
-      <td><div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">${sb}<button class="btn-w" onclick="kundeBearbeiten(${k.id})" style="padding:3px 7px;font-size:11px">${can('write')?'Bearb.':'Ansehen'}</button>${can('delete')?`<button class="btn-d" onclick="kundeLoeschen(${k.id})" style="padding:3px 7px;font-size:11px">X</button>`:''}</div></td></tr>`;
+      <td><div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">${sb}<button class="btn-w" onclick="kundeBearbeiten(${k.id})" style="padding:3px 7px;font-size:11px">${can('write')?t('bearb_btn'):'Ansehen'}</button>${can('delete')?`<button class="btn-d" onclick="kundeLoeschen(${k.id})" style="padding:3px 7px;font-size:11px">X</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
 }
 
@@ -1762,11 +1954,11 @@ function renderDT(){
   let base=filter?datentraeger.filter(d=>d.kunden_id===filter&&d.status==='eingelagert'):datentraeger.filter(d=>d.status==='eingelagert');
   const list=q?base.filter(d=>(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)):base;
   const el=document.getElementById('dt-tabelle');
-  if(!list.length){el.innerHTML='<div class="empty">Keine Datenträger</div>';return;}
-  el.innerHTML='<table><thead><tr><th style="width:7%">Bild</th><th style="width:13%">Firma</th><th style="width:18%">Typ</th><th style="width:18%">Serial</th><th style="width:16%">Preis</th><th style="width:10%">Rabatt</th><th style="width:18%"></th></tr></thead><tbody>'+
+  if(!list.length){el.innerHTML='<div class="empty">'+t('empty_dt')+'</div>';return;}
+  el.innerHTML=`<table><thead><tr><th style="width:7%">${t('col_bild')}</th><th style="width:13%">${t('col_firma')}</th><th style="width:18%">${t('col_typ')}</th><th style="width:18%">${t('col_serial')}</th><th style="width:16%">${t('col_preis')}</th><th style="width:10%">${t('col_rabatt')}</th><th style="width:18%"></th></tr></thead><tbody>`+
     list.map(d=>{
       const imgC=d.hat_bild?`<img src="" class="thumb" style="cursor:pointer" onclick="loadAndShowImg('/api/datentraeger/${d.id}/bild',this)">`:'<div style="width:34px;height:34px;background:var(--surf);border-radius:6px;border:1px dashed var(--brd2)"></div>';
-      const scanBtn=d.hat_eingang_doc?`<button onclick="loadAndOpenDoc('/api/datentraeger/${d.id}/eingang_doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Eingangsprotokoll anzeigen">📄 Eingang</button>`:'<span style="font-size:10px;color:var(--mut)">kein Scan</span>';
+      const scanBtn=d.hat_eingang_doc?`<button onclick="loadAndOpenDoc('/api/datentraeger/${d.id}/eingang_doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Eingangsprotokoll anzeigen">📄 ${_lang==='en'?'Incoming':'Eingang'}</button>`:  `<span style="font-size:10px;color:var(--mut)">${t('kein_scan')}</span>`;
       const pl=d.einheit==='monat'?`${eur(d.preis)}/M`:`${eur(d.preis)}/J`;
       const tresorInfo=d.tresor_bezeichnung?`<br><span style="font-size:10px;color:var(--mut)">🔒 ${d.tresor_bezeichnung}${d.tresor_raum?', Raum '+d.tresor_raum:''}</span>`:'';
       return`<tr><td>${imgC}</td><td style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${d.bezeichnung}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${d.serial}</td><td style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${d.rabatt>0?`<span class="badge ba">${d.rabatt}%</span>`:'-'}</td><td><div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">${scanBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
@@ -2132,12 +2324,12 @@ function genUebergabeHtml(k,sel){
 <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
 <div class="brief-betreff">${_lang==='en'?'Handover Protocol':'Übergabeprotokoll'} ${pnr}</div>
 <div class="brief-sub">${_lang==='en'?'Handover to':'Übergabe an'}: <strong>${person}</strong> &nbsp;|&nbsp; ${_lang==='en'?'Reason':'Grund'}: ${grund}</div>
-${TU.intro?`<div class="brief-txt">${fillPh(TU.intro,map)}</div>`:''}
+${((_lang==='en'&&TU.intro_en)||TU.intro)?`<div class="brief-txt">${fillPh((_lang==='en'&&TU.intro_en)||TU.intro,map)}</div>`:''}
 <table class="brief-tbl">
   <thead><tr><th style="width:5%">Pos.</th><th>${_lang==='en'?'Description':'Bezeichnung'}</th><th style="width:28%">${_lang==='en'?'Serial Number':'Seriennummer'}</th><th style="width:18%">${_lang==='en'?'Storage Date':'Einlagerung'}</th></tr></thead>
   <tbody>${rows}</tbody>
 </table>
-${TU.nach?`<div class="brief-txt" style="margin-top:8px">${fillPh(TU.nach,map)}</div>`:''}
+${((_lang==='en'&&TU.nach_en)||TU.nach)?`<div class="brief-txt" style="margin-top:8px">${fillPh((_lang==='en'&&TU.nach_en)||TU.nach,map)}</div>`:''}
 <div class="brief-sig-row" style="display:flex;gap:30px;padding:24px 20px 10px">
   <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">${_lang==='en'?'Signature (Issuer)':'Unterschrift Übergeber'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${T.sig||T.firmenname||''}</div></div>
   <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">${_lang==='en'?'Signature (Recipient)':'Unterschrift Empfänger'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${person}</div></div>
@@ -2182,7 +2374,7 @@ function updateS2Info(){const el=document.getElementById('s2-info');if(!activePe
 
 function renderPendingList(){
   const el=document.getElementById('pending-list');
-  if(!pendingUebergaben.length){el.innerHTML='<div class="empty">Keine</div>';return;}
+  if(!pendingUebergaben.length){el.innerHTML=('<div class="empty">'+t('empty_archiv')+'</div>');return;}
   el.innerHTML=pendingUebergaben.map(pu=>{const isA=activePendingId===pu.id;return`<div class="pending-card" style="${isA?'border-color:var(--i-brd);background:var(--i-bg)':''}"><div style="display:flex;justify-content:space-between;gap:8px"><div><div style="font-size:13px;font-weight:700">${pu.firma||'?'}</div><div style="font-size:11px;color:var(--mut)">${pu.datum} - ${pu.dt_ids.length} DT</div></div><div style="display:flex;flex-direction:column;gap:4px"><button onclick="selectPending(${pu.id})" style="padding:3px 8px;font-size:11px" ${isA?'class="btn-p"':''}>Wählen</button><button onclick="printHtml(pendingUebergaben.find(p=>p.id===${pu.id})?.html||'','Formular_${pu.id}.pdf')" style="padding:3px 8px;font-size:11px">Formular</button><button onclick="deletePending(${pu.id})" style="padding:3px 8px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad);cursor:pointer">🗑</button></div></div></div>`;}).join('');
 }
 
@@ -2251,7 +2443,7 @@ function renderArchiv(){
   const q=(document.getElementById('archiv-search')?.value||'').toLowerCase();
   const archivDT=datentraeger.filter(d=>d.status==='uebergeben'&&(filter?d.kunden_id===filter:true)&&(!q||(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.kunden_nr||'').toLowerCase().includes(q)));
   const el=document.getElementById('archiv-inhalt');
-  if(!archivDT.length){el.innerHTML='<div class="empty">Keine</div>';return;}
+  if(!archivDT.length){el.innerHTML='<div class="empty">'+t('empty_archiv')+'</div>';return;}
   const gr={};archivDT.forEach(d=>{if(!gr[d.kunden_id])gr[d.kunden_id]=[];gr[d.kunden_id].push(d);});
   el.innerHTML=Object.keys(gr).map(kid=>{
     const k=kunden.find(k=>k.id===parseInt(kid));
@@ -2285,6 +2477,17 @@ async function loadTemplates(){
   const el_ei=document.getElementById('e-intro');if(el_ei)el_ei.value=window._TE.intro||'';
   const el_en=document.getElementById('e-nach');if(el_en)el_en.value=window._TE.nach||'';
   const el_ef=document.getElementById('e-footer-tpl');if(el_ef)el_ef.value=window._TE.footer||'';
+  // Fill EN template fields
+  const enFills={
+    'u-intro-tpl-en':['_TU','intro_en'],'u-nach-tpl-en':['_TU','nach_en'],'u-footer-tpl-en':['_TU','footer_en'],
+    'e-intro-en':['_TE','intro_en'],'e-nach-en':['_TE','nach_en'],'e-footer-tpl-en':['_TE','footer_en'],
+    'f-anrede-en':['_T','anrede_en'],'f-intro-en':['_T','intro_en'],'f-schluss-en':['_T','schluss_en'],
+    'f-gruss-en':['_T','gruss_en'],'f-sig-en':['_T','sig_en'],
+    'tv-par1-en':['_TV','par1_en'],'tv-laufzeit-en':['_TV','laufzeit_en'],'tv-kfrist-en':['_TV','kfrist_en'],
+    'tv-par-entgelt-en':['_TV','parEntgelt_en'],'tv-par-haftung-en':['_TV','parHaftung_en'],
+    'tv-par-dsgvo-en':['_TV','parDsgvo_en'],'tv-schluss-en':['_TV','schluss_en']
+  };
+  Object.entries(enFills).forEach(([id,[obj,key]])=>{const el=document.getElementById(id);if(el)el.value=window[obj]?.[key]||'';});
   // Fill Vertrag fields
   const TVF={par1:'par1',laufzeit:'laufzeit',kfrist:'kfrist','par-entgelt':'parEntgelt','par-haftung':'parHaftung','par-dsgvo':'parDsgvo',schluss:'schluss'};
   Object.entries(TVF).forEach(([fid,key])=>{const el=document.getElementById('tv-'+fid);if(el)el.value=window._TV[key]||'';});
@@ -2314,6 +2517,25 @@ function readTplFields(){
   // Vertrag fields
   const TVF={par1:'par1',laufzeit:'laufzeit',kfrist:'kfrist','par-entgelt':'parEntgelt','par-haftung':'parHaftung','par-dsgvo':'parDsgvo',schluss:'schluss'};
   Object.entries(TVF).forEach(([fid,key])=>{const el=document.getElementById('tv-'+fid);if(el)window._TV[key]=el.value;});
+  // EN template fields
+  window._TU.intro_en=document.getElementById('u-intro-tpl-en')?.value||'';
+  window._TU.nach_en=document.getElementById('u-nach-tpl-en')?.value||'';
+  window._TU.footer_en=document.getElementById('u-footer-tpl-en')?.value||'';
+  window._TE.intro_en=document.getElementById('e-intro-en')?.value||'';
+  window._TE.nach_en=document.getElementById('e-nach-en')?.value||'';
+  window._TE.footer_en=document.getElementById('e-footer-tpl-en')?.value||'';
+  window._T.anrede_en=document.getElementById('f-anrede-en')?.value||'';
+  window._T.intro_en=document.getElementById('f-intro-en')?.value||'';
+  window._T.schluss_en=document.getElementById('f-schluss-en')?.value||'';
+  window._T.gruss_en=document.getElementById('f-gruss-en')?.value||'';
+  window._T.sig_en=document.getElementById('f-sig-en')?.value||'';
+  window._TV.par1_en=document.getElementById('tv-par1-en')?.value||'';
+  window._TV.laufzeit_en=document.getElementById('tv-laufzeit-en')?.value||'';
+  window._TV.kfrist_en=document.getElementById('tv-kfrist-en')?.value||'';
+  window._TV.parEntgelt_en=document.getElementById('tv-par-entgelt-en')?.value||'';
+  window._TV.parHaftung_en=document.getElementById('tv-par-haftung-en')?.value||'';
+  window._TV.parDsgvo_en=document.getElementById('tv-par-dsgvo-en')?.value||'';
+  window._TV.schluss_en=document.getElementById('tv-schluss-en')?.value||'';
   window._T.akzentfarbe=accentColor;
 }
 
@@ -2335,11 +2557,11 @@ function buildPhBars(){
   document.getElementById('ph-bar-r').innerHTML=PH_R.map(p=>`<span class="ph-btn" onclick="insertPh('${p.tag}','r')">${p.lbl}</span>`).join('');
   document.getElementById('ph-bar-u').innerHTML=PH_U.map(p=>`<span class="ph-btn" onclick="insertPh('${p.tag}','u')">${p.lbl}</span>`).join('');
   ['f-intro','f-schluss'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('focus',()=>focusedTA=el);});
-  ['u-intro-tpl','u-nach-tpl','u-footer-tpl'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('focus',()=>focusedTA=el);});
+  ['u-intro-tpl','u-nach-tpl','u-footer-tpl','u-intro-tpl-en','u-nach-tpl-en','u-footer-tpl-en'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('focus',()=>focusedTA=el);});
 }
 
 function insertPh(tag,type){
-  const bars=type==='r'?['f-intro','f-schluss']:['u-intro-tpl','u-nach-tpl','u-footer-tpl'];
+  const bars=type==='r'?['f-intro','f-schluss','f-intro-en','f-schluss-en']:['u-intro-tpl','u-nach-tpl','u-footer-tpl','u-intro-tpl-en','u-nach-tpl-en','u-footer-tpl-en'];
   const target=focusedTA&&bars.includes(focusedTA.id)?focusedTA:document.getElementById(bars[0]);
   if(!target)return;const s=target.selectionStart,e=target.selectionEnd,v=target.value;
   target.value=v.substring(0,s)+tag+v.substring(e);target.selectionStart=target.selectionEnd=s+tag.length;target.focus();
@@ -2727,7 +2949,7 @@ function druckeEingangFromForm(){
     <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
     <div class="brief-betreff">${_lang==='en'?'Incoming Inspection Report – Media Storage':'Eingangsprotokoll – Datenträger-Einlagerung'}</div>
     <div class="brief-sub">${_lang==='en'?'Protocol No.':'Protokoll-Nr.'}: ${pnr}</div>
-    ${TE.intro?`<div class="brief-txt">${TE.intro.replace(/\n/g,'<br>')}</div>`:''}
+    ${((_lang==='en'&&TE.intro_en)||TE.intro)?`<div class="brief-txt">${((_lang==='en'&&TE.intro_en)||TE.intro).replace(/\n/g,'<br>')}</div>`:''}
     <table class="brief-tbl">
       <thead><tr><th style="width:35%">${_lang==='en'?'Field':'Feld'}</th><th>${_lang==='en'?'Content':'Inhalt'}</th></tr></thead>
       <tbody>
@@ -2738,7 +2960,7 @@ function druckeEingangFromForm(){
         ${_escV?`<tr><td>${_lang==='en'?'Depositor':'Einlagerer'}</td><td>${k.firma}</td></tr>${_eigKV?`<tr><td>${_lang==='en'?'Main Owner':'Haupt-Eigentümer'}</td><td>${_eigKV.firma}</td></tr>`:''}${_nbEigKV?`<tr><td>${_lang==='en'?'Co-Owner':'Neben-Eigentümer'}</td><td>${_nbEigKV.firma}</td></tr>`:''}`:''}        <tr><td>${_lang==='en'?'Storage Location':'Lagerplatz'}</td><td style="color:#ccc">________________________</td></tr>
       </tbody>
     </table>
-    ${TE.nach?`<div class="brief-txt">${TE.nach.replace(/\n/g,'<br>')}</div>`:`<div class="brief-txt">${_lang==='en'?'Both parties confirm the proper handover and storage of the above-mentioned data carrier.':'Beide Parteien bestätigen die ordnungsgemäße Übergabe und Einlagerung des oben genannten Datenträgers.'}</div>`}
+    ${((_lang==='en'&&TE.nach_en)||TE.nach)?`<div class="brief-txt">${((_lang==='en'&&TE.nach_en)||TE.nach).replace(/\n/g,'<br>')}</div>`:`<div class="brief-txt">${_lang==='en'?'Both parties confirm the proper handover and storage of the above-mentioned data carrier.':'Beide Parteien bestätigen die ordnungsgemäße Übergabe und Einlagerung des oben genannten Datenträgers.'}</div>`}
     <div class="brief-sig-row">
       <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Handed over by Customer':'Übergeben durch Kunde'}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
       <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Received by':'Übernommen durch'}: ${currentUser?.name||''}</div><div class="brief-sig-line">${currentUser?.name||'___________'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ${dat}</div></div>
