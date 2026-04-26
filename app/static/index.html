@@ -413,28 +413,28 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="g2">
     <div class="card">
       <div class="stitle" data-i18n="st_k_vt">Vertragsvorlage</div>
-      <p style="font-size:12px;color:var(--mut);margin-bottom:12px;line-height:1.6">Wähle eine Firma und drucke eine Vertragsvorlage mit Briefkopf. Die Vorlage enthält alle Felder für einen Einlagerungsvertrag.</p>
-      <label>Firma</label>
+      <p style="font-size:12px;color:var(--mut);margin-bottom:12px;line-height:1.6" data-i18n="lbl_vt_vorlage_hint">Wähle eine Firma und drucke eine Vertragsvorlage mit Briefkopf. Die Vorlage enthält alle Felder für einen Einlagerungsvertrag.</p>
+      <label data-i18n="lbl_k_firma">Firma</label>
       <select id="vt-v-kunden_id" onchange="vtVorschauUpdate()"><option value="">Firma wählen</option></select>
-      <label>Vertragsnummer</label>
+      <label data-i18n="lbl_vt_nr">Vertragsnummer</label>
       <input id="vt-v-nr" placeholder="VT-2026-001">
-      <label>Vertragsbeginn</label>
+      <label data-i18n="lbl_vt_beginn">Vertragsbeginn</label>
       <input id="vt-v-beginn" type="date">
-      <label>Vertragsende (optional)</label>
+      <label data-i18n="lbl_vt_ende">Vertragsende (optional)</label>
       <input id="vt-v-ende" type="date">
-      <label>Laufzeit / Verlängerung</label>
+      <label data-i18n="lbl_vt_laufzeit">Laufzeit / Verlängerung</label>
       <input id="vt-v-laufzeit" placeholder="z.B. 12 Monate, automatische Verlängerung">
-      <label>Kündigungsfrist</label>
+      <label data-i18n="lbl_vt_kfrist">Kündigungsfrist</label>
       <input id="vt-v-kfrist" placeholder="z.B. 4 Wochen zum Monatsende">
-      <label>Besondere Vereinbarungen</label>
+      <label data-i18n="lbl_vt_bes_vereinb">Besondere Vereinbarungen</label>
       <textarea id="vt-v-notiz" rows="3" placeholder="z.B. Sonderkonditionen, Mengenrabatt..."></textarea>
       <div style="margin-top:14px;display:flex;gap:8px">
-        <button onclick="vtVorschauUpdate()" style="flex:1">Vorschau</button>
-        <button class="btn-p" onclick="vtVorlageDrucken()" style="flex:1">Vorlage drucken</button>
+        <button onclick="vtVorschauUpdate()" style="flex:1" data-i18n="lbl_vorschau">Vorschau</button>
+        <button class="btn-p" onclick="vtVorlageDrucken()" style="flex:1" data-i18n="btn_vorlage_drucken">Vorlage drucken</button>
       </div>
     </div>
     <div class="card" style="padding:0;overflow:hidden">
-      <div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)">Vorschau</div>
+      <div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)" data-i18n="lbl_vorschau">Vorschau</div>
       <div id="vt-v-vorschau" style="min-height:300px;font-family:Arial,Helvetica,sans-serif;font-size:12px">
         <div style="color:#999;padding:20px">Firma wählen...</div>
       </div>
@@ -573,18 +573,18 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <input id="r-zeitraum" placeholder="01.01.2025 - 31.12.2025">
       <div style="font-size:11px;color:var(--mut);margin-top:4px;line-height:1.5">Tagesgenau: DT ab Einlagerungsdatum anteilig. Format: TT.MM.JJJJ - TT.MM.JJJJ</div>
       <div style="margin-top:12px;border-top:1px solid var(--brd);padding-top:10px">
-        <div class="stitle" style="font-size:12px;margin-bottom:8px">Rabatt</div>
+        <div class="stitle" style="font-size:12px;margin-bottom:8px" data-i18n="lbl_rabatt">Rabatt</div>
         <div class="r2">
           <div><label data-i18n="lbl_allg_rabatt">Allgemeiner Rabatt (%)</label><input id="r-rabatt-allg" type="number" min="0" max="100" step="0.1" placeholder="0" oninput="rechnungVorschau()"></div>
           <div id="r-mengenrabatt-info" style="display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:2px"><div style="font-size:11px;color:var(--mut);line-height:1.6">Mengenrabatt wird automatisch<br>anhand der Stufentabelle (Templates) berechnet.</div></div>
         </div>
       </div>
       <div style="margin-top:12px;display:flex;gap:8px">
-        <button onclick="rechnungVorschau()" style="flex:1">Vorschau</button>
+        <button onclick="rechnungVorschau()" style="flex:1" data-i18n="lbl_vorschau">Vorschau</button>
         <button class="btn-p" onclick="rechnungExportieren()" style="flex:1">Drucken &amp; Speichern</button>
       </div>
     </div>
-    <div class="card" style="padding:0;overflow:hidden"><div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)">Vorschau</div><div id="r-vorschau" style="min-height:220px;font-family:Arial,Helvetica,sans-serif;font-size:12px"><div style="color:#999;padding:20px">Firma wählen...</div></div></div>
+    <div class="card" style="padding:0;overflow:hidden"><div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)" data-i18n="lbl_vorschau">Vorschau</div><div id="r-vorschau" style="min-height:220px;font-family:Arial,Helvetica,sans-serif;font-size:12px"><div style="color:#999;padding:20px">Firma wählen...</div></div></div>
   </div>
   </div><!-- end re-panel-neu -->
   <div class="sub-panel" id="re-panel-historie">
@@ -593,10 +593,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="stitle" style="margin:0" data-i18n="st_re_history">Rechnungshistorie</div>
       <div style="display:flex;gap:8px">
         <input type="search" id="hist-search" placeholder="Suche nach Firma, Nr..." oninput="renderRechnungHistoriePage()" style="width:220px">
-        <button onclick="if(confirm('Alle gespeicherten Rechnungen löschen?')){localStorage.removeItem('dtv_re_hist');renderRechnungHistoriePage()}" class="btn-d" style="padding:4px 10px;font-size:11px">Alle löschen</button>
+        <button onclick="if(confirm(ta('Alle gespeicherten Rechnungen löschen?','Delete all saved invoices?'))){localStorage.removeItem('dtv_re_hist');renderRechnungHistoriePage()}" class="btn-d" style="padding:4px 10px;font-size:11px" data-i18n="btn_alle_loeschen">Alle löschen</button>
       </div>
     </div>
-    <div id="r-historie-page"><div class="empty">Noch keine gespeicherten Rechnungen</div></div>
+    <div id="r-historie-page"><div class="empty" data-i18n="empty_rechnungen">Noch keine gespeicherten Rechnungen</div></div>
   </div>
   </div><!-- end re-panel-historie -->
 </div><!-- end page-rechnung -->
@@ -610,27 +610,27 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="step-panel active" id="step-1">
     <div class="g2">
       <div class="card">
-        <div class="stitle">Schritt 1</div>
-        <label>Firma</label><select id="u-kunden_id" onchange="renderUebergabeListe()"><option value="">wählen</option></select>
+        <div class="stitle" data-i18n="st_ue_step1">Schritt 1</div>
+        <label data-i18n="lbl_k_firma">Firma</label><select id="u-kunden_id" onchange="renderUebergabeListe()"><option value="">wählen</option></select>
         <label data-i18n="lbl_datum">Datum</label><input id="u-datum" type="date">
         <label data-i18n="lbl_ue_empfaenger">Übergabe an</label><input id="u-empfaenger" placeholder="Name des Empfängers">
         <label data-i18n="lbl_ue_grund">Grund</label>
         <select id="u-grund"></select>
         <div style="margin-top:12px;display:flex;gap:8px">
-          <button onclick="formularVorschau()" style="flex:1">Vorschau</button>
-          <button class="btn-w" onclick="formularHerunterladen()" style="flex:1">Formular</button>
+          <button onclick="formularVorschau()" style="flex:1" data-i18n="lbl_vorschau">Vorschau</button>
+          <button class="btn-w" onclick="formularHerunterladen()" style="flex:1" data-i18n="lbl_formular">Formular</button>
         </div>
       </div>
-      <div class="card"><div class="stitle" data-i18n="st_ue_dt">Datenträger auswählen</div><div id="u-liste"><div class="empty">Firma wählen</div></div></div>
+      <div class="card"><div class="stitle" data-i18n="st_ue_dt">Datenträger auswählen</div><div id="u-liste"><div class="empty" data-i18n="opt_firma_waehlen">Firma wählen</div></div></div>
     </div>
-    <div class="card" id="u-vorschau-card" style="display:none;padding:0;overflow:hidden"><div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)">Vorschau</div><div id="u-vorschau" style="font-family:Arial,Helvetica,sans-serif;font-size:12px"></div></div>
-    <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn-p" onclick="weiterZuSchritt2()" style="padding:9px 20px">Weiter zu Schritt 2</button></div>
+    <div class="card" id="u-vorschau-card" style="display:none;padding:0;overflow:hidden"><div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)" data-i18n="lbl_vorschau">Vorschau</div><div id="u-vorschau" style="font-family:Arial,Helvetica,sans-serif;font-size:12px"></div></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn-p" onclick="weiterZuSchritt2()" style="padding:9px 20px" data-i18n="lbl_ue_weiter">Weiter zu Schritt 2</button></div>
   </div>
   <div class="step-panel" id="step-2">
     <div class="g2">
       <div class="card">
         <div class="stitle" data-i18n="st_ue_dok">Dokument hochladen</div>
-        <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rad);padding:10px;font-size:12px;margin-bottom:12px"><strong>Ausstehende Übergabe:</strong><br><span id="s2-info" style="color:var(--mut)">-</span></div>
+        <div style="background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rad);padding:10px;font-size:12px;margin-bottom:12px"><strong data-i18n="lbl_ue_ausstehend">Ausstehende Übergabe:</strong><br><span id="s2-info" style="color:var(--mut)">-</span></div>
         <div class="upzone" id="doc-upzone" onclick="document.getElementById('u-doc-file').click()">
           <input type="file" id="u-doc-file" accept="image/*,application/pdf" style="display:none" onchange="handleUebergabeDoc(event)">
           <div id="u-doc-prev" data-i18n="txt_scan_foto_hochladen">Scan / Foto hochladen</div>
@@ -702,9 +702,9 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <textarea id="f-footer-adr" style="display:none"></textarea>
           <input id="f-iban" type="hidden"><input id="f-bic" type="hidden"><input id="f-bank" type="hidden"><input id="f-steuernr" type="hidden"><input id="f-gf" type="hidden"><input id="f-hrb" type="hidden">
         </div>
-        <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1">Zurück</button><button class="btn-p" onclick="tplSpeichern()" id="save-tpl-btn" style="flex:2">Speichern</button></div>
+        <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1" data-i18n="lbl_zurueck">Zurück</button><button class="btn-p" onclick="tplSpeichern()" id="save-tpl-btn" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
       </div>
-      <div><div class="stitle" style="margin-bottom:8px">Vorschau</div>
+      <div><div class="stitle" style="margin-bottom:8px" data-i18n="lbl_vorschau">Vorschau</div>
         <div class="brief" id="brief-preview">
           <div class="brief-header">
             <div class="brief-header-left">
@@ -753,9 +753,9 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
             <label>Footer (EN)</label><textarea id="u-footer-tpl-en" rows="2" oninput="syncUBrief()"></textarea>
           </div>
         </div>
-        <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1">Zurück</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2">Speichern</button></div>
+        <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1" data-i18n="lbl_zurueck">Zurück</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
       </div>
-      <div><div class="stitle" style="margin-bottom:8px">Vorschau</div>
+      <div><div class="stitle" style="margin-bottom:8px" data-i18n="lbl_vorschau">Vorschau</div>
         <div class="brief" id="u-brief-preview">
           <div class="brief-header">
             <div class="brief-header-left">
@@ -797,9 +797,9 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
             <label>Footer (EN)</label><textarea id="e-footer-tpl-en" rows="2" oninput="syncEVorschau()"></textarea>
           </div>
         </div>
-        <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1">Zurück</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2">Speichern</button></div>
+        <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1" data-i18n="lbl_zurueck">Zurück</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
       </div>
-      <div><div class="stitle" style="margin-bottom:8px">Vorschau</div>
+      <div><div class="stitle" style="margin-bottom:8px" data-i18n="lbl_vorschau">Vorschau</div>
         <div class="brief" id="e-brief-preview">
           <div class="brief-header">
             <div class="brief-header-left">
@@ -894,7 +894,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         </div><!-- end tpl-v-fields-en -->
         <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1" data-i18n="lbl_zuruecksetzen">Zurücksetzen</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
       </div>
-      <div><div class="stitle" style="margin-bottom:8px">Vorschau</div>
+      <div><div class="stitle" style="margin-bottom:8px" data-i18n="lbl_vorschau">Vorschau</div>
         <div class="brief" id="v-brief-preview">
           <div class="brief-header">
             <div class="brief-header-left">
@@ -952,26 +952,26 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="card">
         <div class="stitle">Ihr Unternehmen (Briefkopf)</div>
         <label>Firmenname</label><input id="adm-firmenname" placeholder="Muster GmbH" oninput="syncAdmBrief()">
-        <label>Abteilung / Zusatz</label><input id="adm-abt" placeholder="z.B. Datentresor-Service" oninput="syncAdmBrief()">
-        <label>Adresse (erscheint oben links)</label><textarea id="adm-firma-adr" rows="4" placeholder="Musterstraße 1&#10;12345 Musterstadt&#10;Tel: 0123 456789&#10;info@firma.de" oninput="syncAdmBrief()"></textarea>
-        <div class="r2"><div><label>Bearbeiter</label><input id="adm-bearbeiter" oninput="syncAdmBrief()"></div><div><label>Kürzel</label><input id="adm-kuerzel" oninput="syncAdmBrief()"></div></div>
+        <label data-i18n="lbl_abteilung">Abteilung / Zusatz</label><input id="adm-abt" placeholder="z.B. Datentresor-Service" oninput="syncAdmBrief()">
+        <label data-i18n="lbl_adm_firma_adr">Adresse (erscheint oben links)</label><textarea id="adm-firma-adr" rows="4" placeholder="Musterstraße 1&#10;12345 Musterstadt&#10;Tel: 0123 456789&#10;info@firma.de" oninput="syncAdmBrief()"></textarea>
+        <div class="r2"><div><label data-i18n="lbl_adm_bearbeiter">Bearbeiter</label><input id="adm-bearbeiter" oninput="syncAdmBrief()"></div><div><label data-i18n="lbl_adm_kuerzel">Kürzel</label><input id="adm-kuerzel" oninput="syncAdmBrief()"></div></div>
         <div class="r2"><div><label>Tel</label><input id="adm-tel" oninput="syncAdmBrief()"></div><div><label>Fax</label><input id="adm-fax" oninput="syncAdmBrief()"></div></div>
         <label>E-Mail</label><input id="adm-email" oninput="syncAdmBrief()">
-        <label>Ort (für Datumszeile)</label><input id="adm-ort" oninput="syncAdmBrief()">
+        <label data-i18n="lbl_adm_ort">Ort (für Datumszeile)</label><input id="adm-ort" oninput="syncAdmBrief()">
       </div>
       <div class="card">
-        <div class="stitle">Fußzeile &amp; Bank</div>
-        <label>Adresse (Fußzeile)</label><textarea id="adm-footer-adr" rows="3" oninput="syncAdmBrief()"></textarea>
+        <div class="stitle" data-i18n="st_fusszeile_bank">Fußzeile &amp; Bank</div>
+        <label data-i18n="lbl_adm_footer_adr">Adresse (Fußzeile)</label><textarea id="adm-footer-adr" rows="3" oninput="syncAdmBrief()"></textarea>
         <div class="r2"><div><label>IBAN</label><input id="adm-iban" oninput="syncAdmBrief()"></div><div><label>BIC</label><input id="adm-bic" oninput="syncAdmBrief()"></div></div>
         <div class="r2"><div><label>Bank</label><input id="adm-bank" oninput="syncAdmBrief()"></div><div><label>Steuernr.</label><input id="adm-steuernr" oninput="syncAdmBrief()"></div></div>
-        <label>Geschäftsführung</label><input id="adm-gf" oninput="syncAdmBrief()">
-        <label>Handelsregister</label><input id="adm-hrb" oninput="syncAdmBrief()">
+        <label data-i18n="lbl_adm_gf">Geschäftsführung</label><input id="adm-gf" oninput="syncAdmBrief()">
+        <label data-i18n="lbl_handelsregister">Handelsregister</label><input id="adm-hrb" oninput="syncAdmBrief()">
       </div>
-      <div style="display:flex;gap:8px"><button onclick="loadTemplates()" style="flex:1">Zurücksetzen</button><button class="btn-p" onclick="admUnternehmenSpeichern()" style="flex:2">💾 Speichern</button></div>
+      <div style="display:flex;gap:8px"><button onclick="loadTemplates()" style="flex:1" data-i18n="lbl_zuruecksetzen">Zurücksetzen</button><button class="btn-p" onclick="admUnternehmenSpeichern()" style="flex:2" data-i18n="lbl_speichern">💾 Speichern</button></div>
     </div>
     <div>
       <div class="card" style="border-color:var(--i-brd);background:var(--i-bg)">
-        <div style="font-size:12px;color:var(--i-txt)">Diese Daten werden für alle Dokumente verwendet: Rechnungen, Übergabe- und Eingangsformulare sowie Verträge.</div>
+        <div style="font-size:12px;color:var(--i-txt)" data-i18n="lbl_adm_info">Diese Daten werden für alle Dokumente verwendet: Rechnungen, Übergabe- und Eingangsformulare sowie Verträge.</div>
       </div>
     </div>
   </div>
@@ -1012,8 +1012,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="card">
         <div class="stitle">Datenbank</div>
         <button class="btn-s" onclick="api('/api/db/export').then(r=>r.blob()).then(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='dtv.db';a.click()})" style="width:100%;margin-bottom:8px">DB exportieren (.db)</button>
-        <button onclick="exportCSV('kunden')" style="width:100%;margin-bottom:8px;font-size:12px">Kunden als CSV</button>
-        <button onclick="exportCSV('datentraeger')" style="width:100%;margin-bottom:8px;font-size:12px">Datenträger als CSV</button>
+        <button onclick="exportCSV('kunden')" style="width:100%;margin-bottom:8px;font-size:12px" data-i18n="btn_kunden_csv">Kunden als CSV</button>
+        <button onclick="exportCSV('datentraeger')" style="width:100%;margin-bottom:8px;font-size:12px" data-i18n="btn_dt_csv">Datenträger als CSV</button>
         <button onclick="dbClear()" class="btn-d" style="width:100%;font-size:12px">Factory Reset</button>
       </div>
       <div class="card" id="saml-admin-card" style="display:none">
@@ -1096,8 +1096,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 
         <!-- ACTIONS -->
         <div style="margin-top:14px;display:flex;gap:8px">
-          <button onclick="samlLoadConfig()" style="flex:1;font-size:12px">Zurücksetzen</button>
-          <button onclick="samlSaveConfig()" class="btn-p" id="saml-save-btn" style="flex:2;font-size:12px">Konfiguration speichern</button>
+          <button onclick="samlLoadConfig()" style="flex:1;font-size:12px" data-i18n="lbl_zuruecksetzen">Zurücksetzen</button>
+          <button onclick="samlSaveConfig()" class="btn-p" id="saml-save-btn" style="flex:2;font-size:12px" data-i18n="lbl_saml_speichern">Konfiguration speichern</button>
         </div>
       </div>
     </div>
@@ -1141,8 +1141,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <button onclick="samlTestConnection()" class="btn-w" style="width:100%;margin-top:8px;font-size:12px">Verbindung testen</button>
     </div>
     <div style="margin-top:14px;display:flex;gap:8px">
-      <button onclick="samlLoadConfig()" style="flex:1;font-size:12px">Zurücksetzen</button>
-      <button onclick="samlSaveConfig()" class="btn-p" style="flex:2;font-size:12px">Konfiguration speichern</button>
+      <button onclick="samlLoadConfig()" style="flex:1;font-size:12px" data-i18n="lbl_zuruecksetzen">Zurücksetzen</button>
+      <button onclick="samlSaveConfig()" class="btn-p" style="flex:2;font-size:12px" data-i18n="lbl_saml_speichern">Konfiguration speichern</button>
     </div>
     <div style="margin-top:10px;font-size:11px;color:var(--mut)" data-i18n="lbl_saml_hint">Vollständige SAML-Konfiguration ist auch im Tab Benutzer &amp; Rollen verfügbar.</div>
   </div>
@@ -1181,7 +1181,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.2
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.3
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1580,6 +1580,33 @@ const TRANS={
   btn_mahnung:{de:'Mahnung',en:'Reminder'},
   btn_select:{de:'Wählen',en:'Select'},
   btn_formular:{de:'Formular',en:'Form'},
+  btn_alle_loeschen:{de:'Alle löschen',en:'Delete All'},
+  lbl_rabatt:{de:'Rabatt',en:'Discount'},
+  lbl_adm_kuerzel:{de:'Kürzel',en:'Abbrev.'},
+  lbl_adm_ort:{de:'Ort (für Datumszeile)',en:'City (date line)'},
+  st_fusszeile_bank:{de:'Fußzeile &amp; Bank',en:'Footer &amp; Banking'},
+  lbl_adm_footer_adr:{de:'Adresse (Fußzeile)',en:'Address (Footer)'},
+  lbl_adm_gf:{de:'Geschäftsführung',en:'Management'},
+  lbl_adm_info:{de:'Diese Daten werden für alle Dokumente verwendet: Rechnungen, Übergabe- und Eingangsformulare sowie Verträge.',en:'These details are used in all documents: invoices, handover and incoming forms, and contracts.'},
+  btn_dt_csv:{de:'Datenträger als CSV',en:'Media as CSV'},
+  btn_kunden_csv:{de:'Kunden als CSV',en:'Customers as CSV'},
+  lbl_ue_ausstehend:{de:'Ausstehende Übergabe:',en:'Pending Handover:'},
+  lbl_vt_nr:{de:'Vertragsnummer',en:'Contract No.'},
+  lbl_vt_beginn:{de:'Vertragsbeginn',en:'Contract Start'},
+  lbl_vt_ende:{de:'Vertragsende (optional)',en:'Contract End (optional)'},
+  lbl_vt_laufzeit:{de:'Laufzeit / Verlängerung',en:'Duration / Renewal'},
+  lbl_vt_kfrist:{de:'Kündigungsfrist',en:'Notice Period'},
+  lbl_vt_bes_vereinb:{de:'Besondere Vereinbarungen',en:'Special Agreements'},
+  lbl_vt_vorlage_hint:{de:'Wähle eine Firma und drucke eine Vertragsvorlage mit Briefkopf. Die Vorlage enthält alle Felder für einen Einlagerungsvertrag.',en:'Select a company to print a contract template with letterhead. The template contains all fields for a storage contract.'},
+  btn_vorlage_drucken:{de:'Vorlage drucken',en:'Print Template'},
+  msg_alle_rechnungen_del:{de:'Alle gespeicherten Rechnungen löschen?',en:'Delete all saved invoices?'},
+  msg_tpl_reset:{de:'Zurücksetzen?',en:'Reset?'},
+  msg_ue_keine_dt:{de:'Keine eingelagerten Datenträger',en:'No stored media'},
+  lbl_abteilung:{de:'Abteilung / Zusatz',en:'Department / Add-on'},
+  lbl_adm_firma_adr:{de:'Adresse (erscheint oben links)',en:'Address (top left)'},
+  lbl_adm_bearbeiter:{de:'Bearbeiter',en:'Processor'},
+  lbl_handelsregister:{de:'Handelsregister',en:'Trade Register'},
+  lbl_saml_speichern:{de:'Konfiguration speichern',en:'Save Configuration'},
   // ── select options ────────────────────────────────────
   opt_firma_waehlen:{de:'Firma wählen',en:'Select Company'},
   opt_alle_firmen:{de:'Alle Firmen',en:'All Companies'},
@@ -1711,9 +1738,18 @@ function applyLang(){
   if(ueAktiv){const v=ueAktiv.value;ueAktiv.innerHTML=`<option value="1">${t('opt_aktiv')}</option><option value="0">${t('opt_inaktiv')}</option>`;ueAktiv.value=v;}
   const rmFarbe=document.getElementById('rm-farbe');
   if(rmFarbe){const v=rmFarbe.value;rmFarbe.innerHTML=`<option value="bg">${ta('Grün','Green')}</option><option value="bi">${ta('Blau','Blue')}</option><option value="ba">${ta('Gelb','Yellow')}</option><option value="br">${ta('Rot','Red')}</option>`;rmFarbe.value=v;}
+  // k-form-title: update based on form state
+  const kFormTitle2=document.getElementById('k-form-title');
+  if(kFormTitle2){const kEb=document.getElementById('k-ebanner');kFormTitle2.textContent=kEb&&kEb.style.display!=='none'?t('txt_firma_bearb'):t('txt_neue_firma');}
   // k-save-btn: update label based on form state
   const kEbanner=document.getElementById('k-ebanner');const kSaveBtn=document.getElementById('k-save-btn');
   if(kSaveBtn&&kEbanner){kSaveBtn.textContent=kEbanner.style.display==='none'?t('txt_firma_anlegen'):t('txt_aend_speich');}
+  // r-kunden_id: rebuild company select option
+  const rKid=document.getElementById('r-kunden_id');
+  if(rKid){const rv=rKid.value;const ropts=rKid.querySelectorAll('option[data-kid]');const emOpt=rKid.querySelector('option:not([data-kid])');if(emOpt)emOpt.textContent=t('opt_firma_waehlen');rKid.value=rv;}
+  // vt-v-kunden_id: rebuild company select option
+  const vtVkid=document.getElementById('vt-v-kunden_id');
+  if(vtVkid){const vv=vtVkid.value;const emOpt2=vtVkid.querySelector('option[value=""]');if(emOpt2)emOpt2.textContent=t('opt_firma_waehlen');vtVkid.value=vv;}
 }
 function toggleLang(){
   _lang=_lang==='de'?'en':'de';
@@ -2466,14 +2502,14 @@ function saveReNr(nr){localStorage.setItem('dtv_re_nr',nr);}
 function rechnungVorschau(){
   const k=kunden.find(k=>k.id===parseInt(document.getElementById('r-kunden_id').value));
   const el=document.getElementById('r-vorschau');
-  if(!k){el.innerHTML='<div style="color:#999;padding:20px">Firma wählen...</div>';return;}
+  if(!k){el.innerHTML='<div style="color:#999;padding:20px">'+t('opt_firma_waehlen')+'...</div>';return;}
   el.innerHTML=genRechnungHtml(k);
   // Accent anwenden
   el.querySelectorAll('.brief-hr').forEach(e=>e.style.background=accentColor||'#0065A4');
 }
 function rechnungExportieren(){
   const k=kunden.find(k=>k.id===parseInt(document.getElementById('r-kunden_id').value));
-  if(!k){alert('Firma wählen.');return;}
+  if(!k){alert(t('msg_ue_firma'));return;}
   const nr=document.getElementById('r-nr').value;
   const html=genRechnungHtml(k);
   saveReNr(nr);
@@ -2487,9 +2523,9 @@ function rechnungExportieren(){
 function renderUebergabeListe(){
   const kid=parseInt(document.getElementById('u-kunden_id').value);
   const el=document.getElementById('u-liste');
-  if(!kid){el.innerHTML='<div class="empty">Firma wählen</div>';return;}
+  if(!kid){el.innerHTML='<div class="empty">'+t('opt_firma_waehlen')+'</div>';return;}
   const dts=datentraeger.filter(d=>d.kunden_id===kid&&d.status==='eingelagert');
-  if(!dts.length){el.innerHTML='<div class="empty">Keine eingelagerten Datenträger</div>';return;}
+  if(!dts.length){el.innerHTML='<div class="empty">'+t('msg_ue_keine_dt')+'</div>';return;}
   el.innerHTML=dts.map(d=>`<div class="cb-row"><input type="checkbox" id="uc-${d.id}"><label for="uc-${d.id}" style="font-size:13px;color:var(--txt);margin:0;cursor:pointer"><strong>${d.serial}</strong> - ${d.bezeichnung}<br><span style="color:var(--mut);font-size:11px">eingelagert ${fmtDate(d.einlagerungs_datum)}</span></label></div>`).join('');
 }
 
@@ -2544,7 +2580,7 @@ ${((_lang==='en'&&TU.nach_en)||TU.nach)?`<div class="brief-txt" style="margin-to
 
 function formularVorschau(){
   const k=kunden.find(k=>k.id===parseInt(document.getElementById('u-kunden_id').value));
-  if(!k){alert('Firma wählen.');return;}
+  if(!k){alert(t('msg_ue_firma'));return;}
   const sel=getAusgewaehlte();if(!sel.length){alert(t('msg_ue_dt'));return;}
   const el=document.getElementById('u-vorschau');
   el.innerHTML=genUebergabeHtml(k,sel);
@@ -2553,8 +2589,8 @@ function formularVorschau(){
 }
 function formularHerunterladen(){
   const k=kunden.find(k=>k.id===parseInt(document.getElementById('u-kunden_id').value));
-  if(!k){alert('Firma wählen.');return;}
-  const sel=getAusgewaehlte();if(!sel.length){alert('Datenträger auswählen.');return;}
+  if(!k){alert(t('msg_ue_firma'));return;}
+  const sel=getAusgewaehlte();if(!sel.length){alert(t('msg_ue_dt'));return;}
   printHtml(genUebergabeHtml(k,sel),'Übergabe_'+k.nr+'_'+document.getElementById('u-datum').value.replace(/-/g,'')+'.pdf');
 }
 
@@ -2748,7 +2784,7 @@ async function tplSpeichern(){
   if(r){const btn=document.getElementById('save-tpl-btn');btn.textContent='Gespeichert!';setTimeout(()=>btn.textContent='Speichern',2000);}
 }
 
-function tplReset(){if(!confirm('Zurücksetzen?'))return;}
+function tplReset(){if(!confirm(ta('Zurücksetzen?','Reset?')))return;}
 
 const PH_R=[{tag:'{{BRUTTO}}',lbl:'Brutto'},{tag:'{{NETTO}}',lbl:'Netto'},{tag:'{{UST}}',lbl:'USt.'},{tag:'{{RE_NR}}',lbl:'Re-Nr.'},{tag:'{{ZEITRAUM}}',lbl:'Zeitraum'},{tag:'{{KUNDE_NAME}}',lbl:'Firmenname'}];
 const PH_U=[{tag:'{{ANZAHL}}',lbl:'Anzahl'},{tag:'{{UEBERGABE_DATUM}}',lbl:'Datum'},{tag:'{{EMPFAENGER}}',lbl:'Empfänger'},{tag:'{{GRUND}}',lbl:'Grund'}];
@@ -2919,7 +2955,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.2${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.3${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -3391,7 +3427,7 @@ function renderVertraegeListe(){
         <td style="padding:7px 8px;font-size:11px">${k.vertragsende?fmtDate2(k.vertragsende)+tageBadge:'-'}</td>
         <td style="padding:7px 8px"><span class="badge ${smap[k.vertragsstatus]||'bg'}">${k.vertragsstatus||'-'}</span></td>
         <td style="padding:7px 8px;text-align:center"><span class="badge bg">${dts.length}</span></td>
-        <td style="padding:7px 8px"><div style="display:flex;gap:4px">${docBtn}<button onclick="vtVorschauFirma(${k.id})" style="padding:2px 8px;font-size:11px">Vorlage</button></div></td>
+        <td style="padding:7px 8px"><div style="display:flex;gap:4px">${docBtn}<button onclick="vtVorschauFirma(${k.id})" style="padding:2px 8px;font-size:11px">${ta('Vorlage','Template')}</button></div></td>
       </tr>`;
     }).join('')+'</tbody></table>';
 }
@@ -3477,7 +3513,7 @@ function vtVorschauUpdate(){
   const kid=parseInt(document.getElementById('vt-v-kunden_id')?.value)||0;
   const k=kunden.find(x=>x.id===kid);
   const el=document.getElementById('vt-v-vorschau');if(!el)return;
-  if(!k){el.innerHTML='<div style="color:#999;padding:20px">Firma wählen...</div>';return;}
+  if(!k){el.innerHTML='<div style="color:#999;padding:20px">'+t('opt_firma_waehlen')+'...</div>';return;}
   el.innerHTML=genVertragHtml(k);
   el.querySelectorAll('.brief-hr').forEach(e=>e.style.background=accentColor||'#0065A4');
 }

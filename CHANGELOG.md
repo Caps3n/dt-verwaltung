@@ -6,6 +6,20 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.3] – 2026-04-26
+
+### Added
+- **100 % DE/EN coverage — final round** — all remaining German strings identified in live verification are now translated:
+  - Übergabe tab: "Schritt 1" stitle, "Firma" label, "Vorschau" / "Formular" buttons, "Firma wählen" empty state, "Weiter zu Schritt 2" button, "Ausstehende Übergabe:" label
+  - Rechnung tab: "Rabatt" section heading, "Vorschau" button and stitle, "Alle löschen" button (with bilingual confirm), static "Noch keine Rechnungen" empty state
+  - Templates tab: all four "Vorschau" section headings and three "Zurück" buttons now carry `data-i18n`
+  - Kunden/Contracts sub-tab: all vt-v form labels (Vertragsnummer, Vertragsbeginn, Vertragsende, Laufzeit/Verlängerung, Kündigungsfrist, Besondere Vereinbarungen, hint paragraph), "Vorschau" / "Vorlage drucken" buttons, "Vorlage" row-action button in contracts table
+  - Admin tab: Abteilung, Bearbeiter, Kürzel, Adresse (oben links / Fußzeile), Ort (Datumszeile), Geschäftsführung, Handelsregister, "Fußzeile & Bank" stitle, info text, "Datenträger als CSV" / "Kunden als CSV" buttons, all "Zurücksetzen" / "Konfiguration speichern" buttons including SAML section
+- **JS string fixes** — `renderUebergabeListe`, `formularVorschau`, `formularHerunterladen`, `rechnungVorschau`, `rechnungExportieren`, `vtVorschauUpdate`, and `tplReset` now use `t()` / `ta()` instead of hardcoded German strings
+- **`applyLang()` additions** — `k-form-title`, `r-kunden_id` empty option, and `vt-v-kunden_id` empty option are now updated on language switch
+
+---
+
 ## [1.4.2] – 2026-04-25
 
 ### Added
