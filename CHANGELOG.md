@@ -6,6 +6,22 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.4] – 2026-04-26
+
+### Added
+- **100 % DE/EN coverage — final strings** — all remaining German strings from live v1.4.3 verification translated:
+  - Tresor form: "Wartungskosten jährlich", "Nächster Wartungstermin", "Gebäude"
+  - Kunden tab: "📄 Verträge" sub-tab button; "Haupt-Eigentümer" / "Neben-Eigentümer" escrow field labels
+  - DT form + edit overlay: "Firma" label, all three escrow labels (Haupt-/Neben-Eigentümer, Rechnungsempfänger) with hint spans
+  - Static empty states: "Keine Datenträger", "Noch keine archivierten Datenträger", "Keine abgeschlossenen Übergaben" now carry `data-i18n`
+  - Übergabe `u-kunden_id` initial option text corrected to use `opt_firma_waehlen`
+  - Templates contract editor: "§ 2 Laufzeit & Kündigung", "§ 3 Entgelt", "Standardlaufzeit", "Kündigungsfrist" labels
+- **JS string fixes** — `vt-v-kunden_id` option rebuild, Tresor detail view `dl()` labels (Wartungskosten, Wartungstermine), invoice "Keine Datenträger im Abrechnungszeitraum" all use `t()` / `ta()`
+- **`applyLang()` additions** — escrow select empty options ("gleiche Firma" / "keiner") updated on language switch
+- 22 new TRANS keys added
+
+---
+
 ## [1.4.3] – 2026-04-26
 
 ### Added

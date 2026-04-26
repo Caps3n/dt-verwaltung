@@ -278,10 +278,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div><label>Kaufdatum</label><input id="tr-kaufdatum" type="date"></div>
         <div><label>Kaufpreis (€)</label><input id="tr-kaufpreis" type="number" min="0" step="0.01" value="0"></div>
       </div>
-      <label>Wartungskosten jährlich (€)</label><input id="tr-wartungskosten" type="number" min="0" step="0.01" value="0">
+      <label data-i18n="lbl_wartungskosten">Wartungskosten jährlich (€)</label><input id="tr-wartungskosten" type="number" min="0" step="0.01" value="0">
       <div class="r2">
         <div><label>Letzter Wartungstermin</label><input id="tr-letzter-wartung" type="date"></div>
-        <div><label>Nächster Wartungstermin</label><input id="tr-naechster-wartung" type="date"></div>
+        <div><label data-i18n="lbl_naechster_wartung">Nächster Wartungstermin</label><input id="tr-naechster-wartung" type="date"></div>
       </div>
       <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:12px">
         <div class="stitle" style="font-size:12px;margin-bottom:8px">Standort</div>
@@ -290,7 +290,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <div><label>Stadt</label><input id="tr-stadt" placeholder="München"></div>
         </div>
         <div class="r2">
-          <div><label>Gebäude</label><input id="tr-gebaeude" placeholder="Hauptgebäude"></div>
+          <div><label data-i18n="lbl_gebaeude">Gebäude</label><input id="tr-gebaeude" placeholder="Hauptgebäude"></div>
           <div><label>Etage</label><input id="tr-etage" placeholder="EG, 1.OG..."></div>
         </div>
         <label>Raum</label><input id="tr-raum" placeholder="Raumnummer oder -bezeichnung">
@@ -332,7 +332,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <div id="page-kunden" class="page">
   <div class="sub-tabs">
     <button class="sub-tab active" id="kv-sub-kunden" onclick="showKundenSub('kunden')">👥 Firmen</button>
-    <button class="sub-tab" id="kv-sub-vertraege" onclick="showKundenSub('vertraege')">📄 Verträge</button>
+    <button class="sub-tab" id="kv-sub-vertraege" onclick="showKundenSub('vertraege')" data-i18n="tab_vertraege">📄 Verträge</button>
   </div>
   <div class="sub-panel active" id="kv-panel-kunden">
   <div class="g2">
@@ -377,9 +377,9 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           </label>
         </div>
         <div id="k-escrow-felder" style="display:none">
-          <label>Haupt-Eigentümer <span style="font-weight:400;color:var(--mut)">(Software-Inhaber / Main Owner)</span></label>
+          <label><span data-i18n="lbl_haupt_eigentuemer">Haupt-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_haupt_hint_k">(Software-Inhaber / Main Owner)</span></label>
           <select id="k-haupt_eigentuemer_id"><option value="">— keiner / none —</option></select>
-          <label>Neben-Eigentümer <span style="font-weight:400;color:var(--mut)">(Begünstigter / Beneficiary)</span></label>
+          <label><span data-i18n="lbl_neben_eigentuemer">Neben-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_k">(Begünstigter / Beneficiary)</span></label>
           <select id="k-neben_eigentuemer_id"><option value="">— keiner / none —</option></select>
         </div>
       </div>
@@ -474,14 +474,14 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div class="g2">
       <div class="card">
         <div class="stitle" data-i18n="st_dt_erfassen">Datenträger erfassen</div>
-        <label>Firma</label><select id="dt-kunden_id" onchange="dtKundeGewaehlt()"><option value="">Firma wählen</option></select>
+        <label data-i18n="lbl_k_firma">Firma</label><select id="dt-kunden_id" onchange="dtKundeGewaehlt()"><option value="">Firma wählen</option></select>
         <label data-i18n="lbl_bezeichnung">Bezeichnung / Typ</label><input id="dt-bezeichnung" placeholder="z.B. Festplatte, LTO-Tape">
         <label data-i18n="lbl_seriennr">Seriennummer</label><input id="dt-serial" placeholder="HDD-2024-001">
         <label><span data-i18n="lbl_interne_nr">Interne Nr.</span> <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="dt-interne_nr" placeholder="z.B. INT-001">
         <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="dt-modus" id="dt-modus-einfach" value="einfach" checked onchange="dtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="dt-modus" id="dt-modus-escrow" value="escrow" onchange="dtModusWechseln()"> Escrow / 3-Firmen</label></div>
-        <div id="dt-escrow-section" style="display:none"><label>Haupt-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional, wenn abweichend von Firma)</span></label><select id="dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
-        <label>Neben-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
-        <label>Rechnungsempfänger <span style="font-weight:400;color:var(--mut)">(optional, wenn abweichend)</span></label><select id="dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
+        <div id="dt-escrow-section" style="display:none"><label><span data-i18n="lbl_haupt_eigentuemer">Haupt-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_haupt_hint_dt">(optional, wenn abweichend von Firma)</span></label><select id="dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
+        <label><span data-i18n="lbl_neben_eigentuemer">Neben-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
+        <label><span data-i18n="lbl_rechnungsempfaenger">Rechnungsempfänger</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_rech_hint_dt">(optional, wenn abweichend)</span></label><select id="dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
         <label data-i18n="lbl_preis">Preis</label>
         <div class="r2"><input id="dt-preis" type="number" value="1.00" step="0.10" min="0"><select id="dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
         <label data-i18n="lbl_rabatt">Rabatt (%)</label><input id="dt-rabatt" type="number" value="0" min="0" max="100" step="0.1">
@@ -496,7 +496,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div class="stitle" data-i18n="st_dt_eingelagert">Eingelagerte Datenträger</div>
         <select id="dt-filter" onchange="renderDT()"><option value="">Alle Firmen</option></select>
         <input type="search" id="dt-search" placeholder="Typ, Seriennummer..." oninput="renderDT()" style="margin-top:8px">
-        <div style="margin-top:10px" id="dt-tabelle"><div class="empty">Keine Datenträger</div></div>
+        <div style="margin-top:10px" id="dt-tabelle"><div class="empty" data-i18n="empty_dt">Keine Datenträger</div></div>
       </div>
     </div>
   </div>
@@ -551,7 +551,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <select id="archiv-filter" onchange="renderArchiv()" style="width:180px"><option value="">Alle Firmen</option></select>
       </div>
     </div>
-    <div id="archiv-inhalt"><div class="empty">Noch keine archivierten Datenträger</div></div>
+    <div id="archiv-inhalt"><div class="empty" data-i18n="empty_archiv">Noch keine archivierten Datenträger</div></div>
   </div>
   </div><!-- end dt-panel-archiv -->
 </div>
@@ -611,7 +611,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div class="g2">
       <div class="card">
         <div class="stitle" data-i18n="st_ue_step1">Schritt 1</div>
-        <label data-i18n="lbl_k_firma">Firma</label><select id="u-kunden_id" onchange="renderUebergabeListe()"><option value="">wählen</option></select>
+        <label data-i18n="lbl_k_firma">Firma</label><select id="u-kunden_id" onchange="renderUebergabeListe()"><option value="" data-i18n="opt_firma_waehlen">Firma wählen</option></select>
         <label data-i18n="lbl_datum">Datum</label><input id="u-datum" type="date">
         <label data-i18n="lbl_ue_empfaenger">Übergabe an</label><input id="u-empfaenger" placeholder="Name des Empfängers">
         <label data-i18n="lbl_ue_grund">Grund</label>
@@ -649,7 +649,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="stitle" style="margin-bottom:0" data-i18n="st_ue_abg">Abgeschlossene Übergaben</div>
       <input id="uarch-search" placeholder="Suchen…" style="width:180px;font-size:12px;padding:5px 8px" oninput="renderAbgeschlosseneUebergaben()">
     </div>
-    <div id="uarch-liste"><div class="empty">Keine abgeschlossenen Übergaben</div></div>
+    <div id="uarch-liste"><div class="empty" data-i18n="empty_uebergaben">Keine abgeschlossenen Übergaben</div></div>
   </div>
 
 
@@ -854,11 +854,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div class="card"><div class="stitle">§ 1 Vertragsgegenstand</div>
           <textarea id="tv-par1" rows="4" oninput="syncVBrief()" placeholder="Der Lagerbetreiber übernimmt für den Auftraggeber die sichere Einlagerung von Datenträgern..."></textarea>
         </div>
-        <div class="card"><div class="stitle">§ 2 Laufzeit &amp; Kündigung</div>
-          <label>Standardlaufzeit</label><input id="tv-laufzeit" oninput="syncVBrief()" placeholder="z.B. 12 Monate, automatische Verlängerung">
-          <label>Kündigungsfrist</label><input id="tv-kfrist" oninput="syncVBrief()" placeholder="z.B. 4 Wochen zum Monatsende">
+        <div class="card"><div class="stitle" data-i18n="lbl_vt_section2">§ 2 Laufzeit &amp; Kündigung</div>
+          <label data-i18n="lbl_tv_laufzeit">Standardlaufzeit</label><input id="tv-laufzeit" oninput="syncVBrief()" placeholder="z.B. 12 Monate, automatische Verlängerung">
+          <label data-i18n="lbl_tv_kfrist">Kündigungsfrist</label><input id="tv-kfrist" oninput="syncVBrief()" placeholder="z.B. 4 Wochen zum Monatsende">
         </div>
-        <div class="card"><div class="stitle">§ 3 Entgelt</div>
+        <div class="card"><div class="stitle" data-i18n="lbl_vt_section3">§ 3 Entgelt</div>
           <textarea id="tv-par-entgelt" rows="3" oninput="syncVBrief()" placeholder="Die Vergütung richtet sich nach dem jeweils aktuellen Preisblatt. Rechnungen werden jährlich gestellt und sind innerhalb von 14 Tagen nach Erhalt zu begleichen."></textarea>
         </div>
         <div class="card"><div class="stitle">§ 4 Haftung</div>
@@ -1181,7 +1181,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.3
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.4
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1203,9 +1203,9 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <label data-i18n="lbl_seriennr_short">Seriennummer</label><input id="ov-dt-serial">
     <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="ov-dt-interne_nr" placeholder="z.B. INT-001">
     <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-einfach" value="einfach" checked onchange="ovDtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-escrow" value="escrow" onchange="ovDtModusWechseln()"> Escrow / 3-Firmen</label></div>
-    <div id="ov-dt-escrow-section" style="display:none"><label>Haupt-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
-    <label>Neben-Eigentümer <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
-    <label>Rechnungsempfänger <span style="font-weight:400;color:var(--mut)">(optional)</span></label><select id="ov-dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
+    <div id="ov-dt-escrow-section" style="display:none"><label><span data-i18n="lbl_haupt_eigentuemer">Haupt-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="ov-dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
+    <label><span data-i18n="lbl_neben_eigentuemer">Neben-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="ov-dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
+    <label><span data-i18n="lbl_rechnungsempfaenger">Rechnungsempfänger</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="ov-dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
     <label data-i18n="lbl_preis">Preis</label>
     <div class="r2"><input id="ov-dt-preis" type="number" step="0.10" min="0"><select id="ov-dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
     <label data-i18n="lbl_rabatt">Rabatt (%)</label><input id="ov-dt-rabatt" type="number" min="0" max="100" step="0.1">
@@ -1607,6 +1607,27 @@ const TRANS={
   lbl_adm_bearbeiter:{de:'Bearbeiter',en:'Processor'},
   lbl_handelsregister:{de:'Handelsregister',en:'Trade Register'},
   lbl_saml_speichern:{de:'Konfiguration speichern',en:'Save Configuration'},
+  lbl_wartungskosten:{de:'Wartungskosten jährlich (€)',en:'Annual Maintenance Cost (€)'},
+  lbl_naechster_wartung:{de:'Nächster Wartungstermin',en:'Next Maintenance Date'},
+  lbl_gebaeude:{de:'Gebäude',en:'Building'},
+  tab_vertraege:{de:'📄 Verträge',en:'📄 Contracts'},
+  lbl_haupt_eigentuemer:{de:'Haupt-Eigentümer',en:'Main Owner'},
+  lbl_neben_eigentuemer:{de:'Neben-Eigentümer',en:'Co-Owner'},
+  lbl_rechnungsempfaenger:{de:'Rechnungsempfänger',en:'Billing Recipient'},
+  lbl_haupt_hint_k:{de:'(Software-Inhaber / Main Owner)',en:'(Software Owner / Main Owner)'},
+  lbl_neben_hint_k:{de:'(Begünstigter / Beneficiary)',en:'(Beneficiary)'},
+  lbl_haupt_hint_dt:{de:'(optional, wenn abweichend von Firma)',en:'(optional, if different from company)'},
+  lbl_neben_hint_dt:{de:'(optional)',en:'(optional)'},
+  lbl_rech_hint_dt:{de:'(optional, wenn abweichend)',en:'(optional, if different)'},
+  lbl_gleiche_firma:{de:'— gleiche Firma —',en:'— same company —'},
+  lbl_keiner:{de:'— keiner —',en:'— none —'},
+  lbl_vt_section2:{de:'§ 2 Laufzeit &amp; Kündigung',en:'§ 2 Duration &amp; Termination'},
+  lbl_vt_section3:{de:'§ 3 Entgelt',en:'§ 3 Remuneration'},
+  lbl_tv_kfrist:{de:'Kündigungsfrist',en:'Notice Period'},
+  lbl_tv_laufzeit:{de:'Standardlaufzeit',en:'Default Duration'},
+  lbl_wartungskosten_detail:{de:'Wartungskosten/J.',en:'Maint. Cost/Y.'},
+  lbl_letzter_wartung:{de:'Letzter Wartungstermin',en:'Last Maintenance Date'},
+  lbl_keine_dt_abrechn:{de:'(Keine Datenträger im Abrechnungszeitraum)',en:'(No media in billing period)'},
   // ── select options ────────────────────────────────────
   opt_firma_waehlen:{de:'Firma wählen',en:'Select Company'},
   opt_alle_firmen:{de:'Alle Firmen',en:'All Companies'},
@@ -1738,6 +1759,9 @@ function applyLang(){
   if(ueAktiv){const v=ueAktiv.value;ueAktiv.innerHTML=`<option value="1">${t('opt_aktiv')}</option><option value="0">${t('opt_inaktiv')}</option>`;ueAktiv.value=v;}
   const rmFarbe=document.getElementById('rm-farbe');
   if(rmFarbe){const v=rmFarbe.value;rmFarbe.innerHTML=`<option value="bg">${ta('Grün','Green')}</option><option value="bi">${ta('Blau','Blue')}</option><option value="ba">${ta('Gelb','Yellow')}</option><option value="br">${ta('Rot','Red')}</option>`;rmFarbe.value=v;}
+  // Escrow select empty options (gleiche Firma / keiner)
+  ['dt-eigentuemer_id','dt-rechnungsempfaenger_id','ov-dt-eigentuemer_id','ov-dt-rechnungsempfaenger_id'].forEach(id=>{const s=document.getElementById(id);if(s){const v=s.value;const e=s.querySelector('option[value=""]');if(e)e.textContent=t('lbl_gleiche_firma');s.value=v;}});
+  ['dt-neben_eigentuemer_id','ov-dt-neben_eigentuemer_id'].forEach(id=>{const s=document.getElementById(id);if(s){const v=s.value;const e=s.querySelector('option[value=""]');if(e)e.textContent=t('lbl_keiner');s.value=v;}});
   // k-form-title: update based on form state
   const kFormTitle2=document.getElementById('k-form-title');
   if(kFormTitle2){const kEb=document.getElementById('k-ebanner');kFormTitle2.textContent=kEb&&kEb.style.display!=='none'?t('txt_firma_bearb'):t('txt_neue_firma');}
@@ -2265,7 +2289,7 @@ function genRechnungHtml(k){
     const pi=d.einheit==='monat'?`${eur(d.preis)}/Mo`:`${eur(d.preis)}/J`;
     return`<tr><td>${i+1}</td><td>${d.bezeichnung}${info}</td><td style="font-family:monospace;font-size:10px">${d.serial}</td><td class="r">${pi}</td><td class="r">${d.rabatt>0?d.rabatt+'%':'-'}</td><td class="r">${eur(betrag)}</td></tr>`;
   }).filter(Boolean);
-  if(!rows.length)rows.push('<tr><td colspan="6" style="text-align:center;color:#888;padding:12px">(Keine Datenträger im Abrechnungszeitraum)</td></tr>');
+  if(!rows.length)rows.push('<tr><td colspan="6" style="text-align:center;color:#888;padding:12px">'+ta('(Keine Datenträger im Abrechnungszeitraum)','(No media in billing period)')+'</td></tr>');
   // Mengenrabatt (kundenspezifisch)
   const anzahlPos=rows.filter(r=>!r.includes('Keine Datenträger')).length;
   let kMgTiers=[];try{kMgTiers=JSON.parse(k.mengenrabatt_json||'[]');}catch(e){}
@@ -2955,7 +2979,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.3${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.4${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -3734,7 +3758,7 @@ function showKundenSub(sub){
   if(sub==='vertraege'){
     renderVertraegeListe();
     const s=document.getElementById('vt-v-kunden_id');
-    if(s)s.innerHTML='<option value="">Firma wählen</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} – ${k.firma}</option>`).join('');
+    if(s)s.innerHTML='<option value="">'+t('opt_firma_waehlen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} – ${k.firma}</option>`).join('');
   }
 }
 
@@ -3770,11 +3794,11 @@ function tresorDetail(id){
       ${dl('Standort',loc)}
       ${dl('Kaufdatum',t.kaufdatum?fmtDate(t.kaufdatum):'')}
       ${dl('Kaufpreis',t.kaufpreis?eur(t.kaufpreis):'')}
-      ${dl('Wartungskosten/J.',t.wartungskosten_jaehrlich?eur(t.wartungskosten_jaehrlich):'')}
+      ${dl(ta('Wartungskosten/J.','Maint. Cost/Y.'),t.wartungskosten_jaehrlich?eur(t.wartungskosten_jaehrlich):'')}
     </div>
     <div>
-      ${dl('Letzter Wartungstermin',t.letzter_wartungstermin?fmtDate(t.letzter_wartungstermin):'')}
-      ${dl('Nächster Wartungstermin',t.naechster_wartungstermin?fmtDate(t.naechster_wartungstermin):'')}
+      ${dl(ta('Letzter Wartungstermin','Last Maintenance Date'),t.letzter_wartungstermin?fmtDate(t.letzter_wartungstermin):'')}
+      ${dl(ta('Nächster Wartungstermin','Next Maintenance Date'),t.naechster_wartungstermin?fmtDate(t.naechster_wartungstermin):'')}
       ${dl('Eingelagerte DT',String(t.anzahl_dt||0))}
       ${t.notizen?`<div class="drow"><span class="dlbl">Notizen</span><span style="white-space:pre-wrap">${t.notizen}</span></div>`:''}
     </div>`;
