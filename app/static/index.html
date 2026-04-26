@@ -354,9 +354,9 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       </div>
       <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:10px">
         <div class="stitle" style="font-size:12px;margin-bottom:4px" data-i18n="lbl_mg_section">Mengenrabatt-Stufen (bis 5)</div>
-        <div style="font-size:11px;color:var(--mut);margin-bottom:8px;line-height:1.5">Automatischer Rabatt auf den Nettobetrag je nach Anzahl eingelagerter Datenträger. Leere Zeilen werden ignoriert.</div>
+        <div style="font-size:11px;color:var(--mut);margin-bottom:8px;line-height:1.5" data-i18n="lbl_mg_info">Automatischer Rabatt auf den Nettobetrag je nach Anzahl eingelagerter Datenträger. Leere Zeilen werden ignoriert.</div>
         <table style="width:100%;border-collapse:collapse;font-size:12px">
-          <thead><tr><th style="text-align:left;padding:3px 4px;border-bottom:1px solid var(--brd);color:var(--mut)">Ab (Stück)</th><th style="text-align:left;padding:3px 4px;border-bottom:1px solid var(--brd);color:var(--mut)">Rabatt (%)</th><th style="text-align:left;padding:3px 4px;border-bottom:1px solid var(--brd);color:var(--mut)">Bezeichnung</th></tr></thead>
+          <thead><tr><th style="text-align:left;padding:3px 4px;border-bottom:1px solid var(--brd);color:var(--mut)" data-i18n="lbl_mg_ab">Ab (Stück)</th><th style="text-align:left;padding:3px 4px;border-bottom:1px solid var(--brd);color:var(--mut)" data-i18n="lbl_mg_pct">Rabatt (%)</th><th style="text-align:left;padding:3px 4px;border-bottom:1px solid var(--brd);color:var(--mut)" data-i18n="lbl_mg_bez">Bezeichnung</th></tr></thead>
           <tbody>
             <tr><td style="padding:2px 3px"><input id="k-mg-ab-1" type="number" min="1" placeholder="z.B. 5" style="width:100%"></td><td style="padding:2px 3px"><input id="k-mg-pct-1" type="number" min="0" max="100" step="0.1" placeholder="%" style="width:100%"></td><td style="padding:2px 3px"><input id="k-mg-lbl-1" placeholder="z.B. Mengenrabatt" style="width:100%"></td></tr>
             <tr><td style="padding:2px 3px"><input id="k-mg-ab-2" type="number" min="1" placeholder="z.B. 10" style="width:100%"></td><td style="padding:2px 3px"><input id="k-mg-pct-2" type="number" min="0" max="100" step="0.1" placeholder="%" style="width:100%"></td><td style="padding:2px 3px"><input id="k-mg-lbl-2" placeholder="z.B. Mengenrabatt" style="width:100%"></td></tr>
@@ -697,7 +697,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           </div>
         </div>
         <div class="card" style="background:var(--i-bg);border-color:var(--i-brd)">
-          <div style="font-size:12px;color:var(--i-txt)">Fußzeile, Bankdaten und Steuerinformationen werden im Admin-Bereich unter <strong>Unternehmen</strong> verwaltet.</div>
+          <div style="font-size:12px;color:var(--i-txt)" data-i18n="lbl_tpl_fuss_info">Fußzeile, Bankdaten und Steuerinformationen werden im Admin-Bereich unter <strong>Unternehmen</strong> verwaltet.</div>
           <!-- Hidden fields kept for backward compatibility -->
           <textarea id="f-footer-adr" style="display:none"></textarea>
           <input id="f-iban" type="hidden"><input id="f-bic" type="hidden"><input id="f-bank" type="hidden"><input id="f-steuernr" type="hidden"><input id="f-gf" type="hidden"><input id="f-hrb" type="hidden">
@@ -735,7 +735,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   </div>
   <div id="tpl-u" style="display:none">
     <div class="g2">
-      <div><div class="card" style="border-color:var(--i-brd);background:var(--i-bg)"><div style="font-size:12px;color:var(--i-txt)">Logo und Firmendaten werden vom Rechnungs-Template uebernommen.</div></div>
+      <div><div class="card" style="border-color:var(--i-brd);background:var(--i-bg)"><div style="font-size:12px;color:var(--i-txt)" data-i18n="lbl_tpl_logo_info">Logo und Firmendaten werden vom Rechnungs-Template übernommen.</div></div>
         <div class="card"><div class="stitle" data-i18n="st_texte">Texte</div>
           <div style="display:flex;gap:6px;margin-bottom:10px">
             <button id="tpl-u-btn-de" class="btn-p" onclick="tplEditorLang('u','de')" style="padding:3px 9px;font-size:11px" data-i18n="tpl_de_btn">🇩🇪 Deutsch</button>
@@ -768,7 +768,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <div class="brief-hr"></div><div class="brief-abs-mini" id="ub-abs-mini"></div>
           <div class="brief-main"><div class="brief-empf"><div class="brief-empf-block"><strong><span class="phc">FIRMA</span></strong><br><span class="phc">PLZ ORT</span></div></div><div class="brief-meta-r" id="ub-kontakt-r"></div></div>
           <div class="brief-ort-dat" id="ub-ort-dat"></div>
-          <div class="brief-betreff">Übergabeprotokoll <span class="phc">NR</span></div>
+          <div class="brief-betreff"><span id="ub-heading-text" data-i18n="lbl_ue_heading">Übergabeprotokoll</span> <span class="phc">NR</span></div>
           <div class="brief-txt" id="ub-intro"></div>
           <table class="brief-tbl"><thead><tr><th>Nr.</th><th>Bezeichnung</th><th>Seriennummer</th><th>Eingelagert</th></tr></thead><tbody><tr><td>1</td><td><span class="phc">BEZ</span></td><td><span class="phc">SN</span></td><td><span class="phc">DAT</span></td></tr></tbody></table>
           <div class="brief-txt" id="ub-nach"></div>
@@ -780,7 +780,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div id="tpl-e" style="display:none">
     <div class="g2">
       <div>
-        <div class="card" style="border-color:var(--i-brd);background:var(--i-bg)"><div style="font-size:12px;color:var(--i-txt)">Logo und Firmendaten werden vom Rechnungs-Template übernommen.</div></div>
+        <div class="card" style="border-color:var(--i-brd);background:var(--i-bg)"><div style="font-size:12px;color:var(--i-txt)" data-i18n="lbl_tpl_logo_info">Logo und Firmendaten werden vom Rechnungs-Template übernommen.</div></div>
         <div class="card"><div class="stitle" data-i18n="st_texte">Texte</div>
           <div style="display:flex;gap:6px;margin-bottom:10px">
             <button id="tpl-e-btn-de" class="btn-p" onclick="tplEditorLang('e','de')" style="padding:3px 9px;font-size:11px" data-i18n="tpl_de_btn">🇩🇪 Deutsch</button>
@@ -816,7 +816,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
             <div class="brief-meta-r" id="eb-kontakt-r"></div>
           </div>
           <div class="brief-ort-dat" id="eb-ort-dat"></div>
-          <div class="brief-betreff">Eingangsprotokoll – Datenträger-Einlagerung</div>
+          <div class="brief-betreff" data-i18n="lbl_ep_heading">Eingangsprotokoll – Datenträger-Einlagerung</div>
           <div style="font-size:11px;color:#666;padding:0 20px 6px">Protokoll-Nr.: <span class="phc">EG-XXXXXXXX</span></div>
           <div class="brief-txt" id="eb-intro"></div>
           <table class="brief-tbl"><thead><tr><th>Feld</th><th>Inhalt</th></tr></thead>
@@ -843,7 +843,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div id="tpl-v" style="display:none">
     <div class="g2">
       <div>
-        <div class="card" style="border-color:var(--i-brd);background:var(--i-bg)"><div style="font-size:12px;color:var(--i-txt)">Logo und Firmendaten werden vom Rechnungs-Template übernommen. Die §-Texte sind Vorlagen — beim Drucken können sie noch angepasst werden.</div></div>
+        <div class="card" style="border-color:var(--i-brd);background:var(--i-bg)"><div style="font-size:12px;color:var(--i-txt)" data-i18n="lbl_tpl_logo_info_v">Logo und Firmendaten werden vom Rechnungs-Template übernommen. Die §-Texte sind Vorlagen — beim Drucken können sie noch angepasst werden.</div></div>
         <div class="card" style="padding:10px 14px 8px">
           <div style="display:flex;gap:6px">
             <button id="tpl-v-btn-de" class="btn-p" onclick="tplEditorLang('v','de')" style="padding:3px 9px;font-size:11px" data-i18n="tpl_de_btn">🇩🇪 Deutsch</button>
@@ -914,16 +914,16 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <div class="brief-betreff">Einlagerungsvertrag Nr. <span class="phc">VT-____-___</span></div>
           <div class="brief-sub">zwischen <span id="vb-firma-kurz" class="phc">Lagerbetreiber</span> und <span class="phc">Auftraggeber</span></div>
           <div class="brief-txt"><strong>§ 1 Vertragsgegenstand</strong><br><span id="vb-par1"></span></div>
-          <div class="brief-txt"><strong>§ 2 Vertragslaufzeit</strong><br>Laufzeit: <span id="vb-laufzeit" class="phc">12 Monate</span><br>Kündigungsfrist: <span id="vb-kfrist" class="phc">4 Wochen</span></div>
-          <div class="brief-txt"><strong>§ 3 Eingelagerte Datenträger</strong><br><span style="color:#999;font-size:11px">Liste wird beim Drucken aus den Kundendaten befüllt</span></div>
+          <div class="brief-txt"><strong><span data-i18n="lbl_vt_par2_heading">§ 2 Vertragslaufzeit</span></strong><br><span data-i18n="lbl_vt_laufzeit">Laufzeit / Verlängerung</span>: <span id="vb-laufzeit" class="phc">12 Monate</span><br><span data-i18n="lbl_vt_kfrist">Kündigungsfrist</span>: <span id="vb-kfrist" class="phc">4 Wochen</span></div>
+          <div class="brief-txt"><strong><span data-i18n="lbl_vt_par3_heading">§ 3 Eingelagerte Datenträger</span></strong><br><span style="color:#999;font-size:11px" data-i18n="lbl_vt_dt_info">Liste wird beim Drucken aus den Kundendaten befüllt</span></div>
           <div class="brief-txt"><strong>§ 4 Entgelt</strong><br><span id="vb-par-entgelt"></span></div>
           <div class="brief-txt"><strong>§ 5 Haftung</strong><br><span id="vb-par-haftung"></span></div>
           <div class="brief-txt"><strong>§ 6 Datenschutz</strong><br><span id="vb-par-dsgvo"></span></div>
           <div class="brief-txt" id="vb-schluss"></div>
           <div style="display:flex;gap:20px;padding:20px 20px 8px">
-            <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">Ort, Datum</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
-            <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">Unterschrift Lagerbetreiber</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999" id="vb-sig"></div></div>
-            <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">Unterschrift Auftraggeber</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999"><span class="phc">Auftraggeber</span></div></div>
+            <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px" data-i18n="lbl_ort_datum">Ort, Datum</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
+            <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px" data-i18n="lbl_sig_lager">Unterschrift Lagerbetreiber</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999" id="vb-sig"></div></div>
+            <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px" data-i18n="lbl_sig_ag">Unterschrift Auftraggeber</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999"><span class="phc">Auftraggeber</span></div></div>
           </div>
           <div class="brief-foot"><div class="brief-foot-col" id="vb-foot-adr"></div><div class="brief-foot-col" id="vb-foot-bank"></div><div class="brief-foot-col" id="vb-foot-steuer"></div></div>
         </div>
@@ -1181,7 +1181,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.4
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.5
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1363,6 +1363,19 @@ const TRANS={
   st_logo:{de:'Logo &amp; Farbe',en:'Logo &amp; Colour'},
   st_firma:{de:'🏢 Unternehmensdaten',en:'🏢 Company Data'},
   st_texte:{de:'Texte',en:'Texts'},
+  lbl_tpl_fuss_info:{de:'Fußzeile, Bankdaten und Steuerinformationen werden im Admin-Bereich unter Unternehmen verwaltet.',en:'Footer, bank details and tax information are managed in the Admin area under Company.'},
+  lbl_tpl_logo_info:{de:'Logo und Firmendaten werden vom Rechnungs-Template übernommen.',en:'Logo and company data are taken from the invoice template.'},
+  lbl_tpl_logo_info_v:{de:'Logo und Firmendaten werden vom Rechnungs-Template übernommen. Die §-Texte sind Vorlagen — beim Drucken können sie noch angepasst werden.',en:'Logo and company data are taken from the invoice template. The § texts are templates — they can still be adjusted before printing.'},
+  lbl_ue_heading:{de:'Übergabeprotokoll',en:'Handover Protocol'},
+  lbl_ep_heading:{de:'Eingangsprotokoll – Datenträger-Einlagerung',en:'Incoming Inspection – Data Carrier Storage'},
+  lbl_vt_laufzeit_info:{de:'Laufzeit: ',en:'Duration: '},
+  lbl_vt_kfrist_info:{de:'Kündigungsfrist: ',en:'Notice period: '},
+  lbl_vt_par2_heading:{de:'§ 2 Vertragslaufzeit',en:'§ 2 Contract Duration'},
+  lbl_ort_datum:{de:'Ort, Datum',en:'Place, Date'},
+  lbl_sig_lager:{de:'Unterschrift Lagerbetreiber',en:'Signature Storage Operator'},
+  lbl_sig_ag:{de:'Unterschrift Auftraggeber',en:'Signature Client'},
+  lbl_vt_par3_heading:{de:'§ 3 Eingelagerte Datenträger',en:'§ 3 Stored Data Carriers'},
+  lbl_vt_dt_info:{de:'Liste wird beim Drucken aus den Kundendaten befüllt',en:'List is filled from customer data when printing'},
   st_benutzer:{de:'Benutzer',en:'Users'},
   st_rollen:{de:'Rollen & Berechtigungen',en:'Roles & Permissions'},
   // ── Status labels ─────────────────────────────────────
@@ -1431,6 +1444,7 @@ const TRANS={
   lbl_mg_ab:{de:'Ab (Stück)',en:'From (units)'},
   lbl_mg_pct:{de:'Rabatt (%)',en:'Discount (%)'},
   lbl_mg_bez:{de:'Bezeichnung',en:'Label'},
+  lbl_mg_info:{de:'Automatischer Rabatt auf den Nettobetrag je nach Anzahl eingelagerter Datenträger. Leere Zeilen werden ignoriert.',en:'Automatic discount on the net amount depending on the number of stored data carriers. Empty rows are ignored.'},
   // ── DT form labels ────────────────────────────────────
   lbl_k_firma:{de:'Firma',en:'Company'},
   lbl_bezeichnung:{de:'Bezeichnung / Typ',en:'Description / Type'},
@@ -2979,7 +2993,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.4${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.5${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -3505,26 +3519,26 @@ function genVertragHtml(k){
 <div class="brief-ort-dat">${T.ort||''}, ${fmtDate(today)}</div>
 <div class="brief-betreff">Einlagerungsvertrag Nr. ${vtnr}</div>
 <div class="brief-sub">zwischen ${T.firmenname||'___'} (nachfolgend „Lagerbetreiber") und ${k?.firma||'___'} (nachfolgend „Auftraggeber")</div>
-<div class="brief-txt"><strong>§ 1 Vertragsgegenstand</strong><br>${par1}</div>
-<div class="brief-txt"><strong>§ 2 Vertragslaufzeit</strong><br>
-Vertragsbeginn: <strong>${beginn}</strong><br>
-Vertragsende: <strong>${ende}</strong><br>
-Laufzeit / Verlängerung: ${laufzeit}<br>
-Kündigungsfrist: ${kfrist}</div>
-${dts.length?`<div class="brief-txt"><strong>§ 3 Eingelagerte Datenträger</strong></div>
+<div class="brief-txt"><strong>${_lang==='en'?'§ 1 Subject Matter':'§ 1 Vertragsgegenstand'}</strong><br>${par1}</div>
+<div class="brief-txt"><strong>${_lang==='en'?'§ 2 Contract Duration':'§ 2 Vertragslaufzeit'}</strong><br>
+${_lang==='en'?'Contract start':'Vertragsbeginn'}: <strong>${beginn}</strong><br>
+${_lang==='en'?'Contract end':'Vertragsende'}: <strong>${ende}</strong><br>
+${_lang==='en'?'Duration / Renewal':'Laufzeit / Verlängerung'}: ${laufzeit}<br>
+${_lang==='en'?'Notice period':'Kündigungsfrist'}: ${kfrist}</div>
+${dts.length?`<div class="brief-txt"><strong>${_lang==='en'?'§ 3 Stored Data Carriers':'§ 3 Eingelagerte Datenträger'}</strong></div>
 <table class="brief-tbl">
-  <thead><tr><th>Bezeichnung</th><th style="width:28%">Seriennummer</th><th style="width:14%">Preis/Jahr</th><th style="width:16%">Einlagerung</th></tr></thead>
+  <thead><tr><th>${_lang==='en'?'Description':'Bezeichnung'}</th><th style="width:28%">${_lang==='en'?'Serial No.':'Seriennummer'}</th><th style="width:14%">${_lang==='en'?'Price/Year':'Preis/Jahr'}</th><th style="width:16%">${_lang==='en'?'Stored':'Einlagerung'}</th></tr></thead>
   <tbody>${dts.map(d=>`<tr><td>${d.bezeichnung}</td><td style="font-family:monospace;font-size:10px">${d.serial}</td><td>${eur(d.preis_jahr)}</td><td>${fmtDate(d.einlagerungs_datum)}</td></tr>`).join('')}</tbody>
-</table>`:'<div class="brief-txt"><strong>§ 3 Eingelagerte Datenträger</strong><br>Die einzulagernden Gegenstände werden in einer separaten Anlage aufgeführt.</div>'}
-<div class="brief-txt"><strong>§ 4 Entgelt</strong><br>${parEntgelt}</div>
-<div class="brief-txt"><strong>§ 5 Haftung</strong><br>${parHaftung}</div>
-${parDsgvo?`<div class="brief-txt"><strong>§ 6 Datenschutz</strong><br>${parDsgvo}</div>`:''}
-${notiz?`<div class="brief-txt"><strong>${parDsgvo?'§ 7':'§ 6'} Besondere Vereinbarungen</strong><br>${notiz.replace(/\n/g,'<br>')}</div>`:''}
+</table>`:`<div class="brief-txt"><strong>${_lang==='en'?'§ 3 Stored Data Carriers':'§ 3 Eingelagerte Datenträger'}</strong><br>${_lang==='en'?'The items to be stored are listed in a separate annex.':'Die einzulagernden Gegenstände werden in einer separaten Anlage aufgeführt.'}</div>`}
+<div class="brief-txt"><strong>${_lang==='en'?'§ 4 Remuneration':'§ 4 Entgelt'}</strong><br>${parEntgelt}</div>
+<div class="brief-txt"><strong>${_lang==='en'?'§ 5 Liability':'§ 5 Haftung'}</strong><br>${parHaftung}</div>
+${parDsgvo?`<div class="brief-txt"><strong>${_lang==='en'?'§ 6 Data Protection':'§ 6 Datenschutz'}</strong><br>${parDsgvo}</div>`:''}
+${notiz?`<div class="brief-txt"><strong>${parDsgvo?(_lang==='en'?'§ 7 Special Agreements':'§ 7 Besondere Vereinbarungen'):(_lang==='en'?'§ 6 Special Agreements':'§ 6 Besondere Vereinbarungen')}</strong><br>${notiz.replace(/\n/g,'<br>')}</div>`:''}
 ${schluss?`<div class="brief-txt">${schluss}</div>`:''}
 <div style="display:flex;gap:30px;padding:28px 20px 10px">
-  <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">Ort, Datum</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${T.ort||''}, ___________</div></div>
-  <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">Unterschrift Lagerbetreiber</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${T.firmenname||''}</div></div>
-  <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">Unterschrift Auftraggeber</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${k?.firma||''}</div></div>
+  <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">${_lang==='en'?'Place, Date':'Ort, Datum'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${T.ort||''}, ___________</div></div>
+  <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">${_lang==='en'?'Signature Storage Operator':'Unterschrift Lagerbetreiber'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${T.firmenname||''}</div></div>
+  <div style="flex:1"><div style="font-size:11px;color:#555;margin-bottom:28px">${_lang==='en'?'Signature Client':'Unterschrift Auftraggeber'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">${k?.firma||''}</div></div>
 </div>
 <div class="brief-foot">
   ${T.footerAdr?`<div class="brief-foot-col">${T.footerAdr.replace(/\n/g,'<br>')}</div>`:''}

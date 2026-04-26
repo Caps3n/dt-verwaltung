@@ -6,6 +6,22 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.5] – 2026-04-26
+
+### Fixed
+- **100 % DE/EN coverage — complete** — all remaining German strings found in final live verification are now translated:
+  - Mengenrabatt info text + table headers ("Ab (Stück)", "Rabatt (%)", "Bezeichnung") now carry `data-i18n` using existing TRANS keys
+  - Templates: "Fußzeile, Bankdaten und Steuerinformationen werden im Admin-Bereich verwaltet." → `lbl_tpl_fuss_info`
+  - Templates: "Logo und Firmendaten werden vom Rechnungs-Template übernommen." (Übergabe + Eingang templates) → `lbl_tpl_logo_info` (also fixes typo "uebernommen")
+  - Templates: "Logo und Firmendaten … Die §-Texte sind Vorlagen …" (Vertrag template) → `lbl_tpl_logo_info_v`
+  - Template preview headings: "Übergabeprotokoll" and "Eingangsprotokoll – Datenträger-Einlagerung" → `data-i18n`
+  - Contract preview: "§ 2 Vertragslaufzeit", "Kündigungsfrist", "§ 3 Eingelagerte Datenträger", "Liste wird beim Drucken aus den Kundendaten befüllt" → `data-i18n` spans
+  - Signature labels in static contract preview: "Ort, Datum", "Unterschrift Lagerbetreiber", "Unterschrift Auftraggeber" → `data-i18n`
+- **`genVertragHtml()` JS fully translated** — all §-headings (§ 1–§ 7), Laufzeit/Kündigungsfrist labels, DT table column headers, empty DT fallback text, and signature labels now use `_lang==='en'?...:...` ternaries
+- 14 new TRANS keys added: `lbl_mg_info`, `lbl_tpl_fuss_info`, `lbl_tpl_logo_info`, `lbl_tpl_logo_info_v`, `lbl_ue_heading`, `lbl_ep_heading`, `lbl_vt_par2_heading`, `lbl_vt_par3_heading`, `lbl_vt_dt_info`, `lbl_ort_datum`, `lbl_sig_lager`, `lbl_sig_ag`, `lbl_vt_laufzeit_info`, `lbl_vt_kfrist_info`
+
+---
+
 ## [1.4.4] – 2026-04-26
 
 ### Added
