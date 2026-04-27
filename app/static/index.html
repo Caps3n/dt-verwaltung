@@ -410,33 +410,70 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   </div>
   </div><!-- end kv-panel-kunden -->
   <div class="sub-panel" id="kv-panel-vertraege">
-  <div class="g2">
-    <div class="card">
-      <div class="stitle" data-i18n="st_k_vt">Vertragsvorlage</div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div class="stitle" style="margin:0" data-i18n="st_k_vt">Vertragsvorlage</div>
+      <select id="vt-typ-select" onchange="vtTypChange()" style="flex:1;max-width:300px">
+        <option value="2p" data-i18n="lbl_vt_typ_2p">2-Parteien-Lagervertrag</option>
+        <option value="3p" data-i18n="lbl_vt_typ_3p">3-Parteien-Escrow-Vertrag</option>
+      </select>
+    </div>
+    <div id="vt-panel-2p">
       <p style="font-size:12px;color:var(--mut);margin-bottom:12px;line-height:1.6" data-i18n="lbl_vt_vorlage_hint">Wähle eine Firma und drucke eine Vertragsvorlage mit Briefkopf. Die Vorlage enthält alle Felder für einen Einlagerungsvertrag.</p>
-      <label data-i18n="lbl_k_firma">Firma</label>
-      <select id="vt-v-kunden_id" onchange="vtVorschauUpdate()"><option value="">Firma wählen</option></select>
-      <label data-i18n="lbl_vt_nr">Vertragsnummer</label>
-      <input id="vt-v-nr" placeholder="VT-2026-001">
-      <label data-i18n="lbl_vt_beginn">Vertragsbeginn</label>
-      <input id="vt-v-beginn" type="date">
-      <label data-i18n="lbl_vt_ende">Vertragsende (optional)</label>
-      <input id="vt-v-ende" type="date">
-      <label data-i18n="lbl_vt_laufzeit">Laufzeit / Verlängerung</label>
-      <input id="vt-v-laufzeit" placeholder="z.B. 12 Monate, automatische Verlängerung">
-      <label data-i18n="lbl_vt_kfrist">Kündigungsfrist</label>
-      <input id="vt-v-kfrist" placeholder="z.B. 4 Wochen zum Monatsende">
-      <label data-i18n="lbl_vt_bes_vereinb">Besondere Vereinbarungen</label>
-      <textarea id="vt-v-notiz" rows="3" placeholder="z.B. Sonderkonditionen, Mengenrabatt..."></textarea>
-      <div style="margin-top:14px;display:flex;gap:8px">
-        <button onclick="vtVorschauUpdate()" style="flex:1" data-i18n="lbl_vorschau">Vorschau</button>
-        <button class="btn-p" onclick="vtVorlageDrucken()" style="flex:1" data-i18n="btn_vorlage_drucken">Vorlage drucken</button>
+      <div class="g2">
+        <div>
+          <label data-i18n="lbl_k_firma">Firma</label>
+          <select id="vt-v-kunden_id" onchange="vtVorschauUpdate()"><option value="">Firma wählen</option></select>
+          <label data-i18n="lbl_vt_nr">Vertragsnummer</label>
+          <input id="vt-v-nr" placeholder="VT-2026-001">
+          <label data-i18n="lbl_vt_beginn">Vertragsbeginn</label>
+          <input id="vt-v-beginn" type="date">
+          <label data-i18n="lbl_vt_ende">Vertragsende (optional)</label>
+          <input id="vt-v-ende" type="date">
+          <label data-i18n="lbl_vt_laufzeit">Laufzeit / Verlängerung</label>
+          <input id="vt-v-laufzeit" placeholder="z.B. 12 Monate, automatische Verlängerung">
+          <label data-i18n="lbl_vt_kfrist">Kündigungsfrist</label>
+          <input id="vt-v-kfrist" placeholder="z.B. 4 Wochen zum Monatsende">
+          <label data-i18n="lbl_vt_bes_vereinb">Besondere Vereinbarungen</label>
+          <textarea id="vt-v-notiz" rows="3" placeholder="z.B. Sonderkonditionen, Mengenrabatt..."></textarea>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button onclick="vtVorschauUpdate()" style="flex:1" data-i18n="lbl_vorschau">Vorschau</button>
+            <button class="btn-p" onclick="vtVorlageDrucken()" style="flex:1" data-i18n="btn_vorlage_drucken">Vorlage drucken</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)" data-i18n="lbl_vorschau">Vorschau</div>
+          <div id="vt-v-vorschau" style="min-height:300px;font-family:Arial,Helvetica,sans-serif;font-size:12px;background:#fff;color:#000">
+            <div style="color:#999;padding:20px">Firma wählen...</div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)" data-i18n="lbl_vorschau">Vorschau</div>
-      <div id="vt-v-vorschau" style="min-height:300px;font-family:Arial,Helvetica,sans-serif;font-size:12px">
-        <div style="color:#999;padding:20px">Firma wählen...</div>
+    <div id="vt-panel-3p" style="display:none">
+      <p style="font-size:12px;color:var(--mut);margin-bottom:12px;line-height:1.6" data-i18n="lbl_vt_e_hint">Wähle Auftraggeber und Eigentümer und drucke eine Escrow-Vertragsvorlage mit Briefkopf.</p>
+      <div class="g2">
+        <div>
+          <label data-i18n="lbl_vt_e_auftraggeber">Auftraggeber (Firma 2)</label>
+          <select id="vt-e-auftraggeber_id" onchange="vtEscrowVorschauUpdate()"><option value="">— keine Firma —</option></select>
+          <label data-i18n="lbl_vt_e_eigentuemer">Haupt-Eigentümer (Firma 3)</label>
+          <select id="vt-e-eigentuemer_id" onchange="vtEscrowVorschauUpdate()"><option value="">— keine Firma —</option></select>
+          <label data-i18n="lbl_vt_e_neben">Neben-Eigentümer (optional)</label>
+          <select id="vt-e-neben_id" onchange="vtEscrowVorschauUpdate()"><option value="">— keine Firma —</option></select>
+          <label data-i18n="lbl_vt_e_nr">Vertragsnummer</label>
+          <input id="vt-e-nr" placeholder="ESC-2026-001" oninput="vtEscrowVorschauUpdate()">
+          <label data-i18n="lbl_vt_e_freigabe">Freigabebedingungen / Besondere Vereinbarungen</label>
+          <textarea id="vt-e-notiz" rows="3" oninput="vtEscrowVorschauUpdate()"></textarea>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button onclick="vtEscrowVorschauUpdate()" style="flex:1" data-i18n="lbl_vorschau">Vorschau</button>
+            <button class="btn-p" onclick="vtEscrowDrucken()" style="flex:1" data-i18n="btn_escrow_drucken">Escrow-Vertrag drucken</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)" data-i18n="lbl_vorschau">Vorschau</div>
+          <div id="vt-e-vorschau" style="min-height:300px;font-family:Arial,Helvetica,sans-serif;font-size:12px;background:#fff;color:#000">
+            <div style="color:#999;padding:20px" data-i18n="opt_firma_waehlen">Firma wählen</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -455,34 +492,6 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       </div>
     </div>
     <div id="vt-v-liste"><div class="empty">Laden...</div></div>
-  </div>
-  <div class="card" style="margin-top:0;border-color:var(--i-brd);background:var(--i-bg)">
-    <div class="stitle" data-i18n="st_k_vt_escrow">Escrow-Vertragsvorlage (3 Parteien)</div>
-    <p style="font-size:12px;color:var(--mut);margin-bottom:12px;line-height:1.6" data-i18n="lbl_vt_e_hint">Wähle Auftraggeber und Eigentümer und drucke eine Escrow-Vertragsvorlage mit Briefkopf.</p>
-    <div class="g2">
-      <div>
-        <label data-i18n="lbl_vt_e_auftraggeber">Auftraggeber (Firma 2)</label>
-        <select id="vt-e-auftraggeber_id" onchange="vtEscrowVorschauUpdate()"><option value="">— keine Firma —</option></select>
-        <label data-i18n="lbl_vt_e_eigentuemer">Haupt-Eigentümer (Firma 3)</label>
-        <select id="vt-e-eigentuemer_id" onchange="vtEscrowVorschauUpdate()"><option value="">— keine Firma —</option></select>
-        <label data-i18n="lbl_vt_e_neben">Neben-Eigentümer (optional)</label>
-        <select id="vt-e-neben_id" onchange="vtEscrowVorschauUpdate()"><option value="">— keine Firma —</option></select>
-        <label data-i18n="lbl_vt_e_nr">Vertragsnummer</label>
-        <input id="vt-e-nr" placeholder="ESC-2026-001" oninput="vtEscrowVorschauUpdate()">
-        <label data-i18n="lbl_vt_e_freigabe">Freigabebedingungen / Besondere Vereinbarungen</label>
-        <textarea id="vt-e-notiz" rows="3" oninput="vtEscrowVorschauUpdate()"></textarea>
-        <div style="margin-top:14px;display:flex;gap:8px">
-          <button onclick="vtEscrowVorschauUpdate()" style="flex:1" data-i18n="lbl_vorschau">Vorschau</button>
-          <button class="btn-p" onclick="vtEscrowDrucken()" style="flex:1" data-i18n="btn_escrow_drucken">Escrow-Vertrag drucken</button>
-        </div>
-      </div>
-      <div class="card" style="padding:0;overflow:hidden">
-        <div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)" data-i18n="lbl_vorschau">Vorschau</div>
-        <div id="vt-e-vorschau" style="min-height:300px;font-family:Arial,Helvetica,sans-serif;font-size:12px">
-          <div style="color:#999;padding:20px" data-i18n="opt_firma_waehlen">Firma wählen</div>
-        </div>
-      </div>
-    </div>
   </div>
   </div><!-- end kv-panel-vertraege -->
 </div><!-- end page-kunden -->
@@ -1209,7 +1218,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.6
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.7
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1677,6 +1686,8 @@ const TRANS={
   lbl_vt_kfrist:{de:'Kündigungsfrist',en:'Notice Period'},
   lbl_vt_bes_vereinb:{de:'Besondere Vereinbarungen',en:'Special Agreements'},
   lbl_vt_vorlage_hint:{de:'Wähle eine Firma und drucke eine Vertragsvorlage mit Briefkopf. Die Vorlage enthält alle Felder für einen Einlagerungsvertrag.',en:'Select a company to print a contract template with letterhead. The template contains all fields for a storage contract.'},
+  lbl_vt_typ_2p:{de:'2-Parteien-Lagervertrag',en:'2-Party Storage Contract'},
+  lbl_vt_typ_3p:{de:'3-Parteien-Escrow-Vertrag',en:'3-Party Escrow Contract'},
   btn_vorlage_drucken:{de:'Vorlage drucken',en:'Print Template'},
   msg_alle_rechnungen_del:{de:'Alle gespeicherten Rechnungen löschen?',en:'Delete all saved invoices?'},
   msg_tpl_reset:{de:'Zurücksetzen?',en:'Reset?'},
@@ -1838,6 +1849,7 @@ function applyLang(){
     if(first&&first.value==='')first.textContent=t('lbl_opt_keine_firma');
     sel.value=v;
   });
+  const vtTypSel=document.getElementById('vt-typ-select');if(vtTypSel){const v=vtTypSel.value;vtTypSel.innerHTML=`<option value="2p">${t('lbl_vt_typ_2p')}</option><option value="3p">${t('lbl_vt_typ_3p')}</option>`;vtTypSel.value=v;}
   const vtFilter=document.getElementById('vt-v-status-filter');
   if(vtFilter){const v=vtFilter.value;vtFilter.innerHTML=`<option value="">${t('opt_alle_status')}</option><option value="aktiv">${t('opt_aktiv')}</option><option value="gekuendigt">${t('opt_gekuendigt')}</option><option value="abgelaufen">${t('opt_abgelaufen')}</option><option value="pausiert">${t('opt_pausiert')}</option>`;vtFilter.value=v;}
   ['dt-einheit','ov-dt-einheit'].forEach(id=>{const s=document.getElementById(id);if(!s)return;const v=s.value;s.innerHTML=`<option value="monat">${t('opt_pro_monat')}</option><option value="jahr">${t('opt_pro_jahr')}</option>`;s.value=v;});
@@ -3065,7 +3077,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.6${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.7${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -3619,6 +3631,13 @@ ${schluss?`<div class="brief-txt">${schluss}</div>`:''}
 </div>`;
 }
 
+function vtTypChange(){
+  const v=document.getElementById('vt-typ-select')?.value||'2p';
+  const p2=document.getElementById('vt-panel-2p');
+  const p3=document.getElementById('vt-panel-3p');
+  if(p2)p2.style.display=v==='2p'?'':'none';
+  if(p3)p3.style.display=v==='3p'?'':'none';
+}
 function vtEscrowVorschauUpdate(){
   const agId=parseInt(document.getElementById('vt-e-auftraggeber_id')?.value)||0;
   const eigId=parseInt(document.getElementById('vt-e-eigentuemer_id')?.value)||0;

@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.7] – 2026-04-27
+
+### Changed
+- Contracts tab (Kunden → Verträge): merged 2-party and 3-party escrow contract forms into a single unified card with a type-selector dropdown — cleaner layout, one place for all contracts
+- Contract preview backgrounds are now always white (`background:#fff; color:#000`), independent of the app's dark/light theme
+- `vtTypChange()` JS function toggles between `vt-panel-2p` and `vt-panel-3p` panels on dropdown change
+- `applyLang()` now rebuilds `vt-typ-select` options on language switch (DE/EN)
+- Added TRANS keys: `lbl_vt_typ_2p` (2-Party Storage Contract), `lbl_vt_typ_3p` (3-Party Escrow Contract)
+
+---
+
 ## [1.4.6] – 2026-04-27
 
 ### Added
