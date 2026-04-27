@@ -258,8 +258,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div id="db-typen-liste" style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0"></div>
   </div>
   <div class="card">
-    <div class="stitle">🔒 Tresor-Wartungstermine <span id="db-wartung-count" class="badge ba" style="font-size:11px">0</span></div>
-    <div id="db-wartung-liste"><div class="empty">Keine anstehenden Wartungstermine</div></div>
+    <div class="stitle" data-i18n="st_db_wartung">🔒 Tresor-Wartungstermine <span id="db-wartung-count" class="badge ba" style="font-size:11px">0</span></div>
+    <div id="db-wartung-liste"><div class="empty" data-i18n="empty_db_wartung">Keine anstehenden Wartungstermine</div></div>
   </div>
 </div>
 
@@ -270,43 +270,43 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div id="tr-ebanner" class="ebanner" style="display:none"><span data-i18n="lbl_bearbmodus">Bearbeitungsmodus</span><button onclick="tresorAbbrechen()" style="padding:3px 8px;font-size:11px" data-i18n="lbl_abbrechen">Abbrechen</button></div>
       <div class="stitle" id="tr-form-title">Neuen Tresor anlegen</div>
       <input type="hidden" id="tr-id">
-      <label>Bezeichnung / Name</label><input id="tr-bezeichnung" placeholder="z.B. Tresor A1, Sicherheitsschrank Nord">
-      <label>Hersteller</label><input id="tr-hersteller" placeholder="z.B. Burg Wächter, Hartmann">
-      <label>Modell</label><input id="tr-modell">
-      <label>Seriennummer</label><input id="tr-seriennummer">
+      <label data-i18n="lbl_tr_bezeichnung">Bezeichnung / Name</label><input id="tr-bezeichnung" placeholder="z.B. Tresor A1, Sicherheitsschrank Nord">
+      <label data-i18n="lbl_tr_hersteller">Hersteller</label><input id="tr-hersteller" placeholder="z.B. Burg Wächter, Hartmann">
+      <label data-i18n="lbl_tr_modell">Modell</label><input id="tr-modell">
+      <label data-i18n="lbl_tr_seriennummer">Seriennummer</label><input id="tr-seriennummer">
       <div class="r2">
-        <div><label>Kaufdatum</label><input id="tr-kaufdatum" type="date"></div>
-        <div><label>Kaufpreis (€)</label><input id="tr-kaufpreis" type="number" min="0" step="0.01" value="0"></div>
+        <div><label data-i18n="lbl_tr_kaufdatum">Kaufdatum</label><input id="tr-kaufdatum" type="date"></div>
+        <div><label data-i18n="lbl_tr_kaufpreis">Kaufpreis (€)</label><input id="tr-kaufpreis" type="number" min="0" step="0.01" value="0"></div>
       </div>
       <label data-i18n="lbl_wartungskosten">Wartungskosten jährlich (€)</label><input id="tr-wartungskosten" type="number" min="0" step="0.01" value="0">
       <div class="r2">
-        <div><label>Letzter Wartungstermin</label><input id="tr-letzter-wartung" type="date"></div>
+        <div><label data-i18n="lbl_tr_letzter_wartung">Letzter Wartungstermin</label><input id="tr-letzter-wartung" type="date"></div>
         <div><label data-i18n="lbl_naechster_wartung">Nächster Wartungstermin</label><input id="tr-naechster-wartung" type="date"></div>
       </div>
       <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:12px">
-        <div class="stitle" style="font-size:12px;margin-bottom:8px">Standort</div>
+        <div class="stitle" style="font-size:12px;margin-bottom:8px" data-i18n="st_standort">Standort</div>
         <div class="r2">
           <div><label>Land</label><input id="tr-land" placeholder="Deutschland" value="Deutschland"></div>
-          <div><label>Stadt</label><input id="tr-stadt" placeholder="München"></div>
+          <div><label data-i18n="lbl_tr_stadt">Stadt</label><input id="tr-stadt" placeholder="München"></div>
         </div>
         <div class="r2">
           <div><label data-i18n="lbl_gebaeude">Gebäude</label><input id="tr-gebaeude" placeholder="Hauptgebäude"></div>
-          <div><label>Etage</label><input id="tr-etage" placeholder="EG, 1.OG..."></div>
+          <div><label data-i18n="lbl_tr_etage">Etage</label><input id="tr-etage" placeholder="EG, 1.OG..."></div>
         </div>
-        <label>Raum</label><input id="tr-raum" placeholder="Raumnummer oder -bezeichnung">
+        <label data-i18n="lbl_tr_raum">Raum</label><input id="tr-raum" placeholder="Raumnummer oder -bezeichnung">
       </div>
-      <label style="margin-top:12px">Notizen</label>
+      <label style="margin-top:12px" data-i18n="lbl_tr_notizen">Notizen</label>
       <textarea id="tr-notizen" rows="2" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--brd);border-radius:var(--rad);background:var(--surf);color:var(--txt);font-family:inherit;font-size:13px;resize:vertical"></textarea>
       <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:12px">
         <div class="stitle" style="font-size:12px;margin-bottom:8px" data-i18n="st_wartungsvertrag">Wartungsvertrag</div>
         <div class="upzone" id="tr-wv-zone" onclick="document.getElementById('tr-wv-file').click()">
           <input type="file" id="tr-wv-file" accept="application/pdf,image/*" style="display:none" onchange="handleTresorWV(event)">
-          <div id="tr-wv-prev">PDF / Scan hochladen</div>
+          <div id="tr-wv-prev" data-i18n="lbl_tr_wv_upload">PDF / Scan hochladen</div>
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:16px">
-        <button onclick="tresorAbbrechen()" style="flex:1">Abbrechen</button>
-        <button class="btn-p" onclick="tresorSpeichern()" style="flex:2">Speichern</button>
+        <button onclick="tresorAbbrechen()" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button>
+        <button class="btn-p" onclick="tresorSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button>
       </div>
     </div>
     <div class="card">
@@ -367,13 +367,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         </table>
       </div>
       <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:10px">
-        <div class="stitle" style="font-size:12px;margin-bottom:8px">Einlagerungsart / Storage Type</div>
+        <div class="stitle" style="font-size:12px;margin-bottom:8px" data-i18n="lbl_sz_section">Einlagerungsart</div>
         <div style="display:flex;gap:18px;margin-bottom:10px;font-size:13px;flex-wrap:wrap">
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-            <input type="radio" name="k-szenario" id="k-sz-a" value="A" checked onchange="kSzenarToWechseln()"> Szenario A – Eigene Einlagerung
+            <input type="radio" name="k-szenario" id="k-sz-a" value="A" checked onchange="kSzenarToWechseln()"> <span data-i18n="lbl_sz_a">Szenario A – Eigene Einlagerung</span>
           </label>
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-            <input type="radio" name="k-szenario" id="k-sz-b" value="B" onchange="kSzenarToWechseln()"> Szenario B – Escrow / 3 Firmen
+            <input type="radio" name="k-szenario" id="k-sz-b" value="B" onchange="kSzenarToWechseln()"> <span data-i18n="lbl_sz_b">Szenario B – Escrow / 2 Firmen</span>
           </label>
         </div>
         <div id="k-escrow-felder" style="display:none">
@@ -455,6 +455,34 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       </div>
     </div>
     <div id="vt-v-liste"><div class="empty">Laden...</div></div>
+  </div>
+  <div class="card" style="margin-top:0;border-color:var(--i-brd);background:var(--i-bg)">
+    <div class="stitle" data-i18n="st_k_vt_escrow">Escrow-Vertragsvorlage (3 Parteien)</div>
+    <p style="font-size:12px;color:var(--mut);margin-bottom:12px;line-height:1.6" data-i18n="lbl_vt_e_hint">Wähle Auftraggeber und Eigentümer und drucke eine Escrow-Vertragsvorlage mit Briefkopf.</p>
+    <div class="g2">
+      <div>
+        <label data-i18n="lbl_vt_e_auftraggeber">Auftraggeber (Firma 2)</label>
+        <select id="vt-e-auftraggeber_id" onchange="vtEscrowVorschauUpdate()"><option value="">— keine Firma —</option></select>
+        <label data-i18n="lbl_vt_e_eigentuemer">Haupt-Eigentümer (Firma 3)</label>
+        <select id="vt-e-eigentuemer_id" onchange="vtEscrowVorschauUpdate()"><option value="">— keine Firma —</option></select>
+        <label data-i18n="lbl_vt_e_neben">Neben-Eigentümer (optional)</label>
+        <select id="vt-e-neben_id" onchange="vtEscrowVorschauUpdate()"><option value="">— keine Firma —</option></select>
+        <label data-i18n="lbl_vt_e_nr">Vertragsnummer</label>
+        <input id="vt-e-nr" placeholder="ESC-2026-001" oninput="vtEscrowVorschauUpdate()">
+        <label data-i18n="lbl_vt_e_freigabe">Freigabebedingungen / Besondere Vereinbarungen</label>
+        <textarea id="vt-e-notiz" rows="3" oninput="vtEscrowVorschauUpdate()"></textarea>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button onclick="vtEscrowVorschauUpdate()" style="flex:1" data-i18n="lbl_vorschau">Vorschau</button>
+          <button class="btn-p" onclick="vtEscrowDrucken()" style="flex:1" data-i18n="btn_escrow_drucken">Escrow-Vertrag drucken</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)" data-i18n="lbl_vorschau">Vorschau</div>
+        <div id="vt-e-vorschau" style="min-height:300px;font-family:Arial,Helvetica,sans-serif;font-size:12px">
+          <div style="color:#999;padding:20px" data-i18n="opt_firma_waehlen">Firma wählen</div>
+        </div>
+      </div>
+    </div>
   </div>
   </div><!-- end kv-panel-vertraege -->
 </div><!-- end page-kunden -->
@@ -581,7 +609,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       </div>
       <div style="margin-top:12px;display:flex;gap:8px">
         <button onclick="rechnungVorschau()" style="flex:1" data-i18n="lbl_vorschau">Vorschau</button>
-        <button class="btn-p" onclick="rechnungExportieren()" style="flex:1">Drucken &amp; Speichern</button>
+        <button class="btn-p" onclick="rechnungExportieren()" style="flex:1" data-i18n="lbl_drucken_speichern">Drucken &amp; Speichern</button>
       </div>
     </div>
     <div class="card" style="padding:0;overflow:hidden"><div class="stitle" style="padding:10px 16px;border-bottom:1px solid var(--brd)" data-i18n="lbl_vorschau">Vorschau</div><div id="r-vorschau" style="min-height:220px;font-family:Arial,Helvetica,sans-serif;font-size:12px"><div style="color:#999;padding:20px">Firma wählen...</div></div></div>
@@ -721,9 +749,9 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
             <div class="brief-meta-r" id="b-kontakt-r"></div>
           </div>
           <div class="brief-ort-dat" id="b-ort-dat"></div>
-          <div class="brief-betreff">Rechnung <span class="phc">RE_NR</span></div>
+          <div class="brief-betreff"><span data-i18n="lbl_re_heading">Rechnung</span> <span class="phc">RE_NR</span></div>
           <div class="brief-txt" id="b-anrede"></div><div class="brief-txt" id="b-intro"></div>
-          <table class="brief-tbl"><thead><tr><th style="width:6%">Pos.</th><th>Bezeichnung</th><th>Serial</th><th class="r" style="width:15%">Preis</th><th class="r" style="width:12%">Rabatt</th><th class="r" style="width:17%">Betrag</th></tr></thead>
+          <table class="brief-tbl"><thead><tr><th style="width:6%">Pos.</th><th data-i18n="lbl_re_col_bez">Bezeichnung</th><th>Serial</th><th class="r" style="width:15%" data-i18n="lbl_re_col_preis">Preis</th><th class="r" style="width:12%" data-i18n="lbl_re_col_rabatt">Rabatt</th><th class="r" style="width:17%" data-i18n="lbl_re_col_betrag">Betrag</th></tr></thead>
           <tbody><tr><td>1</td><td><span class="phc">BEZ</span></td><td><span class="phc">SN</span></td><td class="r"><span class="phc">PREIS</span></td><td class="r">-</td><td class="r"><span class="phc">BETRAG</span></td></tr></tbody></table>
           <div class="brief-sums"><table><tr><td style="color:#666">Netto:</td><td><span class="phc">NETTO</span></td></tr><tr><td style="color:#666">USt. 19%:</td><td><span class="phc">UST</span></td></tr><tr class="tot"><td>Brutto:</td><td><span class="phc">BRUTTO</span></td></tr></table></div>
           <div class="brief-txt" id="b-schluss"></div>
@@ -817,11 +845,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           </div>
           <div class="brief-ort-dat" id="eb-ort-dat"></div>
           <div class="brief-betreff" data-i18n="lbl_ep_heading">Eingangsprotokoll – Datenträger-Einlagerung</div>
-          <div style="font-size:11px;color:#666;padding:0 20px 6px">Protokoll-Nr.: <span class="phc">EG-XXXXXXXX</span></div>
+          <div style="font-size:11px;color:#666;padding:0 20px 6px"><span data-i18n="lbl_ep_protokoll_nr">Protokoll-Nr.:</span> <span class="phc">EG-XXXXXXXX</span></div>
           <div class="brief-txt" id="eb-intro"></div>
           <table class="brief-tbl"><thead><tr><th>Feld</th><th>Inhalt</th></tr></thead>
           <tbody>
-            <tr><td style="width:35%;color:#555">Bezeichnung / Typ</td><td><span class="phc">BEZEICHNUNG</span></td></tr>
+            <tr><td style="width:35%;color:#555" data-i18n="lbl_ep_bez_typ">Bezeichnung / Typ</td><td><span class="phc">BEZEICHNUNG</span></td></tr>
             <tr><td style="color:#555">Seriennummer</td><td><span class="phc">SERIAL</span></td></tr>
             <tr><td style="color:#555">Einlagerungsdatum</td><td><span class="phc">DATUM</span></td></tr>
             <tr><td style="color:#555">Preis</td><td><span class="phc">PREIS</span></td></tr>
@@ -830,8 +858,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <div class="brief-txt" id="eb-nach"></div>
           <div style="padding:12px 20px;font-size:12px">
             <div style="display:flex;gap:30px;margin-top:8px">
-              <div style="flex:1"><div style="color:#666;font-size:11px;margin-bottom:24px">Unterschrift Kunde</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">Datum: ___________</div></div>
-              <div style="flex:1"><div style="color:#666;font-size:11px;margin-bottom:24px">Unterschrift Bearbeiter</div><div class="brief-sig" id="eb-sig" style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
+              <div style="flex:1"><div style="color:#666;font-size:11px;margin-bottom:24px" data-i18n="lbl_ep_unt_kunde">Unterschrift Kunde</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">Datum: ___________</div></div>
+              <div style="flex:1"><div style="color:#666;font-size:11px;margin-bottom:24px" data-i18n="lbl_ep_unt_bearb">Unterschrift Bearbeiter</div><div class="brief-sig" id="eb-sig" style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
             </div>
           </div>
           <div class="brief-foot"><div class="brief-foot-col" id="eb-foot-text"></div><div class="brief-foot-col" id="eb-foot-bank"></div><div class="brief-foot-col" id="eb-foot-steuer"></div></div>
@@ -912,7 +940,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           </div>
           <div class="brief-ort-dat" id="vb-ort-dat"></div>
           <div class="brief-betreff">Einlagerungsvertrag Nr. <span class="phc">VT-____-___</span></div>
-          <div class="brief-sub">zwischen <span id="vb-firma-kurz" class="phc">Lagerbetreiber</span> und <span class="phc">Auftraggeber</span></div>
+          <div class="brief-sub">zwischen <span id="vb-firma-kurz" class="phc">Lagerbetreiber</span> und <span class="phc" data-i18n="lbl_ag_placeholder">Auftraggeber</span></div>
           <div class="brief-txt"><strong>§ 1 Vertragsgegenstand</strong><br><span id="vb-par1"></span></div>
           <div class="brief-txt"><strong><span data-i18n="lbl_vt_par2_heading">§ 2 Vertragslaufzeit</span></strong><br><span data-i18n="lbl_vt_laufzeit">Laufzeit / Verlängerung</span>: <span id="vb-laufzeit" class="phc">12 Monate</span><br><span data-i18n="lbl_vt_kfrist">Kündigungsfrist</span>: <span id="vb-kfrist" class="phc">4 Wochen</span></div>
           <div class="brief-txt"><strong><span data-i18n="lbl_vt_par3_heading">§ 3 Eingelagerte Datenträger</span></strong><br><span style="color:#999;font-size:11px" data-i18n="lbl_vt_dt_info">Liste wird beim Drucken aus den Kundendaten befüllt</span></div>
@@ -936,7 +964,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <div id="page-admin" class="page">
   <div class="sub-tabs" id="admin-sub-nav">
     <button class="sub-tab active" id="adm-sub-unternehmen" onclick="showAdminSub('unternehmen')">🏢 Unternehmen</button>
-    <button class="sub-tab" id="adm-sub-benutzer" onclick="showAdminSub('benutzer')">👤 Benutzer &amp; Rollen</button>
+    <button class="sub-tab" id="adm-sub-benutzer" onclick="showAdminSub('benutzer')" data-i18n="tab_benutzer_rollen">👤 Benutzer &amp; Rollen</button>
     <button class="sub-tab" id="adm-sub-saml" onclick="showAdminSub('saml')">🔐 SAML/SSO</button>
   </div>
 
@@ -1181,7 +1209,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.5
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.6
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1433,6 +1461,43 @@ const TRANS={
   lbl_plz:{de:'PLZ',en:'ZIP'},
   lbl_ort:{de:'Ort',en:'City'},
   lbl_land:{de:'Land',en:'Country'},
+  st_db_wartung:{de:'🔒 Tresor-Wartungstermine',en:'🔒 Safe Maintenance Dates'},
+  lbl_tr_bezeichnung:{de:'Bezeichnung / Name',en:'Name / Description'},
+  lbl_tr_hersteller:{de:'Hersteller',en:'Manufacturer'},
+  lbl_tr_modell:{de:'Modell',en:'Model'},
+  lbl_tr_seriennummer:{de:'Seriennummer',en:'Serial Number'},
+  lbl_tr_kaufdatum:{de:'Kaufdatum',en:'Purchase Date'},
+  lbl_tr_kaufpreis:{de:'Kaufpreis (€)',en:'Purchase Price (€)'},
+  lbl_tr_letzter_wartung:{de:'Letzter Wartungstermin',en:'Last Maintenance Date'},
+  lbl_tr_wv_upload:{de:'PDF / Scan hochladen',en:'Upload PDF / Scan'},
+  st_standort:{de:'Standort',en:'Location'},
+  lbl_tr_stadt:{de:'Stadt',en:'City'},
+  lbl_tr_etage:{de:'Etage',en:'Floor'},
+  lbl_tr_raum:{de:'Raum',en:'Room'},
+  lbl_tr_notizen:{de:'Notizen',en:'Notes'},
+  lbl_sz_section:{de:'Einlagerungsart',en:'Storage Type'},
+  lbl_sz_a:{de:'Szenario A – Eigene Einlagerung',en:'Scenario A – Own Storage'},
+  lbl_sz_b:{de:'Szenario B – Escrow / 2 Firmen',en:'Scenario B – Escrow / 2 Companies'},
+  lbl_re_heading:{de:'Rechnung',en:'Invoice'},
+  lbl_re_col_bez:{de:'Bezeichnung',en:'Description'},
+  lbl_re_col_preis:{de:'Preis',en:'Price'},
+  lbl_re_col_rabatt:{de:'Rabatt',en:'Discount'},
+  lbl_re_col_betrag:{de:'Betrag',en:'Amount'},
+  lbl_ep_protokoll_nr:{de:'Protokoll-Nr.:',en:'Protocol No.:'},
+  lbl_ep_bez_typ:{de:'Bezeichnung / Typ',en:'Description / Type'},
+  lbl_ep_unt_kunde:{de:'Unterschrift Kunde',en:'Signature Client'},
+  lbl_ep_unt_bearb:{de:'Unterschrift Bearbeiter',en:'Signature Agent'},
+  lbl_ag_placeholder:{de:'Auftraggeber',en:'Client'},
+  tab_benutzer_rollen:{de:'👤 Benutzer &amp; Rollen',en:'👤 Users &amp; Roles'},
+  st_k_vt_escrow:{de:'Escrow-Vertragsvorlage (3 Parteien)',en:'Escrow Contract Template (3 Parties)'},
+  lbl_vt_e_hint:{de:'Wähle Auftraggeber und Eigentümer und drucke eine Escrow-Vertragsvorlage mit Briefkopf.',en:'Select the principal and owner and print an escrow contract template with letterhead.'},
+  lbl_vt_e_auftraggeber:{de:'Auftraggeber (Firma 2)',en:'Principal (Party 2)'},
+  lbl_vt_e_eigentuemer:{de:'Haupt-Eigentümer (Firma 3)',en:'Main Owner (Party 3)'},
+  lbl_vt_e_neben:{de:'Neben-Eigentümer (optional)',en:'Co-Owner (optional)'},
+  lbl_vt_e_nr:{de:'Vertragsnummer',en:'Contract Number'},
+  lbl_vt_e_freigabe:{de:'Freigabebedingungen / Besondere Vereinbarungen',en:'Release Conditions / Special Agreements'},
+  btn_escrow_drucken:{de:'Escrow-Vertrag drucken',en:'Print Escrow Contract'},
+  lbl_opt_keine_firma:{de:'— keine Firma —',en:'— no company —'},
   lbl_sap_nr:{de:'SAP-Nummer',en:'SAP Number'},
   lbl_vt_section:{de:'Vertrag',en:'Contract'},
   lbl_vertragsnr:{de:'Vertragsnummer',en:'Contract No.'},
@@ -1766,6 +1831,13 @@ function applyLang(){
   const kAnrede=document.getElementById('k-anrede');
   if(kAnrede){const v=kAnrede.value;kAnrede.innerHTML=`<option value="">${ta('Anrede','Title')}</option><option value="Herr">${ta('Herr','Mr.')}</option><option value="Frau">${ta('Frau','Ms.')}</option><option value="Dr.">Dr.</option><option value="Prof.">Prof.</option><option value="Divers">${ta('Divers','Other')}</option>`;kAnrede.value=v;}
   ['k-vertragsstatus','vt-status'].forEach(id=>{const s=document.getElementById(id);if(!s)return;const v=s.value;s.innerHTML=`<option value="aktiv">${t('opt_aktiv')}</option><option value="gekuendigt">${t('opt_gekuendigt')}</option><option value="abgelaufen">${t('opt_abgelaufen')}</option><option value="pausiert">${t('opt_pausiert')}</option>`;s.value=v;});
+  ['vt-e-auftraggeber_id','vt-e-eigentuemer_id','vt-e-neben_id'].forEach(sid=>{
+    const sel=document.getElementById(sid);if(!sel)return;
+    const v=sel.value;
+    const first=sel.options[0];
+    if(first&&first.value==='')first.textContent=t('lbl_opt_keine_firma');
+    sel.value=v;
+  });
   const vtFilter=document.getElementById('vt-v-status-filter');
   if(vtFilter){const v=vtFilter.value;vtFilter.innerHTML=`<option value="">${t('opt_alle_status')}</option><option value="aktiv">${t('opt_aktiv')}</option><option value="gekuendigt">${t('opt_gekuendigt')}</option><option value="abgelaufen">${t('opt_abgelaufen')}</option><option value="pausiert">${t('opt_pausiert')}</option>`;vtFilter.value=v;}
   ['dt-einheit','ov-dt-einheit'].forEach(id=>{const s=document.getElementById(id);if(!s)return;const v=s.value;s.innerHTML=`<option value="monat">${t('opt_pro_monat')}</option><option value="jahr">${t('opt_pro_jahr')}</option>`;s.value=v;});
@@ -2993,7 +3065,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.5${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.6${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -3547,6 +3619,95 @@ ${schluss?`<div class="brief-txt">${schluss}</div>`:''}
 </div>`;
 }
 
+function vtEscrowVorschauUpdate(){
+  const agId=parseInt(document.getElementById('vt-e-auftraggeber_id')?.value)||0;
+  const eigId=parseInt(document.getElementById('vt-e-eigentuemer_id')?.value)||0;
+  const el=document.getElementById('vt-e-vorschau');if(!el)return;
+  if(!agId||!eigId){el.innerHTML='<div style="color:#999;padding:20px">'+t('opt_firma_waehlen')+'...</div>';return;}
+  const ag=kunden.find(x=>x.id===agId);
+  const eig=kunden.find(x=>x.id===eigId);
+  const nbId=parseInt(document.getElementById('vt-e-neben_id')?.value)||0;
+  const nb=nbId?kunden.find(x=>x.id===nbId):null;
+  const vtnr=document.getElementById('vt-e-nr')?.value||'ESC-____-___';
+  const notiz=document.getElementById('vt-e-notiz')?.value||'';
+  el.innerHTML=genVertragEscrowHtml(ag,eig,nb,vtnr,notiz);
+  el.querySelectorAll('.brief-hr').forEach(e=>e.style.background=accentColor||'#0065A4');
+}
+function vtEscrowDrucken(){
+  const agId=parseInt(document.getElementById('vt-e-auftraggeber_id')?.value)||0;
+  const eigId=parseInt(document.getElementById('vt-e-eigentuemer_id')?.value)||0;
+  if(!agId){alert(_lang==='en'?'Please select the Principal (Party 2).':'Bitte Auftraggeber (Firma 2) auswählen.');return;}
+  if(!eigId){alert(_lang==='en'?'Please select the Main Owner (Party 3).':'Bitte Haupt-Eigentümer (Firma 3) auswählen.');return;}
+  const ag=kunden.find(x=>x.id===agId);
+  const eig=kunden.find(x=>x.id===eigId);
+  const nbId=parseInt(document.getElementById('vt-e-neben_id')?.value)||0;
+  const nb=nbId?kunden.find(x=>x.id===nbId):null;
+  const vtnr=document.getElementById('vt-e-nr')?.value||'ESC-____-___';
+  const notiz=document.getElementById('vt-e-notiz')?.value||'';
+  printHtml(genVertragEscrowHtml(ag,eig,nb,vtnr,notiz),vtnr.replace(/[^A-Za-z0-9-]/g,'_')+'.pdf');
+}
+function genVertragEscrowHtml(ag,eig,nb,vtnr,notiz){
+  const T=window._T||{};
+  const ac=accentColor||'#0065A4';
+  const today=new Date().toISOString().slice(0,10);
+  const logoHtml=logoData?`<img src="${logoData}" style="max-height:60px;max-width:160px;object-fit:contain">`:''; 
+  const firmaAdrHtml=(T.firmaAdr||'').replace(/\n/g,'<br>');
+  const agAdr=[ag.strasse,ag.plz&&ag.ort?ag.plz+' '+ag.ort:ag.ort].filter(Boolean).join('<br>');
+  const eigAdr=[eig.strasse,eig.plz&&eig.ort?eig.plz+' '+eig.ort:eig.ort].filter(Boolean).join('<br>');
+  const pnr='ESC-'+(today.replace(/-/g,''));
+  const fA=T.footerAdr?T.footerAdr.replace(/\n/g,'<br>'):''; 
+  const fB=(T.iban?`<strong>IBAN</strong><br>${T.iban}<br>`:'')+( T.bic?`<strong>BIC</strong><br>${T.bic}`:'');
+  const fS=(T.steuernr?`<strong>Steuernr.</strong><br>${T.steuernr}<br>`:'')+( T.gf?`<strong>GF</strong><br>${T.gf}<br>`:'')+( T.hrb?T.hrb:'');
+  return`<div class="brief-header">
+  <div class="brief-header-left">
+    <div class="brief-firma-name">${T.firmenname||''}</div>
+    ${T.abt?`<div class="brief-firma-abt">${T.abt}</div>`:''}
+    <div class="brief-firma-adr">${firmaAdrHtml}</div>
+  </div>
+  <div class="brief-logo-box">${logoHtml}</div>
+</div>
+<div class="brief-hr" style="background:${ac}"></div>
+<div class="brief-abs-mini">${T.firmenname||''}${T.firmaAdr?' | '+(T.firmaAdr||'').split('\n')[0]:''}</div>
+<div class="brief-main">
+  <div class="brief-empf"><div class="brief-empf-block"><strong>${ag.firma}</strong>${ag.ansprechpartner?'<br>z.Hd. '+ag.ansprechpartner:''}<br>${agAdr}</div></div>
+  <div class="brief-meta-r">${T.tel?`Tel. ${T.tel}<br>`:''} ${T.email?`${T.email}<br>`:''}</div>
+</div>
+<div class="brief-ort-dat">${T.ort||''}, ${fmtDate(today)}</div>
+<div class="brief-betreff">${_lang==='en'?'Three-Party Escrow Agreement':'Dreiseitiger Escrow-Einlagerungsvertrag'}</div>
+<div class="brief-sub">${_lang==='en'?'Contract No.':'Vertragsnr.'}: ${vtnr}</div>
+<div class="brief-txt" style="margin-top:16px"><strong>${_lang==='en'?'Contracting Parties':'Vertragsparteien'}</strong></div>
+<table class="brief-tbl" style="margin-top:8px">
+  <thead><tr><th style="width:18%">${_lang==='en'?'Party':'Partei'}</th><th style="width:28%">${_lang==='en'?'Role':'Rolle'}</th><th>${_lang==='en'?'Company':'Firma'}</th></tr></thead>
+  <tbody>
+    <tr><td><strong>${_lang==='en'?'Party 1':'Firma 1'}</strong></td><td>${_lang==='en'?'Safe Operator':'Tresor-Betreiber / Einlagerer'}</td><td>${T.firmenname||''}${T.firmaAdr?'<br><small>'+(T.firmaAdr||'').replace(/\n/g,'<br>')+'</small>':''}</td></tr>
+    <tr><td><strong>${_lang==='en'?'Party 2':'Firma 2'}</strong></td><td>${_lang==='en'?'Principal / Depositor':'Auftraggeber / Hinterleger'}</td><td><strong>${ag.firma}</strong>${ag.ansprechpartner?'<br><small>z.Hd. '+ag.ansprechpartner+'</small>':''}<br><small>${agAdr}</small></td></tr>
+    <tr><td><strong>${_lang==='en'?'Party 3':'Firma 3'}</strong></td><td>${_lang==='en'?'Main Owner / Beneficiary':'Haupt-Eigentümer / Begünstigter'}</td><td><strong>${eig.firma}</strong>${eig.ansprechpartner?'<br><small>z.Hd. '+eig.ansprechpartner+'</small>':''}<br><small>${eigAdr}</small></td></tr>
+    ${nb?`<tr><td><strong>${_lang==='en'?'Party 3b':'Firma 3b'}</strong></td><td>${_lang==='en'?'Co-Owner':'Neben-Eigentümer'}</td><td><strong>${nb.firma}</strong></td></tr>`:''}
+  </tbody>
+</table>
+<div class="brief-txt" style="margin-top:16px"><strong>${_lang==='en'?'§ 1 Subject Matter':'§ 1 Vertragsgegenstand'}</strong></div>
+<div class="brief-txt">${_lang==='en'
+  ?`Party 1 (${T.firmenname||'Safe Operator'}) agrees to securely store data carriers on behalf of Party 2 (${ag.firma}). The data carriers are the property of Party 3 (${eig.firma}). Party 2 is authorised by Party 3 to instruct storage. Party 1 shall only release the data carriers upon joint written instruction by Party 2 and Party 3.`
+  :`Firma 1 (${T.firmenname||'Tresor-Betreiber'}) verpflichtet sich, im Auftrag von Firma 2 (${ag.firma}) Datenträger sicher einzulagern. Die Datenträger stehen im Eigentum von Firma 3 (${eig.firma}). Firma 2 ist von Firma 3 zur Einlagerungsbeauftragung berechtigt. Firma 1 gibt die Datenträger nur auf gemeinsame schriftliche Weisung von Firma 2 und Firma 3 heraus.`
+}</div>
+<div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 2 Release Conditions':'§ 2 Freigabebedingungen'}</strong></div>
+<div class="brief-txt">${notiz?notiz.replace(/\n/g,'<br>'):(_lang==='en'?'Release requires written consent of both Party 2 and Party 3. Unilateral release is excluded.':'Die Herausgabe setzt die schriftliche Zustimmung von Firma 2 und Firma 3 voraus. Eine einseitige Herausgabe ist ausgeschlossen.')}</div>
+<div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 3 Remuneration':'§ 3 Vergütung'}</strong></div>
+<div class="brief-txt">${_lang==='en'?'Remuneration is invoiced annually to Party 2 according to the agreed price list.':'Die Vergütung wird jährlich an Firma 2 nach dem vereinbarten Preisblatt abgerechnet.'}</div>
+<div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 4 Liability':'§ 4 Haftung'}</strong></div>
+<div class="brief-txt">${_lang==='en'?'Party 1 is liable for careful handling. Liability for data content is excluded.':'Firma 1 haftet für sorgfältigen Umgang. Eine Haftung für den Inhalt der Datenträger ist ausgeschlossen.'}</div>
+<div style="display:flex;gap:20px;padding:28px 20px 8px">
+  <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Place, Date':'Ort, Datum'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
+  <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Party 1 – Safe Operator':'Firma 1 – Tresor-Betreiber'}: ${T.firmenname||''}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
+  <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Party 2 – Principal':'Firma 2 – Auftraggeber'}: ${ag.firma}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
+  <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Party 3 – Owner':'Firma 3 – Eigentümer'}: ${eig.firma}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
+</div>
+<div class="brief-foot">
+  ${fA?`<div class="brief-foot-col">${fA}</div>`:''}
+  ${fB?`<div class="brief-foot-col">${fB}</div>`:''}
+  ${fS?`<div class="brief-foot-col">${fS}</div>`:''}
+</div>`;
+}
 function vtVorschauUpdate(){
   const kid=parseInt(document.getElementById('vt-v-kunden_id')?.value)||0;
   const k=kunden.find(x=>x.id===kid);
@@ -3773,6 +3934,10 @@ function showKundenSub(sub){
     renderVertraegeListe();
     const s=document.getElementById('vt-v-kunden_id');
     if(s)s.innerHTML='<option value="">'+t('opt_firma_waehlen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} – ${k.firma}</option>`).join('');
+    ['vt-e-auftraggeber_id','vt-e-eigentuemer_id','vt-e-neben_id'].forEach(sid=>{
+      const se=document.getElementById(sid);if(!se)return;
+      se.innerHTML='<option value="">'+t('lbl_opt_keine_firma')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.firma}</option>`).join('');
+    });
   }
 }
 

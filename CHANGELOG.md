@@ -6,6 +6,24 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.6] – 2026-04-27
+
+### Added
+- **Escrow-Vertragsvorlage (3 Parteien)** — new contract template form in the Verträge sub-tab: select Auftraggeber (Party 2), Haupt-Eigentümer (Party 3), optional Neben-Eigentümer (Party 3b), enter contract number and release conditions, live preview + print. Generates a bilingual 4-§ escrow contract with letterhead, party table, and signature blocks for all three parties. New function `genVertragEscrowHtml()` + `vtEscrowVorschauUpdate()` + `vtEscrowDrucken()`
+- **Szenario B text corrected**: "3 Firmen" → "2 Firmen" (the two customer-side companies in the escrow: depositor + beneficiary)
+- 36 new TRANS keys covering all newly translated strings
+
+### Fixed
+- **100 % DE/EN coverage — Tresor form**: all 15 labels and buttons in the safe/cabinet registration form (Bezeichnung/Name, Hersteller, Modell, Seriennummer, Kaufdatum, Kaufpreis, Letzter Wartungstermin, Standort, Stadt, Etage, Raum, Notizen, PDF hochladen, Abbrechen, Speichern) now carry `data-i18n`
+- **Dashboard**: "🔒 Tresor-Wartungstermine" heading and "Keine anstehenden Wartungstermine" empty state now translated
+- **Invoice template preview**: "Rechnung" heading + table column headers (Bezeichnung, Preis, Rabatt, Betrag) now `data-i18n`
+- **Rechnung button**: "Drucken & Speichern" now uses `data-i18n="lbl_drucken_speichern"` (key already existed, attribute was missing)
+- **Eingangsprotokoll preview**: "Protokoll-Nr.:", "Bezeichnung / Typ" row, "Unterschrift Kunde", "Unterschrift Bearbeiter" now `data-i18n`
+- **Contract preview**: "Auftraggeber" placeholder now `data-i18n`
+- **Admin tab**: "👤 Benutzer & Rollen" now `data-i18n`
+
+---
+
 ## [1.4.5] – 2026-04-26
 
 ### Fixed
