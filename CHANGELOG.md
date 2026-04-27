@@ -6,6 +6,17 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.8] – 2026-04-27
+
+### Added
+- Templates-Tab: 3-Parteien-Escrow-Vertrag Template-Editor mit Typ-Dropdown (§1–§4 editierbar, DE+EN)
+- genVertragEscrowHtml: Verwendet jetzt TV.escrowPar1–4 / TV.escrowPar1_en–4_en aus Vertrag-Templates
+- tplVTypChange() JS-Funktion zum Umschalten zwischen 2P- und 3P-Template-Panels
+
+### Changed
+- genVertragHtml §3: Datenträger-Tabelle entfernt – §3 zeigt immer „separate Anlage"-Platzhalter
+- applyLang: Rebuild tpl-v-typ-select bei Sprachwechsel
+
 ## [1.4.7] – 2026-04-27
 
 ### Changed

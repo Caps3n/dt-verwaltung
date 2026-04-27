@@ -882,6 +882,16 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div>
         <div class="card" style="border-color:var(--i-brd);background:var(--i-bg)"><div style="font-size:12px;color:var(--i-txt)" data-i18n="lbl_tpl_logo_info_v">Logo und Firmendaten werden vom Rechnungs-Template übernommen. Die §-Texte sind Vorlagen — beim Drucken können sie noch angepasst werden.</div></div>
         <div class="card" style="padding:10px 14px 8px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="stitle" style="margin:0" data-i18n="lbl_tpl_v_typ">Vertragstyp</div>
+            <select id="tpl-v-typ-select" onchange="tplVTypChange()" style="flex:1;max-width:300px">
+              <option value="2p" data-i18n="lbl_vt_typ_2p">2-Parteien-Lagervertrag</option>
+              <option value="3p" data-i18n="lbl_vt_typ_3p">3-Parteien-Escrow-Vertrag</option>
+            </select>
+          </div>
+        </div>
+        <div id="tpl-v-panel-2p">
+        <div class="card" style="padding:10px 14px 8px">
           <div style="display:flex;gap:6px">
             <button id="tpl-v-btn-de" class="btn-p" onclick="tplEditorLang('v','de')" style="padding:3px 9px;font-size:11px" data-i18n="tpl_de_btn">🇩🇪 Deutsch</button>
             <button id="tpl-v-btn-en" onclick="tplEditorLang('v','en')" style="padding:3px 9px;font-size:11px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);cursor:pointer" data-i18n="tpl_en_btn">🇬🇧 Englisch</button>
@@ -929,6 +939,43 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <textarea id="tv-schluss-en" rows="2" oninput="syncVBrief()" placeholder="Amendments and additions to this contract require written form."></textarea>
         </div>
         </div><!-- end tpl-v-fields-en -->
+        </div><!-- end tpl-v-panel-2p -->
+        <div id="tpl-v-panel-3p" style="display:none">
+        <div class="card" style="padding:10px 14px 8px">
+          <div style="display:flex;gap:6px">
+            <button id="tpl-v3p-btn-de" class="btn-p" onclick="tplEditorLang('v3p','de')" style="padding:3px 9px;font-size:11px" data-i18n="tpl_de_btn">🇩🇪 Deutsch</button>
+            <button id="tpl-v3p-btn-en" onclick="tplEditorLang('v3p','en')" style="padding:3px 9px;font-size:11px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);cursor:pointer" data-i18n="tpl_en_btn">🇬🇧 Englisch</button>
+          </div>
+        </div>
+        <div id="tpl-v3p-fields-de">
+        <div class="card"><div class="stitle">§ 1 Vertragsgegenstand (Escrow)</div>
+          <textarea id="tev-par1" rows="4" placeholder="Die Parteien schließen einen Escrow-Einlagerungsvertrag gemäß den nachfolgenden Bedingungen..."></textarea>
+        </div>
+        <div class="card"><div class="stitle">§ 2 Freigabebedingungen</div>
+          <textarea id="tev-par2" rows="3" placeholder="Die Herausgabe setzt die schriftliche Zustimmung von Firma 2 und Firma 3 voraus. Eine einseitige Herausgabe ist ausgeschlossen."></textarea>
+        </div>
+        <div class="card"><div class="stitle">§ 3 Vergütung</div>
+          <textarea id="tev-par3" rows="3" placeholder="Die Vergütung wird jährlich an Firma 2 nach dem vereinbarten Preisblatt abgerechnet."></textarea>
+        </div>
+        <div class="card"><div class="stitle">§ 4 Haftung</div>
+          <textarea id="tev-par4" rows="3" placeholder="Firma 1 haftet für sorgfältigen Umgang. Eine Haftung für den Inhalt der Datenträger ist ausgeschlossen."></textarea>
+        </div>
+        </div><!-- end tpl-v3p-fields-de -->
+        <div id="tpl-v3p-fields-en" style="display:none">
+        <div class="card"><div class="stitle">§ 1 Subject Matter / Escrow (EN)</div>
+          <textarea id="tev-par1-en" rows="4" placeholder="The parties conclude a three-party escrow storage agreement..."></textarea>
+        </div>
+        <div class="card"><div class="stitle">§ 2 Release Conditions (EN)</div>
+          <textarea id="tev-par2-en" rows="3" placeholder="Release requires written consent of both Party 2 and Party 3. Unilateral release is excluded."></textarea>
+        </div>
+        <div class="card"><div class="stitle">§ 3 Remuneration (EN)</div>
+          <textarea id="tev-par3-en" rows="3" placeholder="Remuneration is invoiced annually to Party 2 according to the agreed price list."></textarea>
+        </div>
+        <div class="card"><div class="stitle">§ 4 Liability (EN)</div>
+          <textarea id="tev-par4-en" rows="3" placeholder="Party 1 is liable for careful handling. Liability for data content is excluded."></textarea>
+        </div>
+        </div><!-- end tpl-v3p-fields-en -->
+        </div><!-- end tpl-v-panel-3p -->
         <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1" data-i18n="lbl_zuruecksetzen">Zurücksetzen</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
       </div>
       <div><div class="stitle" style="margin-bottom:8px" data-i18n="lbl_vorschau">Vorschau</div>
@@ -1218,7 +1265,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.7
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.8
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1688,6 +1735,7 @@ const TRANS={
   lbl_vt_vorlage_hint:{de:'Wähle eine Firma und drucke eine Vertragsvorlage mit Briefkopf. Die Vorlage enthält alle Felder für einen Einlagerungsvertrag.',en:'Select a company to print a contract template with letterhead. The template contains all fields for a storage contract.'},
   lbl_vt_typ_2p:{de:'2-Parteien-Lagervertrag',en:'2-Party Storage Contract'},
   lbl_vt_typ_3p:{de:'3-Parteien-Escrow-Vertrag',en:'3-Party Escrow Contract'},
+  lbl_tpl_v_typ:{de:'Vertragstyp',en:'Contract Type'},
   btn_vorlage_drucken:{de:'Vorlage drucken',en:'Print Template'},
   msg_alle_rechnungen_del:{de:'Alle gespeicherten Rechnungen löschen?',en:'Delete all saved invoices?'},
   msg_tpl_reset:{de:'Zurücksetzen?',en:'Reset?'},
@@ -1850,6 +1898,7 @@ function applyLang(){
     sel.value=v;
   });
   const vtTypSel=document.getElementById('vt-typ-select');if(vtTypSel){const v=vtTypSel.value;vtTypSel.innerHTML=`<option value="2p">${t('lbl_vt_typ_2p')}</option><option value="3p">${t('lbl_vt_typ_3p')}</option>`;vtTypSel.value=v;}
+  const tplVTypSel=document.getElementById('tpl-v-typ-select');if(tplVTypSel){const v=tplVTypSel.value;tplVTypSel.innerHTML=`<option value="2p">${t('lbl_vt_typ_2p')}</option><option value="3p">${t('lbl_vt_typ_3p')}</option>`;tplVTypSel.value=v;}
   const vtFilter=document.getElementById('vt-v-status-filter');
   if(vtFilter){const v=vtFilter.value;vtFilter.innerHTML=`<option value="">${t('opt_alle_status')}</option><option value="aktiv">${t('opt_aktiv')}</option><option value="gekuendigt">${t('opt_gekuendigt')}</option><option value="abgelaufen">${t('opt_abgelaufen')}</option><option value="pausiert">${t('opt_pausiert')}</option>`;vtFilter.value=v;}
   ['dt-einheit','ov-dt-einheit'].forEach(id=>{const s=document.getElementById(id);if(!s)return;const v=s.value;s.innerHTML=`<option value="monat">${t('opt_pro_monat')}</option><option value="jahr">${t('opt_pro_jahr')}</option>`;s.value=v;});
@@ -2843,7 +2892,9 @@ async function loadTemplates(){
     'f-gruss-en':['_T','gruss_en'],'f-sig-en':['_T','sig_en'],
     'tv-par1-en':['_TV','par1_en'],'tv-laufzeit-en':['_TV','laufzeit_en'],'tv-kfrist-en':['_TV','kfrist_en'],
     'tv-par-entgelt-en':['_TV','parEntgelt_en'],'tv-par-haftung-en':['_TV','parHaftung_en'],
-    'tv-par-dsgvo-en':['_TV','parDsgvo_en'],'tv-schluss-en':['_TV','schluss_en']
+    'tv-par-dsgvo-en':['_TV','parDsgvo_en'],'tv-schluss-en':['_TV','schluss_en'],
+    'tev-par1':['_TV','escrowPar1'],'tev-par2':['_TV','escrowPar2'],'tev-par3':['_TV','escrowPar3'],'tev-par4':['_TV','escrowPar4'],
+    'tev-par1-en':['_TV','escrowPar1_en'],'tev-par2-en':['_TV','escrowPar2_en'],'tev-par3-en':['_TV','escrowPar3_en'],'tev-par4-en':['_TV','escrowPar4_en']
   };
   Object.entries(enFills).forEach(([id,[obj,key]])=>{const el=document.getElementById(id);if(el)el.value=window[obj]?.[key]||'';});
   // Fill Vertrag fields
@@ -2894,6 +2945,14 @@ function readTplFields(){
   window._TV.parHaftung_en=document.getElementById('tv-par-haftung-en')?.value||'';
   window._TV.parDsgvo_en=document.getElementById('tv-par-dsgvo-en')?.value||'';
   window._TV.schluss_en=document.getElementById('tv-schluss-en')?.value||'';
+  window._TV.escrowPar1=document.getElementById('tev-par1')?.value||'';
+  window._TV.escrowPar2=document.getElementById('tev-par2')?.value||'';
+  window._TV.escrowPar3=document.getElementById('tev-par3')?.value||'';
+  window._TV.escrowPar4=document.getElementById('tev-par4')?.value||'';
+  window._TV.escrowPar1_en=document.getElementById('tev-par1-en')?.value||'';
+  window._TV.escrowPar2_en=document.getElementById('tev-par2-en')?.value||'';
+  window._TV.escrowPar3_en=document.getElementById('tev-par3-en')?.value||'';
+  window._TV.escrowPar4_en=document.getElementById('tev-par4-en')?.value||'';
   window._T.akzentfarbe=accentColor;
 }
 
@@ -3077,7 +3136,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.7${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.8${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -3580,7 +3639,6 @@ function genVertragHtml(k){
   const firmaAdrHtml=(T.firmaAdr||'').replace(/\n/g,'<br>');
   const adr=k?[k.strasse,k.plz&&k.ort?k.plz+' '+k.ort:k.ort].filter(Boolean).join('<br>'):'';
   const bline=T.bearbeiter?(T.bearbeiter+(T.kuerzel?'/'+T.kuerzel:'')):'';
-  const dts=k?datentraeger.filter(d=>d.kunden_id===k.id&&d.status==='eingelagert'):[];
   const par1=TV.par1||'Der Lagerbetreiber übernimmt für den Auftraggeber die sichere Einlagerung von Datenträgern gemäß den nachfolgenden Bedingungen. Die eingelagerten Gegenstände werden sorgfältig verwahrt und sind nur für autorisiertes Personal zugänglich.';
   const parEntgelt=TV.parEntgelt||`Die Vergütung richtet sich nach dem jeweils aktuellen Preisblatt. Rechnungen werden ${k?.vertragsnr?'gemäß Vertrag':'jährlich'} gestellt und sind innerhalb von 14 Tagen nach Erhalt zu begleichen.`;
   const parHaftung=TV.parHaftung||'Der Lagerbetreiber haftet für den sorgfältigen Umgang mit den eingelagerten Datenträgern. Eine Haftung für den Inhalt der Datenträger ist ausgeschlossen.';
@@ -3609,11 +3667,7 @@ ${_lang==='en'?'Contract start':'Vertragsbeginn'}: <strong>${beginn}</strong><br
 ${_lang==='en'?'Contract end':'Vertragsende'}: <strong>${ende}</strong><br>
 ${_lang==='en'?'Duration / Renewal':'Laufzeit / Verlängerung'}: ${laufzeit}<br>
 ${_lang==='en'?'Notice period':'Kündigungsfrist'}: ${kfrist}</div>
-${dts.length?`<div class="brief-txt"><strong>${_lang==='en'?'§ 3 Stored Data Carriers':'§ 3 Eingelagerte Datenträger'}</strong></div>
-<table class="brief-tbl">
-  <thead><tr><th>${_lang==='en'?'Description':'Bezeichnung'}</th><th style="width:28%">${_lang==='en'?'Serial No.':'Seriennummer'}</th><th style="width:14%">${_lang==='en'?'Price/Year':'Preis/Jahr'}</th><th style="width:16%">${_lang==='en'?'Stored':'Einlagerung'}</th></tr></thead>
-  <tbody>${dts.map(d=>`<tr><td>${d.bezeichnung}</td><td style="font-family:monospace;font-size:10px">${d.serial}</td><td>${eur(d.preis_jahr)}</td><td>${fmtDate(d.einlagerungs_datum)}</td></tr>`).join('')}</tbody>
-</table>`:`<div class="brief-txt"><strong>${_lang==='en'?'§ 3 Stored Data Carriers':'§ 3 Eingelagerte Datenträger'}</strong><br>${_lang==='en'?'The items to be stored are listed in a separate annex.':'Die einzulagernden Gegenstände werden in einer separaten Anlage aufgeführt.'}</div>`}
+<div class="brief-txt"><strong>${_lang==='en'?'§ 3 Stored Data Carriers':'§ 3 Eingelagerte Datenträger'}</strong><br>${_lang==='en'?'The items to be stored are listed in a separate annex.':'Die einzulagernden Gegenstände werden in einer separaten Anlage aufgeführt.'}</div>
 <div class="brief-txt"><strong>${_lang==='en'?'§ 4 Remuneration':'§ 4 Entgelt'}</strong><br>${parEntgelt}</div>
 <div class="brief-txt"><strong>${_lang==='en'?'§ 5 Liability':'§ 5 Haftung'}</strong><br>${parHaftung}</div>
 ${parDsgvo?`<div class="brief-txt"><strong>${_lang==='en'?'§ 6 Data Protection':'§ 6 Datenschutz'}</strong><br>${parDsgvo}</div>`:''}
@@ -3631,6 +3685,14 @@ ${schluss?`<div class="brief-txt">${schluss}</div>`:''}
 </div>`;
 }
 
+function tplVTypChange(){
+  const v=document.getElementById('tpl-v-typ-select')?.value||'2p';
+  const p2=document.getElementById('tpl-v-panel-2p');
+  const p3=document.getElementById('tpl-v-panel-3p');
+  if(p2)p2.style.display=v==='2p'?'':'none';
+  if(p3)p3.style.display=v==='3p'?'':'none';
+}
+function syncEscrowVBrief(){}
 function vtTypChange(){
   const v=document.getElementById('vt-typ-select')?.value||'2p';
   const p2=document.getElementById('vt-panel-2p');
@@ -3667,6 +3729,7 @@ function vtEscrowDrucken(){
 }
 function genVertragEscrowHtml(ag,eig,nb,vtnr,notiz){
   const T=window._T||{};
+  const TV=window._TV||{};
   const ac=accentColor||'#0065A4';
   const today=new Date().toISOString().slice(0,10);
   const logoHtml=logoData?`<img src="${logoData}" style="max-height:60px;max-width:160px;object-fit:contain">`:''; 
@@ -3705,16 +3768,13 @@ function genVertragEscrowHtml(ag,eig,nb,vtnr,notiz){
   </tbody>
 </table>
 <div class="brief-txt" style="margin-top:16px"><strong>${_lang==='en'?'§ 1 Subject Matter':'§ 1 Vertragsgegenstand'}</strong></div>
-<div class="brief-txt">${_lang==='en'
-  ?`Party 1 (${T.firmenname||'Safe Operator'}) agrees to securely store data carriers on behalf of Party 2 (${ag.firma}). The data carriers are the property of Party 3 (${eig.firma}). Party 2 is authorised by Party 3 to instruct storage. Party 1 shall only release the data carriers upon joint written instruction by Party 2 and Party 3.`
-  :`Firma 1 (${T.firmenname||'Tresor-Betreiber'}) verpflichtet sich, im Auftrag von Firma 2 (${ag.firma}) Datenträger sicher einzulagern. Die Datenträger stehen im Eigentum von Firma 3 (${eig.firma}). Firma 2 ist von Firma 3 zur Einlagerungsbeauftragung berechtigt. Firma 1 gibt die Datenträger nur auf gemeinsame schriftliche Weisung von Firma 2 und Firma 3 heraus.`
-}</div>
+<div class="brief-txt">${_lang==='en'?(TV.escrowPar1_en||`Party 1 (${T.firmenname||'Safe Operator'}) agrees to securely store data carriers on behalf of Party 2 (${ag.firma}). The data carriers are the property of Party 3 (${eig.firma}). Party 2 is authorised by Party 3 to instruct storage. Party 1 shall only release the data carriers upon joint written instruction by Party 2 and Party 3.`):(TV.escrowPar1||`Firma 1 (${T.firmenname||'Tresor-Betreiber'}) verpflichtet sich, im Auftrag von Firma 2 (${ag.firma}) Datenträger sicher einzulagern. Die Datenträger stehen im Eigentum von Firma 3 (${eig.firma}). Firma 2 ist von Firma 3 zur Einlagerungsbeauftragung berechtigt. Firma 1 gibt die Datenträger nur auf gemeinsame schriftliche Weisung von Firma 2 und Firma 3 heraus.`)}</div>
 <div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 2 Release Conditions':'§ 2 Freigabebedingungen'}</strong></div>
-<div class="brief-txt">${notiz?notiz.replace(/\n/g,'<br>'):(_lang==='en'?'Release requires written consent of both Party 2 and Party 3. Unilateral release is excluded.':'Die Herausgabe setzt die schriftliche Zustimmung von Firma 2 und Firma 3 voraus. Eine einseitige Herausgabe ist ausgeschlossen.')}</div>
+<div class="brief-txt">${notiz?notiz.replace(/\n/g,'<br>'):(_lang==='en'?(TV.escrowPar2_en||'Release requires written consent of both Party 2 and Party 3. Unilateral release is excluded.'):(TV.escrowPar2||'Die Herausgabe setzt die schriftliche Zustimmung von Firma 2 und Firma 3 voraus. Eine einseitige Herausgabe ist ausgeschlossen.'))}</div>
 <div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 3 Remuneration':'§ 3 Vergütung'}</strong></div>
-<div class="brief-txt">${_lang==='en'?'Remuneration is invoiced annually to Party 2 according to the agreed price list.':'Die Vergütung wird jährlich an Firma 2 nach dem vereinbarten Preisblatt abgerechnet.'}</div>
+<div class="brief-txt">${_lang==='en'?(TV.escrowPar3_en||'Remuneration is invoiced annually to Party 2 according to the agreed price list.'):(TV.escrowPar3||'Die Vergütung wird jährlich an Firma 2 nach dem vereinbarten Preisblatt abgerechnet.')}</div>
 <div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 4 Liability':'§ 4 Haftung'}</strong></div>
-<div class="brief-txt">${_lang==='en'?'Party 1 is liable for careful handling. Liability for data content is excluded.':'Firma 1 haftet für sorgfältigen Umgang. Eine Haftung für den Inhalt der Datenträger ist ausgeschlossen.'}</div>
+<div class="brief-txt">${_lang==='en'?(TV.escrowPar4_en||'Party 1 is liable for careful handling. Liability for data content is excluded.'):(TV.escrowPar4||'Firma 1 haftet für sorgfältigen Umgang. Eine Haftung für den Inhalt der Datenträger ist ausgeschlossen.')}</div>
 <div style="display:flex;gap:20px;padding:28px 20px 8px">
   <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Place, Date':'Ort, Datum'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
   <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Party 1 – Safe Operator':'Firma 1 – Tresor-Betreiber'}: ${T.firmenname||''}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
