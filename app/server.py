@@ -362,6 +362,27 @@ def init_db():
         user_id INTEGER NOT NULL,
         expires TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS rechnungen (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nr TEXT NOT NULL,
+        kunden_id INTEGER,
+        firma TEXT,
+        kunden_nr TEXT,
+        dat TEXT,
+        zr TEXT,
+        netto TEXT,
+        html TEXT,
+        ts INTEGER,
+        erstellt TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS mahnungen (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        rechnung_nr TEXT NOT NULL,
+        dat TEXT,
+        html TEXT,
+        ts INTEGER,
+        erstellt TEXT DEFAULT CURRENT_TIMESTAMP
+    );
     """)
     # Default roles
     for name, farbe, perms in [
@@ -1526,6 +1547,104 @@ def get_wartungstermine():
     return jsonify(result)
 
 # ─── HEALTH ──────────────────────────────────────────────────────────────────
+# ─── RECHNUNGEN ──────────────────────────────────────────────────────────────
+@app.route('/api/rechnungen', methods=['GET'])
+@require_auth('read')
+def get_rechnungen():
+    db = get_db()
+    rows = db.execute(
+        "SELECT id,nr,kunden_id,firma,kunden_nr,dat,zr,netto,ts,erstellt FROM rechnungen ORDER BY ts DESC"
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+@app.route('/api/rechnungen', methods=['POST'])
+@require_auth('write')
+def post_rechnungen():
+    data = request.json or {}
+    db = get_db()
+    # upsert by nr: if same nr exists, overwrite
+    db.execute("DELETE FROM rechnungen WHERE nr=?", (data.get('nr',''),))
+    db.execute(
+        "INSERT INTO rechnungen(nr,kunden_id,firma,kunden_nr,dat,zr,netto,html,ts) VALUES(?,?,?,?,?,?,?,?,?)",
+        (data.get('nr'), data.get('kunden_id'), data.get('firma'), data.get('kunden_nr'),
+         data.get('dat'), data.get('zr'), data.get('netto'), data.get('html'), data.get('ts'))
+    )
+    db.commit()
+    row = db.execute("SELECT id FROM rechnungen WHERE nr=?", (data.get('nr'),)).fetchone()
+    return jsonify({'id': row['id'] if row else None}), 201
+
+@app.route('/api/rechnungen/<int:rid>', methods=['DELETE'])
+@require_auth('delete')
+def delete_rechnung(rid):
+    db = get_db()
+    db.execute("DELETE FROM rechnungen WHERE id=?", (rid,))
+    db.commit()
+    return jsonify({'ok': True})
+
+@app.route('/api/rechnungen', methods=['DELETE'])
+@require_auth('delete')
+def delete_all_rechnungen():
+    db = get_db()
+    db.execute("DELETE FROM rechnungen")
+    db.commit()
+    return jsonify({'ok': True})
+
+# ─── MAHNUNGEN ───────────────────────────────────────────────────────────────
+@app.route('/api/mahnungen/<rechnung_nr>', methods=['GET'])
+@require_auth('read')
+def get_mahnungen(rechnung_nr):
+    db = get_db()
+    rows = db.execute(
+        "SELECT id,rechnung_nr,dat,ts FROM mahnungen WHERE rechnung_nr=? ORDER BY ts ASC",
+        (rechnung_nr,)
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+@app.route('/api/mahnungen', methods=['POST'])
+@require_auth('write')
+def post_mahnung():
+    data = request.json or {}
+    db = get_db()
+    db.execute(
+        "INSERT INTO mahnungen(rechnung_nr,dat,html,ts) VALUES(?,?,?,?)",
+        (data.get('rechnung_nr'), data.get('dat'), data.get('html'), data.get('ts'))
+    )
+    db.commit()
+    return jsonify({'ok': True}), 201
+
+@app.route('/api/mahnungen/<int:mid>', methods=['DELETE'])
+@require_auth('delete')
+def delete_mahnung(mid):
+    db = get_db()
+    db.execute("DELETE FROM mahnungen WHERE id=?", (mid,))
+    db.commit()
+    return jsonify({'ok': True})
+
+@app.route('/api/mahnungen_by_id/<int:mid>', methods=['GET'])
+@require_auth('read')
+def get_mahnung_by_id(mid):
+    db = get_db()
+    row = db.execute("SELECT id,rechnung_nr,dat,html,ts FROM mahnungen WHERE id=?", (mid,)).fetchone()
+    if not row:
+        return jsonify({'error': 'Nicht gefunden'}), 404
+    return jsonify(dict(row))
+
+# ─── RE-NUMMER ────────────────────────────────────────────────────────────────
+@app.route('/api/re_nr', methods=['GET'])
+@require_auth('read')
+def get_re_nr():
+    db = get_db()
+    # Latest nr in current year
+    import datetime
+    yr = datetime.date.today().year
+    row = db.execute(
+        "SELECT nr FROM rechnungen WHERE nr LIKE ? ORDER BY ts DESC LIMIT 1",
+        (f'RE-{yr}-%',)
+    ).fetchone()
+    if row:
+        return jsonify({'nr': row['nr']})
+    return jsonify({'nr': None})
+
 @app.route('/api/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok', 'db': DB_PATH})

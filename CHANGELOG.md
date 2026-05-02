@@ -6,6 +6,23 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.4.9] – 2026-05-02
+
+### Added
+- Rechnungshistorie & Mahnungen jetzt server-seitig (SQLite): neue Tabellen `rechnungen` + `mahnungen`
+- API-Endpoints: `GET/POST/DELETE /api/rechnungen`, `GET/POST/DELETE /api/mahnungen`, `GET /api/re_nr`, `GET /api/mahnungen_by_id/<id>`
+- Rechnungsnummer (`RE-JJJJ-NNN`) wird aus der Datenbank ermittelt – kein Browser-localStorage mehr nötig
+
+### Changed
+- Frontend: `rechnungSpeichern`, `renderRechnungHistoriePage`, `rechnungLoeschen`, `rechnungMahnung`, `toggleMahnungenRow`, `nextReNr`, `rechnungExportieren` auf async/await + Backend-API umgestellt
+- Alle localStorage-Zugriffe auf `dtv_re_hist`, `dtv_re_nr`, `dtv_mahnungen_*` wurden entfernt
+- Rechnungshistorie ist jetzt browserübergreifend und überlebt Container-Neustarts
+
+### Fixed
+- Rechnungen wurden im Archiv nicht angezeigt wenn man den Browser wechselte (localStorage war browser-spezifisch)
+
+---
+
 ## [1.4.8] – 2026-04-27
 
 ### Added

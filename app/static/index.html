@@ -630,7 +630,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="stitle" style="margin:0" data-i18n="st_re_history">Rechnungshistorie</div>
       <div style="display:flex;gap:8px">
         <input type="search" id="hist-search" placeholder="Suche nach Firma, Nr..." oninput="renderRechnungHistoriePage()" style="width:220px">
-        <button onclick="if(confirm(ta('Alle gespeicherten Rechnungen löschen?','Delete all saved invoices?'))){localStorage.removeItem('dtv_re_hist');renderRechnungHistoriePage()}" class="btn-d" style="padding:4px 10px;font-size:11px" data-i18n="btn_alle_loeschen">Alle löschen</button>
+        <button onclick="if(confirm(ta('Alle gespeicherten Rechnungen löschen?','Delete all saved invoices?'))){apiJ('/api/rechnungen',{method:'DELETE'}).then(()=>renderRechnungHistoriePage())}" class="btn-d" style="padding:4px 10px;font-size:11px" data-i18n="btn_alle_loeschen">Alle löschen</button>
       </div>
     </div>
     <div id="r-historie-page"><div class="empty" data-i18n="empty_rechnungen">Noch keine gespeicherten Rechnungen</div></div>
@@ -1265,7 +1265,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.8
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.9
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -2098,7 +2098,7 @@ async function showApp() {
   document.getElementById('r-datum').value=today;
   document.getElementById('u-datum').value=today;
   document.getElementById('r-zeitraum').value=`01.01.${yr} - ${fmtDate(today)}`;
-  document.getElementById('r-nr').value=nextReNr();
+  nextReNr().then(nr=>{ document.getElementById('r-nr').value=nr; });
 }
 
 // ══ LOAD ALL ═════════════════════════════════════════
@@ -2494,41 +2494,45 @@ ${T.schluss?`<div class="brief-txt" style="margin-top:10px">${fillPh(T.schluss,m
 </div>`;
 }
 
-// ── Rechnungshistorie ────────────────────────────────
-function rechnungSpeichern(k,nr,html){
-  const hist=JSON.parse(localStorage.getItem('dtv_re_hist')||'[]');
+// ── Rechnungshistorie (server-seitig) ───────────────
+let _reHist=[];
+async function _loadReHist(){
+  const d=await apiJ('/api/rechnungen');
+  _reHist=Array.isArray(d)?d:[];
+}
+async function rechnungSpeichern(k,nr,html){
   const zr=document.getElementById('r-zeitraum').value;
   const dat=document.getElementById('r-datum').value;
-  // Betrag aus dem HTML lesen (Netto-Zeile)
   const m=html.match(/Nettobetrag<\/td><td[^>]*>EUR ([\d.,]+)/);
   const netto=m?m[1]:'';
-  hist.unshift({nr,firma:k.firma,kunden_nr:k.nr,dat,zr,netto,html,ts:Date.now()});
-  // max 50 speichern
-  localStorage.setItem('dtv_re_hist',JSON.stringify(hist.slice(0,50)));
-  renderRechnungHistorie(hist.slice(0,5));
+  await apiJ('/api/rechnungen',{method:'POST',body:JSON.stringify({nr,firma:k.firma,kunden_id:k.id,kunden_nr:k.nr,dat,zr,netto,html,ts:Date.now()})});
+  await _loadReHist();
+  renderRechnungHistorie(_reHist.slice(0,5));
 }
 function renderRechnungHistorie(list){
   const el=document.getElementById('r-historie');if(!el)return;
   if(!list||!list.length){el.innerHTML='<div class="empty">'+t('empty_rechnungen')+'</div>';return;}
   el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_nr')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_zeitraum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_netto')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_datum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)"></th></tr></thead><tbody>'+
-    list.map((r,i)=>`<tr><td style="padding:5px 6px;font-weight:600;font-family:monospace;font-size:11px">${r.nr}</td><td style="padding:5px 6px">${r.firma}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${r.zr}</td><td style="padding:5px 6px;font-size:11px">${r.netto?'EUR '+r.netto:'-'}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td><td style="padding:5px 6px"><div style="display:flex;gap:4px"><button onclick="rechnungWiederdrucken(${i})" style="padding:2px 8px;font-size:11px">${t('btn_drucken')}</button><button onclick="rechnungMahnung(${i})" class="btn-w" style="padding:2px 8px;font-size:11px">${t('btn_mahnung')}</button><button onclick="rechnungHistorieLadenAlle(${i})" class="btn-d" style="padding:2px 6px;font-size:11px">✕</button></div></td></tr>`).join('')+
+    list.map((r)=>`<tr><td style="padding:5px 6px;font-weight:600;font-family:monospace;font-size:11px">${r.nr}</td><td style="padding:5px 6px">${r.firma}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${r.zr}</td><td style="padding:5px 6px;font-size:11px">${r.netto?'EUR '+r.netto:'-'}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td><td style="padding:5px 6px"><div style="display:flex;gap:4px"><button onclick="rechnungWiederdrucken(${r.id})" style="padding:2px 8px;font-size:11px">${t('btn_drucken')}</button><button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:2px 8px;font-size:11px">${t('btn_mahnung')}</button></div></td></tr>`).join('')+
     '</tbody></table>';
 }
-function rechnungHistorieLadenAlle(del){
-  const hist=JSON.parse(localStorage.getItem('dtv_re_hist')||'[]');
-  if(del!==undefined&&typeof del==='number'){
-    hist.splice(del,1);
-    localStorage.setItem('dtv_re_hist',JSON.stringify(hist));
-  }
-  renderRechnungHistorie(hist);
+async function rechnungHistorieLadenAlle(){
+  await _loadReHist();
+  renderRechnungHistorie(_reHist);
 }
-
-function renderRechnungHistoriePage(){
-  const hist=JSON.parse(localStorage.getItem('dtv_re_hist')||'[]');
+async function renderRechnungHistoriePage(){
+  await _loadReHist();
   const q=(document.getElementById('hist-search')?.value||'').toLowerCase();
+  const hist=_reHist;
   const filtered=q?hist.filter(r=>(r.firma||'').toLowerCase().includes(q)||(r.nr||'').toLowerCase().includes(q)||(r.zr||'').toLowerCase().includes(q)):hist;
   const el=document.getElementById('r-historie-page');if(!el)return;
   if(!filtered.length){el.innerHTML='<div class="empty">'+(q?t('empty_kunden_suche'):t('empty_rechnungen'))+'</div>';return;}
+  // Mahnungen laden
+  const mCounts={};
+  await Promise.all(filtered.map(async r=>{
+    const ml=await apiJ('/api/mahnungen/'+encodeURIComponent(r.nr));
+    mCounts[r.nr]=Array.isArray(ml)?ml.length:0;
+  }));
   el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr>'+
     '<th style="text-align:left;font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_nr')+'</th>'+
     '<th style="text-align:left;font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_firma_header')+'</th>'+
@@ -2537,11 +2541,8 @@ function renderRechnungHistoriePage(){
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_datum')+'</th>'+
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)"></th>'+
     '</tr></thead><tbody>'+
-    filtered.map((r,i)=>{
-      const idx=hist.indexOf(r);
-      const mKey='dtv_mahnungen_'+r.nr;
-      const mList=JSON.parse(localStorage.getItem(mKey)||'[]');
-      const mCount=mList.length;
+    filtered.map((r)=>{
+      const mCount=mCounts[r.nr]||0;
       return`<tr style="border-bottom:1px solid var(--brd)">
       <td style="padding:7px 8px;font-weight:600;font-family:monospace;font-size:12px">${r.nr}</td>
       <td style="padding:7px 8px;font-weight:600">${r.firma}</td>
@@ -2549,10 +2550,10 @@ function renderRechnungHistoriePage(){
       <td style="padding:7px 8px;font-size:12px">${r.netto?'EUR '+r.netto:'-'}</td>
       <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td>
       <td style="padding:7px 8px"><div style="display:flex;gap:4px;flex-wrap:wrap">
-        <button onclick="rechnungWiederdrucken(${idx})" style="padding:3px 8px;font-size:11px" title="Rechnung als PDF drucken">PDF</button>
-        <button onclick="rechnungMahnung(${idx})" class="btn-w" style="padding:3px 8px;font-size:11px">${t('btn_mahnung')}</button>
+        <button onclick="rechnungWiederdrucken(${r.id})" style="padding:3px 8px;font-size:11px" title="Rechnung als PDF drucken">PDF</button>
+        <button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:3px 8px;font-size:11px">${t('btn_mahnung')}</button>
         <button onclick="toggleMahnungenRow('${r.nr}')" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="${ta('Mahnungen anzeigen','Show reminders')}">📋 ${ta('Mahnungen','Reminders')} (${mCount})</button>
-        <button onclick="rechnungLoeschen(${idx})" class="btn-d" style="padding:3px 7px;font-size:11px">✕</button>
+        <button onclick="rechnungLoeschen(${r.id})" class="btn-d" style="padding:3px 7px;font-size:11px">✕</button>
       </div></td>
     </tr>
     <tr id="mahnung-row-${r.nr}" style="display:none;background:var(--surf)">
@@ -2561,22 +2562,18 @@ function renderRechnungHistoriePage(){
     }).join('')+
     '</tbody></table>';
 }
-function rechnungLoeschen(idx){
+async function rechnungLoeschen(id){
   if(!confirm(t('msg_rechnung_del')))return;
-  const hist=JSON.parse(localStorage.getItem('dtv_re_hist')||'[]');
-  hist.splice(idx,1);
-  localStorage.setItem('dtv_re_hist',JSON.stringify(hist));
+  await apiJ('/api/rechnungen/'+id,{method:'DELETE'});
   renderRechnungHistoriePage();
 }
-function rechnungWiederdrucken(idx){
-  const hist=JSON.parse(localStorage.getItem('dtv_re_hist')||'[]');
-  const r=hist[idx];if(!r)return;
+function rechnungWiederdrucken(id){
+  const r=_reHist.find(x=>x.id===id);if(!r)return;
   printHtml(r.html,'Rechnung_'+r.kunden_nr+'_'+r.nr+'.pdf');
 }
 
-function rechnungMahnung(idx){
-  const hist=JSON.parse(localStorage.getItem('dtv_re_hist')||'[]');
-  const r=hist[idx];if(!r)return;
+async function rechnungMahnung(id){
+  const r=_reHist.find(x=>x.id===id);if(!r)return;
   const T=window._T||{};
   const ac=accentColor||'#0065A4';
   const heute=fmtDate(today);
@@ -2586,7 +2583,6 @@ function rechnungMahnung(idx){
   const logoHtml=logoData?`<img src="${logoData}" style="max-height:60px;max-width:160px;object-fit:contain">`:'';
   const firmaAdrHtml=(T.firmaAdr||'').replace(/\n/g,'<br>');
   const bline=T.bearbeiter?(T.bearbeiter+(T.kuerzel?'/'+T.kuerzel:'')):'';
-  // Zahlungsziel: 14 Tage
   const zielDat=new Date();zielDat.setDate(zielDat.getDate()+14);
   const ziel=fmtDate(zielDat.toISOString().split('T')[0]);
   const html=`<div class="brief-header">
@@ -2629,38 +2625,38 @@ ${T.iban?`<div class="brief-txt" style="background:#f8f8f8;border-radius:4px;pad
   ${(T.iban||T.bic)?`<div class="brief-foot-col">${T.iban?'<strong>IBAN</strong><br>'+T.iban+'<br>':''}${T.bic?'<strong>BIC</strong><br>'+T.bic:''}</div>`:''}
   ${(T.steuernr||T.gf||T.hrb)?`<div class="brief-foot-col">${T.steuernr?'<strong>Steuernr.</strong><br>'+T.steuernr+'<br>':''}${T.gf?'<strong>GF</strong> '+T.gf+'<br>':''}${T.hrb||''}</div>`:''}
 </div>`;
-  // Save mahnung to history
-  const mKey='dtv_mahnungen_'+r.nr;
-  const mList=JSON.parse(localStorage.getItem(mKey)||'[]');
-  mList.push({dat:today,html,firma:r.firma,nr:r.nr});
-  localStorage.setItem(mKey,JSON.stringify(mList));
+  await apiJ('/api/mahnungen',{method:'POST',body:JSON.stringify({rechnung_nr:r.nr,dat:today,html,ts:Date.now()})});
   renderRechnungHistoriePage();
   printHtml(html,'Mahnung_'+r.kunden_nr+'_'+r.nr+'.pdf');
 }
 
-function toggleMahnungenRow(nr){
+async function toggleMahnungenRow(nr){
   const row=document.getElementById('mahnung-row-'+nr);
   if(!row)return;
   const isOpen=row.style.display!=='none';
   row.style.display=isOpen?'none':'table-row';
   if(!isOpen){
-    const mKey='dtv_mahnungen_'+nr;
-    const mList=JSON.parse(localStorage.getItem(mKey)||'[]');
+    const mList=await apiJ('/api/mahnungen/'+encodeURIComponent(nr))||[];
     const cell=document.getElementById('mahnung-cell-'+nr);
     if(cell){
       if(!mList.length){cell.innerHTML='<span style="font-size:11px;color:var(--mut)">Keine Mahnungen</span>';return;}
       cell.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px">'+
-        mList.map((m,i)=>`<tr><td style="padding:3px 8px;color:var(--mut);width:100px">${fmtDate(m.dat)}</td><td style="padding:3px 8px">${ta('Mahnung','Notice')} ${i+1}</td><td style="padding:3px 8px"><button onclick="printHtml(JSON.parse(localStorage.getItem('dtv_mahnungen_${nr}')||'[]')[${i}]?.html||'','Mahnung_${nr}.pdf')" style="padding:2px 8px;font-size:10px">Drucken</button></td></tr>`).join('')+
+        mList.map((m,i)=>`<tr><td style="padding:3px 8px;color:var(--mut);width:100px">${fmtDate(m.dat)}</td><td style="padding:3px 8px">${ta('Mahnung','Notice')} ${i+1}</td><td style="padding:3px 8px"><button onclick="printMahnungById(${m.id},'Mahnung_${nr}.pdf')" style="padding:2px 8px;font-size:10px">Drucken</button></td></tr>`).join('')+
         '</table>';
     }
   }
 }
+async function printMahnungById(id,fname){
+  // Mahnung-HTML aus der DB holen und drucken
+  const mList=await apiJ('/api/mahnungen_by_id/'+id);
+  if(mList&&mList.html)printHtml(mList.html,fname);
+}
 
-function nextReNr(){
+async function nextReNr(){
   const yr=new Date().getFullYear();
-  const stored=localStorage.getItem('dtv_re_nr');
-  if(stored){
-    const m=stored.match(/^RE-(\d{4})-(\d+)$/);
+  const d=await apiJ('/api/re_nr');
+  if(d&&d.nr){
+    const m=d.nr.match(/^RE-(\d{4})-(\d+)$/);
     if(m&&parseInt(m[1])===yr){
       const n=parseInt(m[2])+1;
       return`RE-${yr}-${String(n).padStart(3,'0')}`;
@@ -2668,7 +2664,7 @@ function nextReNr(){
   }
   return`RE-${yr}-001`;
 }
-function saveReNr(nr){localStorage.setItem('dtv_re_nr',nr);}
+function saveReNr(_nr){/* jetzt server-seitig über /api/rechnungen */}
 
 function rechnungVorschau(){
   const k=kunden.find(k=>k.id===parseInt(document.getElementById('r-kunden_id').value));
@@ -2678,15 +2674,15 @@ function rechnungVorschau(){
   // Accent anwenden
   el.querySelectorAll('.brief-hr').forEach(e=>e.style.background=accentColor||'#0065A4');
 }
-function rechnungExportieren(){
+async function rechnungExportieren(){
   const k=kunden.find(k=>k.id===parseInt(document.getElementById('r-kunden_id').value));
   if(!k){alert(t('msg_ue_firma'));return;}
   const nr=document.getElementById('r-nr').value;
   const html=genRechnungHtml(k);
-  saveReNr(nr);
-  rechnungSpeichern(k,nr,html);
+  await rechnungSpeichern(k,nr,html);
   // Nächste Nummer vorschlagen
-  setTimeout(()=>{document.getElementById('r-nr').value=nextReNr();},200);
+  const nextNr=await nextReNr();
+  document.getElementById('r-nr').value=nextNr;
   printHtml(html,'Rechnung_'+k.nr+'_'+nr+'.pdf');
 }
 
@@ -3136,7 +3132,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.8${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.9${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
