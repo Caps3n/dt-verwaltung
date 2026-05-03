@@ -1,4 +1,6 @@
-# DT-Verwaltung v1.4.7
+# DT-Verwaltung v1.4.9
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-caps3n-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/caps3n)
 
 Web-based management solution for secure data-carrier storage and software escrow.
 Built for service providers who store, manage, and document the return of data carriers (HDDs, SSDs, tapes, USB drives, etc.) on behalf of their customers — including full support for 3-party software-escrow arrangements.
@@ -166,6 +168,14 @@ Optional encryption: set `DB_KEY` in the environment **before** the first start.
 | Auth | Token-based (`X-Token` header), optional SAML 2.0 |
 | Container | Docker, non-root (UID 1000), health check |
 | CI/CD | GitHub Actions → ghcr.io |
+
+---
+
+## Support
+
+If this project is useful to you, consider buying me a coffee ☕
+
+[![Buy Me a Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/caps3n)
 
 ---
 
