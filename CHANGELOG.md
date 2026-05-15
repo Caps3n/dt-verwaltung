@@ -6,6 +6,21 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.5.0] – 2026-05-15
+
+### Added
+- Kundenformular: neue Felder „Max. Mahnungen" und „Mahngebühr (€)" — pro Kunde konfigurierbar je nach Vertragsverhandlung
+- DB-Migration: neue Spalten `max_mahnungen` (Default 3) und `mahngebuehr` (Default 5.00) in Tabelle `kunden`
+- Mahnungslogik: Mahnung-Button zeigt nächste Stufe an (1. Mahnung / 2. Mahnung / Letzte Mahnung)
+- Mahnungslogik: Button wird deaktiviert wenn die max. Anzahl für diesen Kunden erreicht ist
+- Archiv: Mahnungsanzeige zeigt jetzt „X/Y" (aktuell/max) statt nur der Anzahl
+- Mahnung-Dokument: Betreff lautet „Letzte Mahnung" bei der finalen Mahnstufe
+
+### Changed
+- Mahngebühr kommt jetzt aus dem Kundendatensatz statt fest auf 5,00 € codiert
+
+---
+
 ## [1.4.9] – 2026-05-02
 
 ### Added

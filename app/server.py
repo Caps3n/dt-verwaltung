@@ -239,6 +239,8 @@ def init_db():
         vertragsstatus TEXT DEFAULT 'aktiv',
         vertragsnotiz TEXT,
         mengenrabatt_json TEXT DEFAULT '[]',
+        max_mahnungen INTEGER DEFAULT 3,
+        mahngebuehr REAL DEFAULT 5.00,
         vertrag_doc BLOB,
         vertrag_doc_type TEXT,
         vertrag_doc_name TEXT,
@@ -498,6 +500,15 @@ def init_db():
         pass
     try:
         db.execute("ALTER TABLE kunden ADD COLUMN escrow_neben_id INTEGER")
+    except Exception:
+        pass
+    # Migration: add max_mahnungen + mahngebuehr to kunden
+    try:
+        db.execute("ALTER TABLE kunden ADD COLUMN max_mahnungen INTEGER DEFAULT 3")
+    except Exception:
+        pass
+    try:
+        db.execute("ALTER TABLE kunden ADD COLUMN mahngebuehr REAL DEFAULT 5.00")
     except Exception:
         pass
     db.execute("INSERT OR IGNORE INTO template_settings(id) VALUES(1)")
@@ -762,7 +773,7 @@ def delete_benutzer(uid):
 def get_kunden():
     db = get_db()
     rows = db.execute(
-        "SELECT id,nr,firma,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,vertrag_doc_name FROM kunden ORDER BY firma"
+        "SELECT id,nr,firma,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,vertrag_doc_name,max_mahnungen,mahngebuehr FROM kunden ORDER BY firma"
     ).fetchall()
     db.close()
     return jsonify([dict(r) for r in rows])
@@ -776,12 +787,13 @@ def create_kunde():
     db = get_db()
     try:
         db.execute(
-            "INSERT INTO kunden(nr,firma,anrede,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,mengenrabatt_json,szenario,escrow_haupt_id,escrow_neben_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO kunden(nr,firma,anrede,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,mengenrabatt_json,szenario,escrow_haupt_id,escrow_neben_id,max_mahnungen,mahngebuehr) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (data['nr'], data['firma'], data.get('anrede',''), data.get('ansprechpartner'), data.get('email'), data.get('tel'),
              data.get('mobil'), data.get('strasse'), data.get('plz'), data.get('ort'), data.get('land', 'Deutschland'),
              data.get('sap_nr'), data.get('vertragsnr'), data.get('vertragsbeginn'), data.get('vertragsende'),
              data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'),
-             data.get('szenario', 'A'), data.get('escrow_haupt_id') or None, data.get('escrow_neben_id') or None)
+             data.get('szenario', 'A'), data.get('escrow_haupt_id') or None, data.get('escrow_neben_id') or None,
+             int(data.get('max_mahnungen') or 3), float(data.get('mahngebuehr') or 5.00))
         )
         db.commit()
         kid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
@@ -805,12 +817,13 @@ def update_kunde(kid):
              old['vertragsstatus'] or 'abgelaufen', old['vertragsnotiz'] or '')
         )
     db.execute(
-        "UPDATE kunden SET nr=?,firma=?,anrede=?,ansprechpartner=?,email=?,tel=?,mobil=?,strasse=?,plz=?,ort=?,land=?,sap_nr=?,vertragsnr=?,vertragsbeginn=?,vertragsende=?,vertragsstatus=?,vertragsnotiz=?,mengenrabatt_json=?,szenario=?,escrow_haupt_id=?,escrow_neben_id=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
+        "UPDATE kunden SET nr=?,firma=?,anrede=?,ansprechpartner=?,email=?,tel=?,mobil=?,strasse=?,plz=?,ort=?,land=?,sap_nr=?,vertragsnr=?,vertragsbeginn=?,vertragsende=?,vertragsstatus=?,vertragsnotiz=?,mengenrabatt_json=?,szenario=?,escrow_haupt_id=?,escrow_neben_id=?,max_mahnungen=?,mahngebuehr=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
         (data['nr'], data['firma'], data.get('anrede',''), data.get('ansprechpartner'), data.get('email'), data.get('tel'),
          data.get('mobil'), data.get('strasse'), data.get('plz'), data.get('ort'), data.get('land', 'Deutschland'),
          data.get('sap_nr'), data.get('vertragsnr'), data.get('vertragsbeginn'), data.get('vertragsende'),
          data.get('vertragsstatus', 'aktiv'), data.get('vertragsnotiz'), data.get('mengenrabatt_json', '[]'),
-         data.get('szenario', 'A'), data.get('escrow_haupt_id') or None, data.get('escrow_neben_id') or None, kid)
+         data.get('szenario', 'A'), data.get('escrow_haupt_id') or None, data.get('escrow_neben_id') or None,
+         int(data.get('max_mahnungen') or 3), float(data.get('mahngebuehr') or 5.00), kid)
     )
     db.commit()
     row = db.execute("SELECT * FROM kunden WHERE id=?", (kid,)).fetchone()

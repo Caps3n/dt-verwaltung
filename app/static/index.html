@@ -351,6 +351,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div class="r2"><div><label data-i18n="lbl_vertragsnr">Vertragsnummer</label><input id="k-vertragsnr" placeholder="VT-2025-001"></div><div><label data-i18n="lbl_vt_beginn">Vertragsbeginn</label><input id="k-vertragsbeginn" type="date"></div></div>
         <div class="r2"><div><label data-i18n="lbl_vt_ende">Vertragsende</label><input id="k-vertragsende" type="date"></div><div><label data-i18n="lbl_vt_status">Status</label><select id="k-vertragsstatus"><option value="aktiv">Aktiv</option><option value="gekuendigt">Gekuendigt</option><option value="abgelaufen">Abgelaufen</option><option value="pausiert">Pausiert</option></select></div></div>
         <label data-i18n="lbl_vt_notiz">Vertragsnotiz</label><input id="k-vertragsnotiz" placeholder="z.B. jaehrliche Verlaengerung">
+        <div class="r2" style="margin-top:8px">
+          <div><label data-i18n="lbl_max_mahnungen">Max. Mahnungen</label><input id="k-max_mahnungen" type="number" min="1" max="10" step="1" value="3" style="width:80px"></div>
+          <div><label data-i18n="lbl_mahngebuehr">Mahngebühr (€)</label><input id="k-mahngebuehr" type="number" min="0" step="0.01" value="5.00" style="width:100px"></div>
+        </div>
       </div>
       <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:10px">
         <div class="stitle" style="font-size:12px;margin-bottom:4px" data-i18n="lbl_mg_section">Mengenrabatt-Stufen (bis 5)</div>
@@ -1265,7 +1269,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.4.9
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.5.0
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1561,6 +1565,8 @@ const TRANS={
   lbl_vt_ende:{de:'Vertragsende',en:'Contract End'},
   lbl_vt_status:{de:'Status',en:'Status'},
   lbl_vt_notiz:{de:'Vertragsnotiz',en:'Contract Note'},
+  lbl_max_mahnungen:{de:'Max. Mahnungen',en:'Max. Reminders'},
+  lbl_mahngebuehr:{de:'Mahngebühr (€)',en:'Reminder Fee (€)'},
   lbl_mg_section:{de:'Mengenrabatt-Stufen (bis 5)',en:'Volume Discount Tiers (up to 5)'},
   lbl_mg_ab:{de:'Ab (Stück)',en:'From (units)'},
   lbl_mg_pct:{de:'Rabatt (%)',en:'Discount (%)'},
@@ -2158,8 +2164,8 @@ function dtKundeGewaehlt(){
     const rb=document.getElementById('dt-modus-einfach');if(rb){rb.checked=true;dtModusWechseln();}
   }
 }
-const kFields = ['k-firma','k-nr','k-anrede','k-ansprechpartner','k-email','k-tel','k-mobil','k-strasse','k-plz','k-ort','k-land','k-sap_nr','k-vertragsnr','k-vertragsbeginn','k-vertragsende','k-vertragsstatus','k-vertragsnotiz'];
-const kKeys   = ['firma','nr','anrede','ansprechpartner','email','tel','mobil','strasse','plz','ort','land','sap_nr','vertragsnr','vertragsbeginn','vertragsende','vertragsstatus','vertragsnotiz'];
+const kFields = ['k-firma','k-nr','k-anrede','k-ansprechpartner','k-email','k-tel','k-mobil','k-strasse','k-plz','k-ort','k-land','k-sap_nr','k-vertragsnr','k-vertragsbeginn','k-vertragsende','k-vertragsstatus','k-vertragsnotiz','k-max_mahnungen','k-mahngebuehr'];
+const kKeys   = ['firma','nr','anrede','ansprechpartner','email','tel','mobil','strasse','plz','ort','land','sap_nr','vertragsnr','vertragsbeginn','vertragsende','vertragsstatus','vertragsnotiz','max_mahnungen','mahngebuehr'];
 
 function kundeFormData() {
   const d={};
@@ -2205,6 +2211,8 @@ async function kundeSpeichern() {
 function kundeAbbrechen() {
   kFields.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('k-vertragsstatus').value='aktiv';
+  const mmEl=document.getElementById('k-max_mahnungen');if(mmEl)mmEl.value='3';
+  const mgEl=document.getElementById('k-mahngebuehr');if(mgEl)mgEl.value='5.00';
   document.getElementById('k-edit-id').value='';
   document.getElementById('k-form-title').textContent=t('txt_neue_firma');
   document.getElementById('k-save-btn').textContent=t('txt_firma_anlegen');
@@ -2543,6 +2551,11 @@ async function renderRechnungHistoriePage(){
     '</tr></thead><tbody>'+
     filtered.map((r)=>{
       const mCount=mCounts[r.nr]||0;
+      const rKunde=kunden.find(x=>x.id===r.kunden_id)||{};
+      const maxMahn=parseInt(rKunde.max_mahnungen)||3;
+      const mahnVoll=mCount>=maxMahn;
+      const naechsteTitel=mCount+1===maxMahn?ta('Letzte Mahnung','Final Notice'):`${mCount+1}. ${ta('Mahnung','Reminder')}`;
+      const mahnBtnLabel=mahnVoll?ta('Max. Mahnungen erreicht','Max. reminders reached'):naechsteTitel;
       return`<tr style="border-bottom:1px solid var(--brd)">
       <td style="padding:7px 8px;font-weight:600;font-family:monospace;font-size:12px">${r.nr}</td>
       <td style="padding:7px 8px;font-weight:600">${r.firma}</td>
@@ -2551,8 +2564,8 @@ async function renderRechnungHistoriePage(){
       <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td>
       <td style="padding:7px 8px"><div style="display:flex;gap:4px;flex-wrap:wrap">
         <button onclick="rechnungWiederdrucken(${r.id})" style="padding:3px 8px;font-size:11px" title="Rechnung als PDF drucken">PDF</button>
-        <button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:3px 8px;font-size:11px">${t('btn_mahnung')}</button>
-        <button onclick="toggleMahnungenRow('${r.nr}')" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="${ta('Mahnungen anzeigen','Show reminders')}">📋 ${ta('Mahnungen','Reminders')} (${mCount})</button>
+        <button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:3px 8px;font-size:11px"${mahnVoll?' disabled title="'+ta('Maximale Mahnanzahl erreicht','Maximum reminders reached')+'" style="padding:3px 8px;font-size:11px;opacity:0.45;cursor:not-allowed"':''}>${mahnBtnLabel}</button>
+        <button onclick="toggleMahnungenRow('${r.nr}')" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="${ta('Mahnungen anzeigen','Show reminders')}">📋 ${mCount}/${maxMahn}</button>
         <button onclick="rechnungLoeschen(${r.id})" class="btn-d" style="padding:3px 7px;font-size:11px">✕</button>
       </div></td>
     </tr>
@@ -2574,10 +2587,22 @@ function rechnungWiederdrucken(id){
 
 async function rechnungMahnung(id){
   const r=_reHist.find(x=>x.id===id);if(!r)return;
+  // Kundendaten für max_mahnungen + mahngebuehr
+  const k=kunden.find(x=>x.id===r.kunden_id)||{};
+  const maxMahn=parseInt(k.max_mahnungen)||3;
+  const mahngebühr=parseFloat(k.mahngebuehr)||5.00;
+  // Aktuelle Mahnungsanzahl prüfen
+  const vorhandene=await apiJ('/api/mahnungen/'+encodeURIComponent(r.nr))||[];
+  const aktuelleNr=vorhandene.length+1;
+  if(vorhandene.length>=maxMahn){
+    alert(ta(`Maximale Anzahl Mahnungen (${maxMahn}) für diese Rechnung bereits erreicht.`,`Maximum number of reminders (${maxMahn}) for this invoice already reached.`));
+    return;
+  }
+  const istLetzte=aktuelleNr===maxMahn;
+  const mahnTitel=istLetzte?ta('Letzte Mahnung','Final Notice'):`${aktuelleNr}. ${ta('Mahnung','Reminder')}`;
   const T=window._T||{};
   const ac=accentColor||'#0065A4';
   const heute=fmtDate(today);
-  const mahngebühr=5.00;
   const nettoBetrag=r.netto?parseFloat(r.netto.replace(',','.'))||0:0;
   const gesamtBrutto=((nettoBetrag+mahngebühr)*1.19).toFixed(2);
   const logoHtml=logoData?`<img src="${logoData}" style="max-height:60px;max-width:160px;object-fit:contain">`:'';
@@ -2600,7 +2625,7 @@ async function rechnungMahnung(id){
   <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${T.tel}<br>`:''}${T.email?`${T.email}<br>`:''}${r.kunden_nr?`Kd-Nr. ${r.kunden_nr}`:''}</div>
 </div>
 <div class="brief-ort-dat">${T.ort||''}, ${heute}</div>
-<div class="brief-betreff" style="color:#dc2626">Zahlungserinnerung – Rechnung ${r.nr}</div>
+<div class="brief-betreff" style="color:#dc2626">${mahnTitel} – Rechnung ${r.nr}</div>
 <div class="brief-sub">Ursprüngliche Rechnung vom ${fmtDate(r.dat)} | Zeitraum: ${r.zr}</div>
 <div class="brief-txt">${T.anrede||'Sehr geehrte Damen und Herren,'}</div>
 <div class="brief-txt">trotz unserer Zahlungserinnerung haben wir bis heute keinen Zahlungseingang für die oben genannte Rechnung feststellen können. Wir bitten Sie, den ausstehenden Betrag umgehend zu begleichen.</div>
@@ -3132,7 +3157,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.4.9${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.5.0${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
