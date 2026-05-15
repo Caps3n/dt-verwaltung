@@ -1,4 +1,4 @@
-# DT-Verwaltung v1.4.9
+# DT-Verwaltung v1.5.0
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-caps3n-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/caps3n)
 
@@ -46,7 +46,10 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 ### Invoices
 - Automatic invoice creation with volume discount, flat discount, and VAT
 - Invoice history with per-invoice PDF regeneration
-- Reminder function: 1st / 2nd / 3rd reminder per invoice with print button
+- Reminder function: configurable number of reminders per customer (1st / 2nd / … / Final Notice) with print button
+- **Per-customer reminder settings:** maximum number of reminders and reminder fee negotiated per contract
+- Reminder counter shows `X/Y` progress; button is disabled once the limit is reached
+- Final reminder is automatically labelled "Final Notice / Letzte Mahnung"
 
 ### Safe Management (🔒)
 - CRUD for physical safes and cabinets: name, manufacturer, model, serial number
