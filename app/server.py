@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """DT-Verwaltung Backend – Flask + SQLite/SQLCipher (Docker-ready)"""
-import json, hashlib, hmac, secrets, os, base64, sqlite3
+import json, hashlib, hmac, secrets, os, base64, sqlite3, time
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, request, jsonify, send_from_directory, send_file, redirect
@@ -41,6 +41,25 @@ DB_PATH = os.path.join(DATA_DIR, 'dtv.db')
 SESSIONS = {}  # token -> {user_id, expires}  (in-memory cache, backed by DB)
 # SAML client cache (keyed by config hash for hot-reload)
 _saml_client_cache = {}
+
+# ─── SIMPLE TTL CACHE ─────────────────────────────────────────────────────────
+# Lightweight in-memory cache to reduce DB reads for frequently-accessed endpoints.
+# TTL default: 30 s. Invalidated explicitly on every write/update/delete.
+_cache: dict = {}
+
+def _cache_get(key):
+    entry = _cache.get(key)
+    if entry and time.time() < entry['exp']:
+        return entry['val']
+    _cache.pop(key, None)
+    return None
+
+def _cache_set(key, val, ttl: int = 30):
+    _cache[key] = {'val': val, 'exp': time.time() + ttl}
+
+def _cache_del(*keys):
+    for k in keys:
+        _cache.pop(k, None)
 
 # ─── SESSION STORE (DB-backed für multi-worker-safe auth) ────────────────────
 def session_create(user_id, expires_iso):
@@ -511,6 +530,11 @@ def init_db():
         db.execute("ALTER TABLE kunden ADD COLUMN mahngebuehr REAL DEFAULT 5.00")
     except Exception:
         pass
+    # Migration: add bezahlt_am to rechnungen
+    try:
+        db.execute("ALTER TABLE rechnungen ADD COLUMN bezahlt_am TEXT")
+    except Exception:
+        pass
     db.execute("INSERT OR IGNORE INTO template_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_config(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_settings(id) VALUES(1)")
@@ -771,12 +795,17 @@ def delete_benutzer(uid):
 @app.route('/api/kunden', methods=['GET'])
 @require_auth('read')
 def get_kunden():
+    cached = _cache_get('kunden')
+    if cached is not None:
+        return jsonify(cached)
     db = get_db()
     rows = db.execute(
         "SELECT id,nr,firma,ansprechpartner,email,tel,mobil,strasse,plz,ort,land,sap_nr,vertragsnr,vertragsbeginn,vertragsende,vertragsstatus,vertragsnotiz,vertrag_doc_name,max_mahnungen,mahngebuehr FROM kunden ORDER BY firma"
     ).fetchall()
     db.close()
-    return jsonify([dict(r) for r in rows])
+    result = [dict(r) for r in rows]
+    _cache_set('kunden', result)
+    return jsonify(result)
 
 @app.route('/api/kunden', methods=['POST'])
 @require_auth('write')
@@ -799,6 +828,7 @@ def create_kunde():
         kid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
         row = db.execute("SELECT * FROM kunden WHERE id=?", (kid,)).fetchone()
         db.close()
+        _cache_del('kunden')
         return jsonify(dict(row)), 201
     except sqlite3.IntegrityError:
         db.close()
@@ -828,6 +858,7 @@ def update_kunde(kid):
     db.commit()
     row = db.execute("SELECT * FROM kunden WHERE id=?", (kid,)).fetchone()
     db.close()
+    _cache_del('kunden')
     return jsonify(dict(row))
 
 @app.route('/api/kunden/<int:kid>', methods=['DELETE'])
@@ -837,6 +868,7 @@ def delete_kunde(kid):
     db.execute("DELETE FROM kunden WHERE id=?", (kid,))
     db.commit()
     db.close()
+    _cache_del('kunden')
     return jsonify({'ok': True})
 
 @app.route('/api/kunden/<int:kid>/history', methods=['GET'])
@@ -1564,27 +1596,58 @@ def get_wartungstermine():
 @app.route('/api/rechnungen', methods=['GET'])
 @require_auth('read')
 def get_rechnungen():
+    cached = _cache_get('rechnungen')
+    if cached is not None:
+        return jsonify(cached)
     db = get_db()
     rows = db.execute(
-        "SELECT id,nr,kunden_id,firma,kunden_nr,dat,zr,netto,ts,erstellt FROM rechnungen ORDER BY ts DESC"
+        "SELECT id,nr,kunden_id,firma,kunden_nr,dat,zr,netto,ts,erstellt,bezahlt_am FROM rechnungen ORDER BY ts DESC"
     ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    db.close()
+    result = [dict(r) for r in rows]
+    _cache_set('rechnungen', result)
+    return jsonify(result)
 
 @app.route('/api/rechnungen', methods=['POST'])
 @require_auth('write')
 def post_rechnungen():
     data = request.json or {}
     db = get_db()
-    # upsert by nr: if same nr exists, overwrite
+    # upsert by nr: preserve bezahlt_am if overwriting
+    old = db.execute("SELECT bezahlt_am FROM rechnungen WHERE nr=?", (data.get('nr',''),)).fetchone()
+    bezahlt_am = old['bezahlt_am'] if old else None
     db.execute("DELETE FROM rechnungen WHERE nr=?", (data.get('nr',''),))
     db.execute(
-        "INSERT INTO rechnungen(nr,kunden_id,firma,kunden_nr,dat,zr,netto,html,ts) VALUES(?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO rechnungen(nr,kunden_id,firma,kunden_nr,dat,zr,netto,html,ts,bezahlt_am) VALUES(?,?,?,?,?,?,?,?,?,?)",
         (data.get('nr'), data.get('kunden_id'), data.get('firma'), data.get('kunden_nr'),
-         data.get('dat'), data.get('zr'), data.get('netto'), data.get('html'), data.get('ts'))
+         data.get('dat'), data.get('zr'), data.get('netto'), data.get('html'), data.get('ts'), bezahlt_am)
     )
     db.commit()
     row = db.execute("SELECT id FROM rechnungen WHERE nr=?", (data.get('nr'),)).fetchone()
+    db.close()
+    _cache_del('rechnungen')
     return jsonify({'id': row['id'] if row else None}), 201
+
+@app.route('/api/rechnungen/<int:rid>/bezahlt', methods=['PATCH'])
+@require_auth('write')
+def rechnung_bezahlt(rid):
+    db = get_db()
+    db.execute("UPDATE rechnungen SET bezahlt_am=? WHERE id=?",
+               (datetime.now().strftime('%Y-%m-%d'), rid))
+    db.commit()
+    db.close()
+    _cache_del('rechnungen')
+    return jsonify({'ok': True})
+
+@app.route('/api/rechnungen/<int:rid>/unbezahlt', methods=['PATCH'])
+@require_auth('write')
+def rechnung_unbezahlt(rid):
+    db = get_db()
+    db.execute("UPDATE rechnungen SET bezahlt_am=NULL WHERE id=?", (rid,))
+    db.commit()
+    db.close()
+    _cache_del('rechnungen')
+    return jsonify({'ok': True})
 
 @app.route('/api/rechnungen/<int:rid>', methods=['DELETE'])
 @require_auth('delete')
@@ -1592,6 +1655,8 @@ def delete_rechnung(rid):
     db = get_db()
     db.execute("DELETE FROM rechnungen WHERE id=?", (rid,))
     db.commit()
+    db.close()
+    _cache_del('rechnungen')
     return jsonify({'ok': True})
 
 @app.route('/api/rechnungen', methods=['DELETE'])
@@ -1600,6 +1665,8 @@ def delete_all_rechnungen():
     db = get_db()
     db.execute("DELETE FROM rechnungen")
     db.commit()
+    db.close()
+    _cache_del('rechnungen')
     return jsonify({'ok': True})
 
 # ─── MAHNUNGEN ───────────────────────────────────────────────────────────────

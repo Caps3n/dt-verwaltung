@@ -238,6 +238,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div style="font-size:28px;font-weight:700;color:var(--w-txt)" id="db-ablauf-count">-</div>
       <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_ablauf_kpi">Verträge &lt;60 Tage</div>
     </div>
+    <div class="card" style="text-align:center;padding:1rem;cursor:pointer" onclick="showTab('rechnungen','historie')">
+      <div style="font-size:28px;font-weight:700;color:#dc2626" id="db-re-offen-count">-</div>
+      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_offene_re">Offene Rechnungen</div>
+      <div style="font-size:12px;color:#dc2626;margin-top:2px" id="db-re-offen-summe"></div>
+    </div>
   </div>
   <div class="g2">
     <div class="card">
@@ -1269,7 +1274,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.5.0
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.5.1
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1799,6 +1804,7 @@ const TRANS={
   db_netto_jahr:{de:'Netto/Jahr (akt.)',en:'Net/Year (active)'},
   db_aktive_vt_kpi:{de:'Aktive Verträge',en:'Active Contracts'},
   db_ablauf_kpi:{de:'Verträge &lt;60 Tage',en:'Contracts &lt;60 Days'},
+  db_offene_re:{de:'Offene Rechnungen',en:'Open Invoices'},
   lbl_bearbmodus:{de:'Bearbeitungsmodus',en:'Edit Mode'},
   st_wartungsvertrag:{de:'Wartungsvertrag',en:'Maintenance Contract'},
   ph_k_search:{de:'Suche Firma, Nr, Ansprechpartner...',en:'Search company, no., contact...'},
@@ -2117,6 +2123,7 @@ async function loadAll() {
   ]);
   kunden = kunden||[]; datentraeger=datentraeger||[]; Übergaben=Übergaben||[]; tresore=tresore||[];
   pendingUebergaben = Übergaben.filter(u=>!u.abgeschlossen);
+  await _loadReHist();  // Rechnungen für Dashboard-Widget
   renderAlles();
 }
 
@@ -2547,6 +2554,7 @@ async function renderRechnungHistoriePage(){
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_zeitraum')+'</th>'+
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_netto')+'</th>'+
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_datum')+'</th>'+
+    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+ta('Status','Status')+'</th>'+
     '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)"></th>'+
     '</tr></thead><tbody>'+
     filtered.map((r)=>{
@@ -2556,21 +2564,35 @@ async function renderRechnungHistoriePage(){
       const mahnVoll=mCount>=maxMahn;
       const naechsteTitel=mCount+1===maxMahn?ta('Letzte Mahnung','Final Notice'):`${mCount+1}. ${ta('Mahnung','Reminder')}`;
       const mahnBtnLabel=mahnVoll?ta('Max. Mahnungen erreicht','Max. reminders reached'):naechsteTitel;
+      // Zahlungsstatus berechnen
+      const bezahlt=!!r.bezahlt_am;
+      const tage30=(new Date()-new Date(r.dat))/(1000*60*60*24);
+      const ueberfaellig=!bezahlt&&tage30>30;
+      const statusBadge=bezahlt
+        ?`<span style="background:#dcfce7;color:#166534;padding:2px 7px;border-radius:9px;font-size:10px;font-weight:600">${ta('Bezahlt','Paid')}</span>`
+        :ueberfaellig
+          ?`<span style="background:#fee2e2;color:#991b1b;padding:2px 7px;border-radius:9px;font-size:10px;font-weight:600">${ta('Überfällig','Overdue')}</span>`
+          :`<span style="background:#fef9c3;color:#854d0e;padding:2px 7px;border-radius:9px;font-size:10px;font-weight:600">${ta('Offen','Open')}</span>`;
+      const bezahltBtn=bezahlt
+        ?`<button onclick="rechnungUnbezahlt(${r.id})" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="${ta('Als offen markieren','Mark as open')}">↩</button>`
+        :`<button onclick="rechnungBezahlt(${r.id})" style="padding:3px 8px;font-size:11px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0" title="${ta('Als bezahlt markieren','Mark as paid')}">✓ ${ta('Bezahlt','Paid')}</button>`;
       return`<tr style="border-bottom:1px solid var(--brd)">
       <td style="padding:7px 8px;font-weight:600;font-family:monospace;font-size:12px">${r.nr}</td>
       <td style="padding:7px 8px;font-weight:600">${r.firma}</td>
       <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${r.zr}</td>
       <td style="padding:7px 8px;font-size:12px">${r.netto?'EUR '+r.netto:'-'}</td>
       <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td>
+      <td style="padding:7px 8px">${statusBadge}</td>
       <td style="padding:7px 8px"><div style="display:flex;gap:4px;flex-wrap:wrap">
+        ${bezahltBtn}
         <button onclick="rechnungWiederdrucken(${r.id})" style="padding:3px 8px;font-size:11px" title="Rechnung als PDF drucken">PDF</button>
-        <button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:3px 8px;font-size:11px"${mahnVoll?' disabled title="'+ta('Maximale Mahnanzahl erreicht','Maximum reminders reached')+'" style="padding:3px 8px;font-size:11px;opacity:0.45;cursor:not-allowed"':''}>${mahnBtnLabel}</button>
+        <button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:3px 8px;font-size:11px"${(mahnVoll||bezahlt)?' disabled title="'+(bezahlt?ta('Rechnung bereits bezahlt','Invoice already paid'):ta('Maximale Mahnanzahl erreicht','Maximum reminders reached'))+'" style="padding:3px 8px;font-size:11px;opacity:0.45;cursor:not-allowed"':''}>${mahnBtnLabel}</button>
         <button onclick="toggleMahnungenRow('${r.nr}')" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="${ta('Mahnungen anzeigen','Show reminders')}">📋 ${mCount}/${maxMahn}</button>
         <button onclick="rechnungLoeschen(${r.id})" class="btn-d" style="padding:3px 7px;font-size:11px">✕</button>
       </div></td>
     </tr>
     <tr id="mahnung-row-${r.nr}" style="display:none;background:var(--surf)">
-      <td colspan="6" style="padding:8px 16px" id="mahnung-cell-${r.nr}"></td>
+      <td colspan="7" style="padding:8px 16px" id="mahnung-cell-${r.nr}"></td>
     </tr>`;
     }).join('')+
     '</tbody></table>';
@@ -2578,6 +2600,16 @@ async function renderRechnungHistoriePage(){
 async function rechnungLoeschen(id){
   if(!confirm(t('msg_rechnung_del')))return;
   await apiJ('/api/rechnungen/'+id,{method:'DELETE'});
+  renderRechnungHistoriePage();
+}
+async function rechnungBezahlt(id){
+  await apiJ('/api/rechnungen/'+id+'/bezahlt',{method:'PATCH'});
+  await _loadReHist();
+  renderRechnungHistoriePage();
+}
+async function rechnungUnbezahlt(id){
+  await apiJ('/api/rechnungen/'+id+'/unbezahlt',{method:'PATCH'});
+  await _loadReHist();
   renderRechnungHistoriePage();
 }
 function rechnungWiederdrucken(id){
@@ -3157,7 +3189,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.5.0${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.5.1${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -3870,6 +3902,13 @@ function renderDashboard(){
   // Typen
   const typen={};eingelagert.forEach(d=>{const t=d.bezeichnung.split(' ')[0]||'Sonstige';typen[t]=(typen[t]||0)+1;});
   document.getElementById('db-typen-liste').innerHTML=Object.entries(typen).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<span class="badge bg" style="font-size:12px;padding:5px 10px">${t} <strong>${n}</strong></span>`).join('');
+  // Offene Rechnungen
+  const offeRe=_reHist.filter(r=>!r.bezahlt_am);
+  const offenSumme=offeRe.reduce((s,r)=>s+parseFloat((r.netto||'0').replace(',','.')),0);
+  const reOffenEl=document.getElementById('db-re-offen-count');
+  const reOffenSumEl=document.getElementById('db-re-offen-summe');
+  if(reOffenEl)reOffenEl.textContent=offeRe.length;
+  if(reOffenSumEl)reOffenSumEl.textContent=offeRe.length?eur(offenSumme):'';
   // Tresor-Wartungstermine
   apiJ('/api/tresore/wartungstermine').then(list=>{
     list=list||[];

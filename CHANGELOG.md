@@ -6,6 +6,24 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.5.1] – 2026-05-23
+
+### Added
+- **Zahlungsstatus** auf Rechnungen: Badge zeigt Offen / Bezahlt / Überfällig (>30 Tage)
+- **„✓ Bezahlt"-Button** in der Rechnungshistorie — Klick setzt `bezahlt_am` Datum; ↩-Button macht es rückgängig
+- **DB-Migration**: neue Spalte `bezahlt_am TEXT` in Tabelle `rechnungen`
+- **API**: `PATCH /api/rechnungen/<id>/bezahlt` und `PATCH /api/rechnungen/<id>/unbezahlt`
+- **Dashboard-Widget** „Offene Rechnungen" mit Anzahl und Gesamtsumme; Klick springt zur Historie
+- Mahnungs-Button deaktiviert wenn Rechnung bereits als bezahlt markiert
+- **Server-seitiger TTL-Cache** (30 s) für `GET /api/kunden` und `GET /api/rechnungen` — reduziert DB-Last bei mehreren gleichzeitigen Nutzern
+- Cache-Invalidierung bei jedem Schreib-/Löschvorgang auf kunden und rechnungen
+
+### Changed
+- `GET /api/rechnungen` liefert jetzt `bezahlt_am` Feld mit
+- Beim Upsert einer Rechnung (selbe RE-Nr.) bleibt `bezahlt_am` erhalten
+
+---
+
 ## [1.5.0] – 2026-05-15
 
 ### Added
