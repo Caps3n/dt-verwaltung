@@ -4,6 +4,13 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.6.02] – 2026-05-23
+
+### Fixed
+- **Login crash**: `pysqlcipher3.dbapi2.Row` has no `.get()` method — converted the login query result to a plain `dict` before TOTP checks, so `user.get('totp_enabled')` and `user.get('totp_secret')` work correctly regardless of the SQLite driver in use.
+
+---
+
 ## [v1.6.01] – 2026-05-23
 
 ### Fixed
