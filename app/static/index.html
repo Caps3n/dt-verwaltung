@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>DT-Verwaltung</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -192,9 +193,14 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <div class="app">
 
 <!-- TOP BAR -->
-<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px;flex-wrap:wrap;gap:6px">
   <div style="font-size:12px;font-weight:700;color:var(--txt)">DT-Verwaltung</div>
-  <div style="display:flex;align-items:center;gap:10px">
+  <!-- Globale Suche -->
+  <div style="position:relative;flex:1;max-width:340px;min-width:140px">
+    <input id="global-search" type="search" placeholder="🔍 Suche Kunde, DT, Seriennr., Rechnung…" oninput="globalSuche(this.value)" style="width:100%;padding:5px 10px;font-size:12px;border:1px solid var(--brd2);border-radius:var(--rad);background:var(--surf);color:var(--txt)" autocomplete="off">
+    <div id="global-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg);border:1px solid var(--brd2);border-radius:var(--rad);z-index:500;max-height:320px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.15)"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <span id="topbar-user" style="font-size:12px;font-weight:600"></span>
     <span id="topbar-role" class="badge"></span>
     <button onclick="openPwModal()" data-i18n="btn_pw" style="padding:4px 10px;font-size:11px">🔑 Passwort</button>
@@ -265,6 +271,14 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="card">
     <div class="stitle" data-i18n="st_db_wartung">🔒 Tresor-Wartungstermine <span id="db-wartung-count" class="badge ba" style="font-size:11px">0</span></div>
     <div id="db-wartung-liste"><div class="empty" data-i18n="empty_db_wartung">Keine anstehenden Wartungstermine</div></div>
+  </div>
+  <div class="card">
+    <div class="stitle">🔧 DT-Medienwartung <span id="db-dt-wartung-count" class="badge ba" style="font-size:11px">0</span></div>
+    <div id="db-dt-wartung-liste"><div class="empty">Keine anstehenden DT-Checks</div></div>
+  </div>
+  <div class="card">
+    <div class="stitle">📈 Umsatz letzte 12 Monate (Netto)</div>
+    <div id="db-umsatz-chart" style="overflow-x:auto;padding:4px 0"><div class="empty">Laden…</div></div>
   </div>
 </div>
 
@@ -534,6 +548,14 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <label data-i18n="lbl_einl_datum">Einlagerungsdatum</label><input id="dt-datum" type="date">
         <label data-i18n="lbl_beschreibung">Beschreibung (optional)</label><input id="dt-beschreibung">
         <label data-i18n="lbl_tresor_select">Tresor / Schrank (optional)</label><select id="dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
+        <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:10px">
+          <div style="font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px">🔧 Wartungsintervall (optional)</div>
+          <div class="r2">
+            <div><label>Intervall (Jahre)</label><input id="dt-wartungsintervall_jahre" type="number" min="0" max="99" step="1" value="0" placeholder="0 = kein Intervall"></div>
+            <div><label>Letzter Check</label><input id="dt-letzter_check_datum" type="date"></div>
+          </div>
+          <div style="font-size:10px;color:var(--mut);margin-top:4px">Bei 0 Jahren wird kein Wartungsintervall überwacht.</div>
+        </div>
         <div style="display:flex;justify-content:flex-end;margin-top:12px">
           <button class="btn-p" onclick="dtWeiterZuSchritt2()" style="padding:9px 20px" data-i18n="lbl_weiter_s2">Weiter zu Schritt 2</button>
         </div>
@@ -541,8 +563,14 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="card">
         <div class="stitle" data-i18n="st_dt_eingelagert">Eingelagerte Datenträger</div>
         <select id="dt-filter" onchange="renderDT()"><option value="">Alle Firmen</option></select>
-        <input type="search" id="dt-search" placeholder="Typ, Seriennummer..." oninput="renderDT()" style="margin-top:8px">
+        <input type="search" id="dt-search" placeholder="Typ, Seriennummer, interne Nr…" oninput="renderDT()" style="margin-top:8px">
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button id="dt-status-alle" class="btn-p" onclick="dtSetStatus('alle')" style="padding:4px 10px;font-size:11px">Alle</button>
+          <button id="dt-status-eingelagert" onclick="dtSetStatus('eingelagert')" style="padding:4px 10px;font-size:11px">✅ Eingelagert</button>
+          <button id="dt-status-uebergeben" onclick="dtSetStatus('uebergeben')" style="padding:4px 10px;font-size:11px">📦 Übergeben</button>
+        </div>
         <div style="margin-top:10px" id="dt-tabelle"><div class="empty" data-i18n="empty_dt">Keine Datenträger</div></div>
+        <div id="dt-pagination" style="display:flex;align-items:center;gap:6px;margin-top:8px;justify-content:center;font-size:12px"></div>
       </div>
     </div>
   </div>
@@ -1030,6 +1058,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   <div class="sub-tabs" id="admin-sub-nav">
     <button class="sub-tab active" id="adm-sub-unternehmen" onclick="showAdminSub('unternehmen')">🏢 Unternehmen</button>
     <button class="sub-tab" id="adm-sub-benutzer" onclick="showAdminSub('benutzer')" data-i18n="tab_benutzer_rollen">👤 Benutzer &amp; Rollen</button>
+    <button class="sub-tab" id="adm-sub-smtp" onclick="showAdminSub('smtp')">📧 E-Mail (SMTP)</button>
+    <button class="sub-tab" id="adm-sub-auditlog" onclick="showAdminSub('auditlog');loadAuditLog()">📋 Audit-Log</button>
     <button class="sub-tab" id="adm-sub-saml" onclick="showAdminSub('saml')">🔐 SAML/SSO</button>
   </div>
 
@@ -1240,6 +1270,69 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div style="margin-top:10px;font-size:11px;color:var(--mut)" data-i18n="lbl_saml_hint">Vollständige SAML-Konfiguration ist auch im Tab Benutzer &amp; Rollen verfügbar.</div>
   </div>
   </div><!-- end adm-panel-saml -->
+
+  <!-- SMTP PANEL -->
+  <div class="sub-panel" id="adm-panel-smtp">
+  <div class="g2">
+    <div class="card">
+      <div class="stitle">📧 E-Mail-Versand (SMTP)</div>
+      <div style="font-size:12px;color:var(--mut);margin-bottom:12px">Aktiviere SMTP, um Mahnungen direkt per E-Mail zu versenden. Passwort wird nur gespeichert wenn eingegeben.</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:12px;font-weight:600">E-Mail-Versand aktivieren</span>
+        <label class="toggle"><input type="checkbox" id="smtp-aktiv" onchange=""><span class="toggle-slider"></span></label>
+      </div>
+      <label>SMTP-Host</label><input id="smtp-host" placeholder="smtp.gmail.com">
+      <div class="r2">
+        <div><label>Port</label><input id="smtp-port" type="number" value="587" placeholder="587"></div>
+        <div>
+          <label style="margin-top:10px">TLS</label>
+          <label class="toggle" style="margin-top:4px;display:block"><input type="checkbox" id="smtp-tls" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <label>Benutzername / E-Mail-Adresse</label><input id="smtp-username" placeholder="user@firma.de" type="email">
+      <label>Passwort <span style="font-weight:400;font-size:10px">(leer lassen = nicht ändern)</span></label><input id="smtp-password" type="password" placeholder="••••••••" autocomplete="new-password">
+      <label>Absender-Name</label><input id="smtp-from-name" placeholder="DT-Verwaltung">
+      <label>Absender-Adresse</label><input id="smtp-from-email" type="email" placeholder="noreply@firma.de">
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn-p" onclick="smtpSpeichern()" style="flex:2">💾 Speichern</button>
+      </div>
+      <div style="border-top:1px solid var(--brd);margin-top:14px;padding-top:12px">
+        <div class="stitle" style="font-size:12px">Test-E-Mail</div>
+        <div class="r2" style="align-items:flex-end">
+          <div><label>An (E-Mail)</label><input id="smtp-test-to" type="email" placeholder="test@firma.de"></div>
+          <div><button onclick="smtpTest()" class="btn-s" style="width:100%;margin-top:10px">📤 Senden</button></div>
+        </div>
+        <div id="smtp-test-result" style="margin-top:8px;font-size:12px;display:none"></div>
+      </div>
+    </div>
+    <div class="card" style="background:var(--i-bg);border-color:var(--i-brd)">
+      <div style="font-size:12px;color:var(--i-txt);line-height:1.7">
+        <strong>Hinweise:</strong><br>
+        • Gmail: App-Passwort verwenden (nicht das Account-Passwort)<br>
+        • Office 365: smtp.office365.com, Port 587, TLS an<br>
+        • Selbst gehosteter Server: TLS je nach Konfiguration<br>
+        <br>
+        Nach dem Speichern erscheint in der Mahnungs-Historie ein <strong>📧 Per E-Mail senden</strong>-Button.
+      </div>
+    </div>
+  </div>
+  </div><!-- end adm-panel-smtp -->
+
+  <!-- AUDIT-LOG PANEL -->
+  <div class="sub-panel" id="adm-panel-auditlog">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="stitle" style="margin:0">📋 Audit-Log</div>
+      <div style="display:flex;gap:8px">
+        <input type="search" id="audit-search" placeholder="Suche…" oninput="filterAuditLog(this.value)" style="width:200px">
+        <button onclick="loadAuditLog()" style="padding:4px 10px;font-size:11px">↻ Neu laden</button>
+      </div>
+    </div>
+    <div id="audit-log-tabelle"><div class="empty">Audit-Log laden…</div></div>
+    <div id="audit-log-pagination" style="display:flex;gap:6px;margin-top:8px;justify-content:center;font-size:12px"></div>
+  </div>
+  </div><!-- end adm-panel-auditlog -->
+
 </div>
 
 <!-- HILFE -->
@@ -1274,7 +1367,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.5.1
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.6.0
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1305,6 +1398,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <label data-i18n="lbl_einl_datum">Einlagerungsdatum</label><input id="ov-dt-datum" type="date">
     <label data-i18n="lbl_beschreibung_short">Beschreibung</label><input id="ov-dt-beschreibung">
     <label data-i18n="lbl_tresor_select">Tresor / Schrank (optional)</label><select id="ov-dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
+    <label>🔧 Wartungsintervall (Jahre, 0 = kein)</label><input id="ov-dt-wartungsintervall_jahre" type="number" min="0" step="1" value="0" style="width:80px">
+    <label>📅 Letzter Check</label><input id="ov-dt-letzter_check_datum" type="date">
     <label data-i18n="lbl_bild_ersetzen">Bild ersetzen</label>
     <div class="upzone" id="ov-bild-zone" onclick="document.getElementById('ov-bild-file').click()"><input type="file" id="ov-bild-file" accept="image/*" style="display:none" onchange="handleOvBild(event)"><div id="ov-bild-prev" data-i18n="txt_klicken">Klicken</div></div>
     <div style="margin-top:14px;display:flex;gap:8px"><button onclick="document.getElementById('dt-ov').classList.remove('open')" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button><button class="btn-p" onclick="dtSpeichern()" style="flex:1" data-i18n="lbl_speichern">Speichern</button></div>
@@ -1328,6 +1423,23 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div style="display:flex;gap:8px;margin-top:16px">
       <button onclick="closePwModal()" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button>
       <button class="btn-p" onclick="pwSpeichern()" style="flex:2" data-i18n="lbl_pw_speichern">Passwort speichern</button>
+    </div>
+    <!-- 2FA Section -->
+    <div style="border-top:1px solid var(--brd);margin-top:16px;padding-top:14px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px">🔐 Zwei-Faktor-Authentifizierung (2FA/TOTP)</div>
+      <div id="totp-status-box" style="font-size:12px;color:var(--mut);margin-bottom:8px"></div>
+      <div id="totp-setup-area" style="display:none">
+        <div id="totp-qr-box" style="display:flex;justify-content:center;margin:10px 0"></div>
+        <div style="font-size:11px;color:var(--mut);text-align:center;margin-bottom:8px">QR-Code mit Authenticator-App scannen<br>(<strong>Google Authenticator</strong>, Authy, etc.)</div>
+        <label style="font-size:11px">Code zur Bestätigung eingeben</label>
+        <input id="totp-verify-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="6-stelliger Code" style="text-align:center;letter-spacing:6px;font-size:18px">
+        <button class="btn-s btn-full" onclick="totpEnable()" style="margin-top:8px">✅ 2FA aktivieren</button>
+        <div id="totp-err" style="display:none;color:var(--d-txt);font-size:12px;margin-top:6px"></div>
+      </div>
+      <div id="totp-actions" style="display:flex;gap:8px;margin-top:4px">
+        <button id="totp-setup-btn" onclick="totpSetup()" style="flex:1;font-size:12px">⚙️ 2FA einrichten</button>
+        <button id="totp-disable-btn" class="btn-d" onclick="totpDisable()" style="flex:1;font-size:12px;display:none">2FA deaktivieren</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2314,7 +2426,7 @@ async function dtHinzufuegen() {
   const preis=parseFloat(document.getElementById('dt-preis').value)||0;
   const einheit=document.getElementById('dt-einheit').value;
   const preis_jahr=einheit==='monat'?preis*12:preis;
-  const data={kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt:parseFloat(document.getElementById('dt-rabatt').value)||0,einlagerungs_datum:document.getElementById('dt-datum').value,beschreibung:document.getElementById('dt-beschreibung').value.trim(),tresor_id:parseInt(document.getElementById('dt-tresor_id').value)||null,interne_nr:document.getElementById('dt-interne_nr')?.value||'',eigentuemer_id:parseInt(document.getElementById('dt-eigentuemer_id')?.value)||null,neben_eigentuemer_id:parseInt(document.getElementById('dt-neben_eigentuemer_id')?.value)||null,rechnungsempfaenger_id:parseInt(document.getElementById('dt-rechnungsempfaenger_id')?.value)||null,bild:pendingDtBild?.data,bild_type:pendingDtBild?.type,eingang_doc:pendingDtScan?.data,eingang_doc_type:pendingDtScan?.type,eingang_doc_name:pendingDtScan?.name};
+  const data={kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt:parseFloat(document.getElementById('dt-rabatt').value)||0,einlagerungs_datum:document.getElementById('dt-datum').value,beschreibung:document.getElementById('dt-beschreibung').value.trim(),tresor_id:parseInt(document.getElementById('dt-tresor_id').value)||null,interne_nr:document.getElementById('dt-interne_nr')?.value||'',eigentuemer_id:parseInt(document.getElementById('dt-eigentuemer_id')?.value)||null,neben_eigentuemer_id:parseInt(document.getElementById('dt-neben_eigentuemer_id')?.value)||null,rechnungsempfaenger_id:parseInt(document.getElementById('dt-rechnungsempfaenger_id')?.value)||null,bild:pendingDtBild?.data,bild_type:pendingDtBild?.type,eingang_doc:pendingDtScan?.data,eingang_doc_type:pendingDtScan?.type,eingang_doc_name:pendingDtScan?.name,wartungsintervall_jahre:parseInt(document.getElementById('dt-wartungsintervall_jahre')?.value)||0,letzter_check_datum:document.getElementById('dt-letzter_check_datum')?.value||null};
   const result=await apiPost('/api/datentraeger',data);
   if(result){
     datentraeger.push(result);
@@ -2347,6 +2459,8 @@ async function dtBearbeiten(id) {
   document.getElementById('ov-dt-beschreibung').value=d.beschreibung||'';
   renderSelects(); // ensure tresor dropdown is populated
   document.getElementById('ov-dt-tresor_id').value=d.tresor_id||'';
+  if(document.getElementById('ov-dt-wartungsintervall_jahre'))document.getElementById('ov-dt-wartungsintervall_jahre').value=d.wartungsintervall_jahre||0;
+  if(document.getElementById('ov-dt-letzter_check_datum'))document.getElementById('ov-dt-letzter_check_datum').value=d.letzter_check_datum||'';
   if(d.hat_bild){const img=await apiJ(`/api/datentraeger/${id}/bild`);if(img)document.getElementById('ov-bild-prev').innerHTML=`<img src="${img.data}" style="max-height:50px;max-width:100%;border-radius:4px;object-fit:contain">`;}
   else document.getElementById('ov-bild-prev').textContent=t('txt_klicken');
   pendingOvBild=null;document.getElementById('ov-bild-file').value='';
@@ -2357,7 +2471,7 @@ async function dtSpeichern() {
   const id=parseInt(document.getElementById('ov-dt-id').value);
   const preis=parseFloat(document.getElementById('ov-dt-preis').value)||0;
   const einheit=document.getElementById('ov-dt-einheit').value;
-  const data={kunden_id:parseInt(document.getElementById('ov-dt-kunden_id').value),bezeichnung:document.getElementById('ov-dt-bezeichnung').value.trim(),serial:document.getElementById('ov-dt-serial').value.trim(),preis,einheit,preis_jahr:einheit==='monat'?preis*12:preis,rabatt:parseFloat(document.getElementById('ov-dt-rabatt').value)||0,einlagerungs_datum:document.getElementById('ov-dt-datum').value,beschreibung:document.getElementById('ov-dt-beschreibung').value.trim(),tresor_id:parseInt(document.getElementById('ov-dt-tresor_id').value)||null,interne_nr:document.getElementById('ov-dt-interne_nr')?.value||'',eigentuemer_id:parseInt(document.getElementById('ov-dt-eigentuemer_id')?.value)||null,neben_eigentuemer_id:parseInt(document.getElementById('ov-dt-neben_eigentuemer_id')?.value)||null,rechnungsempfaenger_id:parseInt(document.getElementById('ov-dt-rechnungsempfaenger_id')?.value)||null};
+  const data={kunden_id:parseInt(document.getElementById('ov-dt-kunden_id').value),bezeichnung:document.getElementById('ov-dt-bezeichnung').value.trim(),serial:document.getElementById('ov-dt-serial').value.trim(),preis,einheit,preis_jahr:einheit==='monat'?preis*12:preis,rabatt:parseFloat(document.getElementById('ov-dt-rabatt').value)||0,einlagerungs_datum:document.getElementById('ov-dt-datum').value,beschreibung:document.getElementById('ov-dt-beschreibung').value.trim(),tresor_id:parseInt(document.getElementById('ov-dt-tresor_id').value)||null,interne_nr:document.getElementById('ov-dt-interne_nr')?.value||'',eigentuemer_id:parseInt(document.getElementById('ov-dt-eigentuemer_id')?.value)||null,neben_eigentuemer_id:parseInt(document.getElementById('ov-dt-neben_eigentuemer_id')?.value)||null,rechnungsempfaenger_id:parseInt(document.getElementById('ov-dt-rechnungsempfaenger_id')?.value)||null,wartungsintervall_jahre:parseInt(document.getElementById('ov-dt-wartungsintervall_jahre')?.value)||0,letzter_check_datum:document.getElementById('ov-dt-letzter_check_datum')?.value||null};
   if(pendingOvBild){data.bild=pendingOvBild.data;data.bild_type=pendingOvBild.type;}
   const result=await apiPut(`/api/datentraeger/${id}`,data);
   if(result){const i=datentraeger.findIndex(d=>d.id===id);if(i>=0)datentraeger[i]={...datentraeger[i],...result};document.getElementById('dt-ov').classList.remove('open');renderAlles();}
@@ -2370,21 +2484,80 @@ async function dtLoeschen(id) {
   if(r){datentraeger=datentraeger.filter(d=>d.id!==id);renderAlles();}
 }
 
+let _dtStatusFilter='alle';
+let _dtPage=0;const _dtPerPage=25;
+function dtSetStatus(s){
+  _dtStatusFilter=s;_dtPage=0;
+  ['alle','eingelagert','uebergeben'].forEach(x=>{
+    const b=document.getElementById('dt-status-'+x);
+    if(b){b.className=x===s?'btn-p':'';b.style.padding='4px 10px';b.style.fontSize='11px';}
+  });
+  renderDT();
+}
 function renderDT(){
   const filter=parseInt(document.getElementById('dt-filter')?.value)||0;
   const q=(document.getElementById('dt-search')?.value||'').toLowerCase();
-  let base=filter?datentraeger.filter(d=>d.kunden_id===filter&&d.status==='eingelagert'):datentraeger.filter(d=>d.status==='eingelagert');
-  const list=q?base.filter(d=>(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)):base;
+  let base=datentraeger;
+  if(_dtStatusFilter==='eingelagert') base=base.filter(d=>d.status==='eingelagert');
+  else if(_dtStatusFilter==='uebergeben') base=base.filter(d=>d.status==='uebergeben');
+  if(filter) base=base.filter(d=>d.kunden_id===filter);
+  const list=q?base.filter(d=>(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.interne_nr||'').toLowerCase().includes(q)):base;
   const el=document.getElementById('dt-tabelle');
-  if(!list.length){el.innerHTML='<div class="empty">'+t('empty_dt')+'</div>';return;}
-  el.innerHTML=`<table><thead><tr><th style="width:7%">${t('col_bild')}</th><th style="width:13%">${t('col_firma')}</th><th style="width:18%">${t('col_typ')}</th><th style="width:18%">${t('col_serial')}</th><th style="width:16%">${t('col_preis')}</th><th style="width:10%">${t('col_rabatt')}</th><th style="width:18%"></th></tr></thead><tbody>`+
-    list.map(d=>{
+  const pgEl=document.getElementById('dt-pagination');
+  const total=list.length;
+  const pages=Math.ceil(total/_dtPerPage);
+  if(_dtPage>=pages)_dtPage=Math.max(0,pages-1);
+  const page=list.slice(_dtPage*_dtPerPage,(_dtPage+1)*_dtPerPage);
+  if(!page.length){el.innerHTML='<div class="empty">'+t('empty_dt')+'</div>';if(pgEl)pgEl.innerHTML='';return;}
+  el.innerHTML=`<table><thead><tr><th style="width:7%">${t('col_bild')}</th><th style="width:13%">${t('col_firma')}</th><th style="width:17%">${t('col_typ')}</th><th style="width:16%">${t('col_serial')}</th><th style="width:14%">${t('col_preis')}</th><th style="width:8%">Status</th><th style="width:25%"></th></tr></thead><tbody>`+
+    page.map(d=>{
       const imgC=d.hat_bild?`<img src="" class="thumb" style="cursor:pointer" onclick="loadAndShowImg('/api/datentraeger/${d.id}/bild',this)">`:'<div style="width:34px;height:34px;background:var(--surf);border-radius:6px;border:1px dashed var(--brd2)"></div>';
-      const scanBtn=d.hat_eingang_doc?`<button onclick="loadAndOpenDoc('/api/datentraeger/${d.id}/eingang_doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Eingangsprotokoll anzeigen">📄 ${_lang==='en'?'Incoming':'Eingang'}</button>`:  `<span style="font-size:10px;color:var(--mut)">${t('kein_scan')}</span>`;
+      const scanBtn=d.hat_eingang_doc?`<button onclick="loadAndOpenDoc('/api/datentraeger/${d.id}/eingang_doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Eingangsprotokoll anzeigen">📄 ${_lang==='en'?'Incoming':'Eingang'}</button>`:`<span style="font-size:10px;color:var(--mut)">${t('kein_scan')}</span>`;
       const pl=d.einheit==='monat'?`${eur(d.preis)}/M`:`${eur(d.preis)}/J`;
       const tresorInfo=d.tresor_bezeichnung?`<br><span style="font-size:10px;color:var(--mut)">🔒 ${d.tresor_bezeichnung}${d.tresor_raum?', Raum '+d.tresor_raum:''}</span>`:'';
-      return`<tr><td>${imgC}</td><td style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${d.bezeichnung}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${d.serial}</td><td style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${d.rabatt>0?`<span class="badge ba">${d.rabatt}%</span>`:'-'}</td><td><div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">${scanBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
+      const statusBadge=d.status==='eingelagert'?`<span class="badge bg" style="font-size:10px">✅</span>`:`<span class="badge ba" style="font-size:10px">📦</span>`;
+      const qrBtn=`<button onclick="showQR(${d.id},'${(d.interne_nr||d.serial).replace(/'/g,"\\'")}',this)" style="padding:2px 6px;font-size:10px;border:1px solid var(--brd2);border-radius:3px;background:var(--surf);cursor:pointer" title="QR-Code">QR</button>`;
+      return`<tr><td>${imgC}</td><td style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${d.bezeichnung}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${d.serial}${d.interne_nr?`<br><span style="color:var(--mut)">${d.interne_nr}</span>`:''}</td><td style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${statusBadge}</td><td><div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">${scanBtn}${qrBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">✎</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">✕</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
+  // Pagination
+  if(pgEl){
+    pgEl.innerHTML=pages<=1?'':`<span style="color:var(--mut)">${_dtPage*_dtPerPage+1}–${Math.min((_dtPage+1)*_dtPerPage,total)} / ${total}</span>`+
+      (_dtPage>0?`<button onclick="_dtPage--;renderDT()" style="padding:3px 8px">◀</button>`:'')+
+      Array.from({length:pages},(_, i)=>`<button onclick="_dtPage=${i};renderDT()" style="padding:3px 8px;${i===_dtPage?'background:var(--i-bg);color:var(--i-txt);border-color:var(--i-brd)':''}">${i+1}</button>`).join('')+
+      (_dtPage<pages-1?`<button onclick="_dtPage++;renderDT()" style="padding:3px 8px">▶</button>`:'');
+  }
+}
+
+// QR-Code Overlay
+let _qrInstance=null;
+function showQR(did, label, btn){
+  let ov=document.getElementById('qr-overlay');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='qr-overlay';
+    ov.style.cssText='display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1000;align-items:center;justify-content:center;background:rgba(0,0,0,.6)';
+    ov.innerHTML='<div style="background:var(--bg);border-radius:var(--radl);padding:1.5rem;text-align:center;min-width:240px"><div id="qr-title" style="font-weight:700;margin-bottom:12px"></div><div id="qr-canvas"></div><div id="qr-label" style="font-size:11px;color:var(--mut);margin-top:8px;font-family:monospace"></div><div style="margin-top:14px;display:flex;gap:8px;justify-content:center"><button onclick="printQR()" class="btn-p" style="padding:5px 14px;font-size:12px">🖨️ Drucken</button><button onclick="document.getElementById(\'qr-overlay\').style.display=\'none\'" style="padding:5px 14px;font-size:12px">Schließen</button></div></div>';
+    document.body.appendChild(ov);
+  }
+  document.getElementById('qr-title').textContent='QR-Code: '+label;
+  document.getElementById('qr-label').textContent=label;
+  const canvas=document.getElementById('qr-canvas');
+  canvas.innerHTML='';
+  if(window.QRCode){
+    new QRCode(canvas,{text:label,width:180,height:180,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+  } else {
+    canvas.innerHTML='<div style="color:var(--d-txt);font-size:12px">QR-Lib nicht geladen</div>';
+  }
+  ov.style.display='flex';
+}
+function printQR(){
+  const c=document.querySelector('#qr-canvas img')||document.querySelector('#qr-canvas canvas');
+  if(!c)return;
+  const w=window.open('','_blank');
+  const src=c.tagName==='IMG'?c.src:c.toDataURL();
+  const lbl=document.getElementById('qr-label').textContent;
+  w.document.write(`<html><body style="text-align:center;font-family:Arial;padding:20px"><img src="${src}" style="width:180px"><p style="font-size:13px;font-family:monospace;margin-top:8px">${lbl}</p></body></html>`);
+  w.document.close();w.print();
 }
 
 function renderSelects(){
@@ -2698,7 +2871,7 @@ async function toggleMahnungenRow(nr){
     if(cell){
       if(!mList.length){cell.innerHTML='<span style="font-size:11px;color:var(--mut)">Keine Mahnungen</span>';return;}
       cell.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:11px">'+
-        mList.map((m,i)=>`<tr><td style="padding:3px 8px;color:var(--mut);width:100px">${fmtDate(m.dat)}</td><td style="padding:3px 8px">${ta('Mahnung','Notice')} ${i+1}</td><td style="padding:3px 8px"><button onclick="printMahnungById(${m.id},'Mahnung_${nr}.pdf')" style="padding:2px 8px;font-size:10px">Drucken</button></td></tr>`).join('')+
+        mList.map((m,i)=>`<tr><td style="padding:3px 8px;color:var(--mut);width:100px">${fmtDate(m.dat)}</td><td style="padding:3px 8px">${ta('Mahnung','Notice')} ${i+1}</td><td style="padding:3px 8px;display:flex;gap:4px"><button onclick="printMahnungById(${m.id},'Mahnung_${nr}.pdf')" style="padding:2px 8px;font-size:10px">🖨️ Drucken</button><button onclick="sendMahnungEmail(${m.id},prompt('E-Mail-Adresse:'))" style="padding:2px 8px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer">📧 E-Mail</button></td></tr>`).join('')+
         '</table>';
     }
   }
@@ -3189,7 +3362,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.5.1${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.6.0${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -4735,6 +4908,283 @@ function renderHilfeSync(){
   document.getElementById('faq-container').innerHTML=html;
 }
 applyLang();
+
+// ══ GLOBALE SUCHE ════════════════════════════════════════════════════════════
+function globalSuche(q){
+  const box=document.getElementById('global-results');
+  if(!q||q.length<2){box.style.display='none';return;}
+  q=q.toLowerCase();
+  const results=[];
+  // Kunden
+  kunden.filter(k=>(k.firma||'').toLowerCase().includes(q)||(k.nr||'').toLowerCase().includes(q)||(k.vertragsnr||'').toLowerCase().includes(q)).slice(0,4).forEach(k=>{
+    results.push({label:`👥 ${k.firma}`,sub:`${k.nr}${k.vertragsnr?' · VT '+k.vertragsnr:''}`,action:`showTab('kunden')`});
+  });
+  // Datenträger
+  datentraeger.filter(d=>(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.interne_nr||'').toLowerCase().includes(q)).slice(0,4).forEach(d=>{
+    const k=kunden.find(x=>x.id===d.kunden_id);
+    results.push({label:`💾 ${d.bezeichnung}`,sub:`${d.serial}${d.interne_nr?' · '+d.interne_nr:''} · ${k?.firma||''}`,action:`showTab('datentraeger')`});
+  });
+  // Rechnungen aus _reHist
+  if(typeof _reHist!=='undefined'){
+    _reHist.filter(r=>(r.nr||'').toLowerCase().includes(q)||(r.firma||'').toLowerCase().includes(q)).slice(0,3).forEach(r=>{
+      results.push({label:`🧾 ${r.nr}`,sub:`${r.firma||''} · ${r.dat||''}`,action:`showTab('rechnung');showRechnungSub('historie')`});
+    });
+  }
+  if(!results.length){box.innerHTML='<div style="padding:10px 14px;font-size:12px;color:var(--mut)">Keine Treffer</div>';box.style.display='block';return;}
+  box.innerHTML=results.map((r,i)=>`<div onclick="document.getElementById('global-search').value='';document.getElementById('global-results').style.display='none';${r.action}" style="padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--brd);font-size:12px" onmouseover="this.style.background='var(--surf)'" onmouseout="this.style.background=''"><div style="font-weight:600">${r.label}</div><div style="font-size:11px;color:var(--mut)">${r.sub}</div></div>`).join('');
+  box.style.display='block';
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#global-search')&&!e.target.closest('#global-results'))
+    document.getElementById('global-results').style.display='none';
+});
+
+// ══ DASHBOARD CHART ══════════════════════════════════════════════════════════
+async function renderUmsatzChart(){
+  const el=document.getElementById('db-umsatz-chart');
+  if(!el)return;
+  try{
+    const data=await apiJ('/api/dashboard/umsatz_monat');
+    if(!data||!data.length){el.innerHTML='<div class="empty">Keine Rechnungsdaten</div>';return;}
+    const max=Math.max(...data.map(d=>d.netto),1);
+    const W=Math.max(520,data.length*50);
+    const H=140;const PAD=30;const BW=Math.floor((W-PAD*2)/data.length)-6;
+    let svg=`<svg viewBox="0 0 ${W} ${H+40}" style="width:100%;min-width:${W}px;height:auto">`;
+    data.forEach((d,i)=>{
+      const barH=Math.max(2,Math.round((d.netto/max)*(H-PAD)));
+      const x=PAD+i*(BW+6);const y=H-barH;
+      const col=d.netto>0?'var(--i-txt)':'var(--brd2)';
+      svg+=`<rect x="${x}" y="${y}" width="${BW}" height="${barH}" fill="${col}" rx="3" opacity=".85"/>`;
+      if(d.netto>0){
+        const valLbl=d.netto>=1000?Math.round(d.netto/1000)+'k':Math.round(d.netto)+'';
+        svg+=`<text x="${x+BW/2}" y="${y-4}" text-anchor="middle" font-size="9" fill="var(--txt)">${valLbl}</text>`;
+      }
+      const mo=d.monat.slice(5);
+      svg+=`<text x="${x+BW/2}" y="${H+16}" text-anchor="middle" font-size="9" fill="var(--mut)">${mo}</text>`;
+    });
+    const yr=[...new Set(data.map(d=>d.monat.slice(0,4)))];
+    yr.forEach(y=>{const first=data.findIndex(d=>d.monat.startsWith(y));if(first>=0){const x=PAD+first*(BW+6);svg+=`<text x="${x}" y="${H+30}" font-size="8" fill="var(--hint)">${y}</text>`;}});
+    svg+=`</svg>`;
+    el.innerHTML=svg;
+  }catch(e){el.innerHTML='<div class="empty">Chart-Fehler</div>';}
+}
+
+// ══ DT WARTUNG DASHBOARD ═════════════════════════════════════════════════════
+async function renderDTWartungDashboard(){
+  try{
+    const list=await apiJ('/api/datentraeger/wartung_faellig')||[];
+    const cEl=document.getElementById('db-dt-wartung-count');
+    const lEl=document.getElementById('db-dt-wartung-liste');
+    if(cEl)cEl.textContent=list.length;
+    if(!lEl)return;
+    if(!list.length){lEl.innerHTML='<div class="empty">Keine anstehenden DT-Checks</div>';return;}
+    lEl.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">DT</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Firma</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Nächster Check</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">Status</th></tr></thead><tbody>'+
+      list.map(d=>{
+        const cls=d.ueberfaellig?'br':(d.tage_bis_check<=14?'br':'ba');
+        const lbl=d.ueberfaellig?`Überfällig (${Math.abs(d.tage_bis_check)}d)`:(`In ${d.tage_bis_check}d`);
+        return`<tr><td style="padding:5px 6px;font-weight:600;font-size:11px">${d.bezeichnung}${d.interne_nr?`<br><span style="font-size:10px;color:var(--mut)">${d.interne_nr}</span>`:''}</td><td style="padding:5px 6px;font-size:11px">${d.firma||''}</td><td style="padding:5px 6px;font-size:11px">${d.naechster_check||''}</td><td style="padding:5px 6px"><span class="badge ${cls}" style="font-size:10px">${lbl}</span></td></tr>`;
+      }).join('')+'</tbody></table>';
+  }catch(e){}
+}
+
+// ══ SMTP ═════════════════════════════════════════════════════════════════════
+async function loadSmtpSettings(){
+  const d=await apiJ('/api/smtp_settings');
+  if(!d)return;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||'';};
+  const setChk=(id,v)=>{const el=document.getElementById(id);if(el)el.checked=!!v;};
+  set('smtp-host',d.host);set('smtp-port',d.port||587);set('smtp-username',d.username);
+  set('smtp-from-name',d.from_name||'DT-Verwaltung');set('smtp-from-email',d.from_email);
+  setChk('smtp-tls',d.use_tls!==0);setChk('smtp-aktiv',d.aktiv);
+}
+async function smtpSpeichern(){
+  const g=(id)=>document.getElementById(id)?.value||'';
+  const gChk=(id)=>document.getElementById(id)?.checked;
+  const r=await apiPut('/api/smtp_settings',{
+    host:g('smtp-host'),port:parseInt(g('smtp-port'))||587,username:g('smtp-username'),
+    password:g('smtp-password'),from_email:g('smtp-from-email'),from_name:g('smtp-from-name'),
+    use_tls:gChk('smtp-tls'),aktiv:gChk('smtp-aktiv')
+  });
+  if(r){document.getElementById('smtp-password').value='';alert('SMTP-Einstellungen gespeichert.');}
+}
+async function smtpTest(){
+  const to=document.getElementById('smtp-test-to')?.value?.trim();
+  if(!to){alert('Bitte E-Mail-Adresse eingeben.');return;}
+  const res=document.getElementById('smtp-test-result');
+  res.style.display='block';res.textContent='Sende…';res.style.color='var(--mut)';
+  const r=await apiPost('/api/smtp/test',{to});
+  if(r&&!r.error){res.textContent='✅ Test-E-Mail erfolgreich gesendet!';res.style.color='var(--s-txt)';}
+  else{res.textContent='❌ Fehler: '+(r?.error||'Unbekannt');res.style.color='var(--d-txt)';}
+}
+async function sendMahnungEmail(mid,to){
+  if(!to){to=prompt('E-Mail-Adresse des Empfängers:');if(!to)return;}
+  const r=await apiPost(`/api/mahnungen/${mid}/email`,{to});
+  if(r&&!r.error)alert('✅ Mahnung per E-Mail gesendet an '+to);
+  else alert('❌ Fehler: '+(r?.error||'Unbekannt'));
+}
+
+// ══ AUDIT LOG ════════════════════════════════════════════════════════════════
+let _auditData=[],_auditPage=0;const _auditPerPage=50;
+async function loadAuditLog(){
+  const el=document.getElementById('audit-log-tabelle');if(!el)return;
+  el.innerHTML='<div class="empty">Lädt…</div>';
+  const d=await apiJ('/api/audit_log?limit=500');
+  if(!d){el.innerHTML='<div class="empty">Fehler beim Laden</div>';return;}
+  _auditData=d.items||[];_auditPage=0;
+  renderAuditLog(_auditData);
+}
+function filterAuditLog(q){
+  if(!q){renderAuditLog(_auditData);return;}
+  q=q.toLowerCase();
+  renderAuditLog(_auditData.filter(r=>(r.benutzer||'').toLowerCase().includes(q)||(r.aktion||'').toLowerCase().includes(q)||(r.details||'').toLowerCase().includes(q)||(r.tabelle||'').toLowerCase().includes(q)));
+}
+function renderAuditLog(items){
+  const el=document.getElementById('audit-log-tabelle');if(!el)return;
+  const pgEl=document.getElementById('audit-log-pagination');
+  const pages=Math.ceil(items.length/_auditPerPage);
+  if(_auditPage>=pages)_auditPage=0;
+  const page=items.slice(_auditPage*_auditPerPage,(_auditPage+1)*_auditPerPage);
+  if(!page.length){el.innerHTML='<div class="empty">Keine Einträge</div>';if(pgEl)pgEl.innerHTML='';return;}
+  el.innerHTML='<table><thead><tr><th style="width:18%">Zeitstempel</th><th style="width:14%">Benutzer</th><th style="width:18%">Aktion</th><th style="width:12%">Tabelle</th><th>Details</th></tr></thead><tbody>'+
+    page.map(r=>`<tr><td style="font-size:10px;color:var(--mut)">${r.ts||''}</td><td style="font-weight:600">${r.benutzer||''}</td><td><span class="badge bi" style="font-size:10px">${r.aktion||''}</span></td><td style="font-size:11px;color:var(--mut)">${r.tabelle||''}</td><td style="font-size:11px">${r.details||''}</td></tr>`).join('')+'</tbody></table>';
+  if(pgEl)pgEl.innerHTML=pages<=1?'':
+    (_auditPage>0?`<button onclick="_auditPage--;renderAuditLog(_auditData)" style="padding:3px 8px">◀</button>`:'')+
+    `<span style="color:var(--mut);font-size:11px"> Seite ${_auditPage+1}/${pages} </span>`+
+    (_auditPage<pages-1?`<button onclick="_auditPage++;renderAuditLog(_auditData)" style="padding:3px 8px">▶</button>`:'');
+}
+
+// ══ 2FA / TOTP ═══════════════════════════════════════════════════════════════
+async function openPwModal(){
+  document.getElementById('pw-modal').classList.add('open');
+  document.getElementById('pw-alt').value='';
+  document.getElementById('pw-neu').value='';
+  document.getElementById('pw-neu2').value='';
+  document.getElementById('pw-fehler').style.display='none';
+  // Load 2FA status
+  await totpRefreshStatus();
+}
+async function totpRefreshStatus(){
+  const statusBox=document.getElementById('totp-status-box');
+  const setupArea=document.getElementById('totp-setup-area');
+  const disableBtn=document.getElementById('totp-disable-btn');
+  const setupBtn=document.getElementById('totp-setup-btn');
+  if(!statusBox)return;
+  try{
+    const me=await apiJ('/api/me');
+    if(me&&me.totp_enabled){
+      statusBox.innerHTML='<span class="badge bg">✅ 2FA aktiv</span>';
+      if(disableBtn)disableBtn.style.display='';
+      if(setupBtn)setupBtn.style.display='none';
+    }else{
+      statusBox.innerHTML='<span class="badge ba">2FA deaktiviert</span>';
+      if(disableBtn)disableBtn.style.display='none';
+      if(setupBtn)setupBtn.style.display='';
+    }
+  }catch(e){}
+  if(setupArea)setupArea.style.display='none';
+}
+async function totpSetup(){
+  const area=document.getElementById('totp-setup-area');
+  const qrBox=document.getElementById('totp-qr-box');
+  const errEl=document.getElementById('totp-err');
+  if(!area)return;
+  area.style.display='block';qrBox.innerHTML='';if(errEl)errEl.style.display='none';
+  document.getElementById('totp-verify-code').value='';
+  const r=await apiPost('/api/me/totp/setup',{});
+  if(!r||r.error){alert(r?.error||'2FA nicht verfügbar');area.style.display='none';return;}
+  if(window.QRCode){
+    new QRCode(qrBox,{text:r.uri,width:160,height:160,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+  }else{
+    qrBox.innerHTML=`<div style="font-size:11px;font-family:monospace;word-break:break-all;padding:8px;background:var(--surf);border-radius:var(--rad)">${r.secret}</div>`;
+  }
+}
+async function totpEnable(){
+  const code=(document.getElementById('totp-verify-code')?.value||'').trim();
+  const errEl=document.getElementById('totp-err');
+  if(!code||code.length!==6){if(errEl){errEl.textContent='Bitte 6-stelligen Code eingeben';errEl.style.display='block';}return;}
+  const r=await apiPost('/api/me/totp/enable',{code});
+  if(r&&!r.error){alert('✅ 2FA erfolgreich aktiviert!');document.getElementById('totp-setup-area').style.display='none';await totpRefreshStatus();}
+  else{if(errEl){errEl.textContent=r?.error||'Falscher Code';errEl.style.display='block';}}
+}
+async function totpDisable(){
+  if(!confirm('2FA wirklich deaktivieren?'))return;
+  const r=await api('/api/me/totp',{method:'DELETE'});
+  if(r&&r.ok){alert('2FA deaktiviert.');await totpRefreshStatus();}
+}
+
+// ══ HOOK: renderDashboard erweitern ══════════════════════════════════════════
+const _origRenderDashboard=renderDashboard;
+function renderDashboard(){
+  _origRenderDashboard();
+  renderUmsatzChart();
+  renderDTWartungDashboard();
+}
+
+// ══ HOOK: showAdminSub für SMTP ══════════════════════════════════════════════
+const _origShowAdminSub=showAdminSub;
+function showAdminSub(sub){
+  _origShowAdminSub(sub);
+  if(sub==='smtp')loadSmtpSettings();
+}
+
+// ══ HOOK: dtHinzufuegen – Wartungsintervall mitspeichern ═════════════════════
+const _origDtHinzufuegen=typeof dtHinzufuegen!=='undefined'?dtHinzufuegen:null;
+
+// ══ HOOK: Login – TOTP-Code-Eingabe ══════════════════════════════════════════
+// Der login flow prüft ob server totp_required zurückgibt
+const _origDoLogin=doLogin;
+async function doLogin(){
+  const totp=document.getElementById('login-totp-code');
+  if(totp)totp.style.display='none';
+  await _origDoLogin();
+}
+
+// TOTP code field im Login einbauen
+(function(){
+  const loginBox=document.querySelector('#login-screen .overlay-box, #login-screen > div > div');
+  if(!loginBox)return;
+  const btn=document.getElementById('login-user')?.closest('div');
+  // inject TOTP field after the password
+  const passEl=document.getElementById('login-pass');
+  if(passEl&&!document.getElementById('login-totp-code')){
+    const div=document.createElement('div');
+    div.id='login-totp-wrapper';div.style.display='none';
+    div.innerHTML='<label style="font-size:11px;font-weight:600;color:var(--mut);display:block;margin-top:10px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px">2FA-Code</label><input id="login-totp-code" type="text" inputmode="numeric" maxlength="6" placeholder="6-stelliger Code" style="width:100%;padding:8px 10px;border:1px solid var(--brd2);border-radius:var(--rad);font-size:16px;text-align:center;letter-spacing:6px;background:var(--surf);color:var(--txt)" onkeydown="if(event.key===\'Enter\')doLogin()">';
+    passEl.parentNode.insertBefore(div,passEl.nextSibling);
+  }
+})();
+
+// Override doLogin to handle 2FA
+(function(){
+  const _orig=window.doLogin;
+  window.doLogin=async function(){
+    const user=document.getElementById('login-user').value;
+    const pw=document.getElementById('login-pass').value;
+    const totpWrapper=document.getElementById('login-totp-wrapper');
+    const totpCode=document.getElementById('login-totp-code');
+    const body={username:user,password:pw};
+    if(totpCode&&totpWrapper&&totpWrapper.style.display!=='none'){
+      body.totp_code=totpCode.value.trim();
+    }
+    const errEl=document.getElementById('login-error');
+    errEl.style.display='none';
+    try{
+      const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const d=await r.json();
+      if(r.status===401&&d.totp_required){
+        // Show TOTP field
+        if(totpWrapper)totpWrapper.style.display='block';
+        if(totpCode){totpCode.value='';totpCode.focus();}
+        errEl.textContent='Bitte 2FA-Code aus Ihrer Authenticator-App eingeben.';errEl.style.display='block';
+        return;
+      }
+      if(!r.ok||d.error){errEl.textContent=d.error||'Fehler';errEl.style.display='block';return;}
+      // Success
+      if(totpWrapper)totpWrapper.style.display='none';
+      _saveLogin(d.token,d.user);
+    }catch(e){errEl.textContent='Verbindungsfehler';errEl.style.display='block';}
+  };
+})();
 </script>
 </body>
 </html>

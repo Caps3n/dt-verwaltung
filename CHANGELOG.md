@@ -6,6 +6,28 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.6.0] – 2026-05-23
+
+### Added
+- **E-Mail-Versand (SMTP)**: SMTP-Konfiguration im Admin-Tab; Mahnungen können per 📧-Button direkt per E-Mail gesendet werden
+- **Audit-Log**: neue DB-Tabelle `audit_log` protokolliert alle Änderungen (Benutzer, Aktion, Tabelle, Datensatz-ID); eigener Admin-Tab mit Suche und Pagination
+- **Globale Suche**: Suchleiste in der Top-Navigation durchsucht Kunden, Datenträger und Rechnungen gleichzeitig
+- **QR-Code je Datenträger**: QR-Button in der DT-Tabelle öffnet einen druckbaren QR-Code-Overlay (qrcode.js)
+- **Status-Filter im DT-Tab**: Filterschaltflächen „Alle / ✅ Eingelagert / 📦 Übergeben"
+- **Umsatz-Chart im Dashboard**: monatliches Umsatz-Balkendiagramm (SVG, letzte 12 Monate) via neuem API-Endpoint `/api/dashboard/umsatz_monat`
+- **Datenträger-Wartungsintervall**: neue Felder `wartungsintervall_jahre` und `letzter_check_datum`; Dashboard-Widget zeigt fällige Wartungen
+- **2FA / TOTP für lokale Benutzer**: Setup, Aktivierung und Deaktivierung im Passwort-Modal; Login prüft TOTP-Code wenn aktiviert
+- **Pagination** in der DT-Liste: 25 Einträge pro Seite mit Blätter-Navigation
+- **📧 E-Mail-Button in der Mahnungs-Historie**: direkte E-Mail-Zustellung aus der aufgeklappten Mahnungsliste
+- DB-Migrationen: neue Spalten `totp_secret`, `totp_enabled` in `benutzer`; neue Tabellen `audit_log`, `smtp_settings`
+- pyotp zur Dockerfile-Abhängigkeit hinzugefügt
+
+### Changed
+- DT-Bearbeiten-Overlay: Wartungsintervall-Felder hinzugefügt
+- DT-Hinzufügen: übergibt `wartungsintervall_jahre` und `letzter_check_datum` an die API
+
+---
+
 ## [1.5.1] – 2026-05-23
 
 ### Added

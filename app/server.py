@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 """DT-Verwaltung Backend – Flask + SQLite/SQLCipher (Docker-ready)"""
 import json, hashlib, hmac, secrets, os, base64, sqlite3, time
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from functools import wraps
+
+try:
+    import pyotp
+    PYOTP_AVAILABLE = True
+except ImportError:
+    PYOTP_AVAILABLE = False
+    print("[2FA] pyotp not installed – TOTP disabled")
 from flask import Flask, request, jsonify, send_from_directory, send_file, redirect
 from flask_cors import CORS
 
@@ -404,6 +414,26 @@ def init_db():
         ts INTEGER,
         erstellt TEXT DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS audit_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ts TEXT DEFAULT CURRENT_TIMESTAMP,
+        benutzer TEXT NOT NULL,
+        aktion TEXT NOT NULL,
+        tabelle TEXT,
+        datensatz_id INTEGER,
+        details TEXT
+    );
+    CREATE TABLE IF NOT EXISTS smtp_settings (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        host TEXT DEFAULT '',
+        port INTEGER DEFAULT 587,
+        username TEXT DEFAULT '',
+        password TEXT DEFAULT '',
+        from_email TEXT DEFAULT '',
+        from_name TEXT DEFAULT 'DT-Verwaltung',
+        use_tls INTEGER DEFAULT 1,
+        aktiv INTEGER DEFAULT 0
+    );
     """)
     # Default roles
     for name, farbe, perms in [
@@ -535,6 +565,19 @@ def init_db():
         db.execute("ALTER TABLE rechnungen ADD COLUMN bezahlt_am TEXT")
     except Exception:
         pass
+    # Migration: add TOTP columns to benutzer
+    for col, typ in [('totp_secret','TEXT'), ('totp_enabled','INTEGER DEFAULT 0')]:
+        try:
+            db.execute(f"ALTER TABLE benutzer ADD COLUMN {col} {typ}")
+        except Exception:
+            pass
+    # Migration: add Wartungsintervall to datentraeger
+    for col, typ in [('wartungsintervall_jahre','INTEGER DEFAULT 0'), ('letzter_check_datum','TEXT')]:
+        try:
+            db.execute(f"ALTER TABLE datentraeger ADD COLUMN {col} {typ}")
+        except Exception:
+            pass
+    db.execute("INSERT OR IGNORE INTO smtp_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO template_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_config(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_settings(id) VALUES(1)")
@@ -602,6 +645,16 @@ def login():
     if not user or not verify_pw(pw, user['password_hash']):
         db.close()
         return jsonify({'error': 'Falscher Benutzername oder Passwort'}), 401
+    # Check 2FA/TOTP if enabled
+    if PYOTP_AVAILABLE and user.get('totp_enabled') and user.get('totp_secret'):
+        totp_code = data.get('totp_code', '').strip()
+        if not totp_code:
+            db.close()
+            return jsonify({'error': 'totp_required', 'totp_required': True}), 401
+        totp = pyotp.TOTP(user['totp_secret'])
+        if not totp.verify(totp_code, valid_window=1):
+            db.close()
+            return jsonify({'error': 'Ungültiger 2FA-Code'}), 401
     # Auto-upgrade legacy SHA-256 hash → PBKDF2 on successful login
     if not user['password_hash'].startswith('pbkdf2:'):
         db.execute("UPDATE benutzer SET password_hash=? WHERE id=?",
@@ -613,7 +666,8 @@ def login():
     return jsonify({'token': token, 'user': {
         'id': user['id'], 'username': user['username'], 'name': user['name'],
         'rollen_name': user['rollen_name'], 'farbe': user['farbe'],
-        'perms': json.loads(user['berechtigungen'])
+        'perms': json.loads(user['berechtigungen']),
+        'totp_enabled': bool(user.get('totp_enabled'))
     }})
 
 @app.route('/api/logout', methods=['POST'])
@@ -963,13 +1017,14 @@ def create_dt():
     data = request.json or {}
     db = get_db()
     db.execute(
-        "INSERT INTO datentraeger(kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt,einlagerungs_datum,beschreibung,bild,bild_type,eingang_doc,eingang_doc_type,eingang_doc_name,tresor_id,interne_nr,eigentuemer_id,neben_eigentuemer_id,rechnungsempfaenger_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO datentraeger(kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt,einlagerungs_datum,beschreibung,bild,bild_type,eingang_doc,eingang_doc_type,eingang_doc_name,tresor_id,interne_nr,eigentuemer_id,neben_eigentuemer_id,rechnungsempfaenger_id,wartungsintervall_jahre,letzter_check_datum) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis', 0), data.get('einheit', 'monat'),
          data.get('preis_jahr', 0), data.get('rabatt', 0), data['einlagerungs_datum'],
          data.get('beschreibung', ''), data.get('bild'), data.get('bild_type'),
          data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
          data.get('tresor_id') or None, data.get('interne_nr',''),
-         data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None)
+         data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None,
+         data.get('wartungsintervall_jahre') or 0, data.get('letzter_check_datum') or None)
     )
     db.commit()
     did = db.execute("SELECT last_insert_rowid()").fetchone()[0]
@@ -989,41 +1044,43 @@ def create_dt():
 def update_dt(did):
     data = request.json or {}
     db = get_db()
+    _wj = data.get('wartungsintervall_jahre') or 0
+    _lcd = data.get('letzter_check_datum') or None
     if data.get('bild') and data.get('eingang_doc'):
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=?,wartungsintervall_jahre=?,letzter_check_datum=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
              data.get('beschreibung',''), data.get('bild'), data.get('bild_type'),
              data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
              data.get('tresor_id') or None, data.get('interne_nr',''),
-             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, did)
+             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, _wj, _lcd, did)
         )
     elif data.get('bild'):
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=?,wartungsintervall_jahre=?,letzter_check_datum=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
              data.get('beschreibung',''), data.get('bild'), data.get('bild_type'),
              data.get('tresor_id') or None, data.get('interne_nr',''),
-             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, did)
+             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, _wj, _lcd, did)
         )
     elif data.get('eingang_doc'):
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=?,wartungsintervall_jahre=?,letzter_check_datum=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
              data.get('beschreibung',''), data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
              data.get('tresor_id') or None, data.get('interne_nr',''),
-             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, did)
+             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, _wj, _lcd, did)
         )
     else:
         db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=? WHERE id=?",
+            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=?,wartungsintervall_jahre=?,letzter_check_datum=? WHERE id=?",
             (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
              data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
              data.get('beschreibung',''), data.get('tresor_id') or None, data.get('interne_nr',''),
-             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, did)
+             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, _wj, _lcd, did)
         )
     db.commit()
     row = db.execute(
@@ -1724,6 +1781,274 @@ def get_re_nr():
     if row:
         return jsonify({'nr': row['nr']})
     return jsonify({'nr': None})
+
+# ─── AUDIT LOG ───────────────────────────────────────────────────────────────
+def log_audit(user_name, aktion, tabelle=None, datensatz_id=None, details=None):
+    try:
+        db = get_db()
+        db.execute(
+            "INSERT INTO audit_log(benutzer,aktion,tabelle,datensatz_id,details) VALUES(?,?,?,?,?)",
+            (user_name, aktion, tabelle, datensatz_id, details)
+        )
+        db.commit()
+        db.close()
+    except Exception as e:
+        print(f"[AUDIT] Error: {e}")
+
+@app.route('/api/audit_log', methods=['GET'])
+@require_auth('manageUsers')
+def get_audit_log():
+    limit = min(int(request.args.get('limit', 200)), 500)
+    offset = int(request.args.get('offset', 0))
+    db = get_db()
+    rows = db.execute(
+        "SELECT id,ts,benutzer,aktion,tabelle,datensatz_id,details FROM audit_log ORDER BY id DESC LIMIT ? OFFSET ?",
+        (limit, offset)
+    ).fetchall()
+    total = db.execute("SELECT COUNT(*) FROM audit_log").fetchone()[0]
+    db.close()
+    return jsonify({'items': [dict(r) for r in rows], 'total': total})
+
+# ─── SMTP SETTINGS ───────────────────────────────────────────────────────────
+@app.route('/api/smtp_settings', methods=['GET'])
+@require_auth('manageUsers')
+def get_smtp_settings():
+    db = get_db()
+    row = db.execute("SELECT id,host,port,username,from_email,from_name,use_tls,aktiv FROM smtp_settings WHERE id=1").fetchone()
+    db.close()
+    return jsonify(dict(row) if row else {})
+
+@app.route('/api/smtp_settings', methods=['PUT'])
+@require_auth('manageUsers')
+def update_smtp_settings():
+    data = request.json or {}
+    db = get_db()
+    # Store password only if provided (not empty)
+    if data.get('password'):
+        db.execute(
+            "UPDATE smtp_settings SET host=?,port=?,username=?,password=?,from_email=?,from_name=?,use_tls=?,aktiv=? WHERE id=1",
+            (data.get('host',''), int(data.get('port',587)), data.get('username',''),
+             data.get('password',''), data.get('from_email',''), data.get('from_name','DT-Verwaltung'),
+             1 if data.get('use_tls') else 0, 1 if data.get('aktiv') else 0)
+        )
+    else:
+        db.execute(
+            "UPDATE smtp_settings SET host=?,port=?,username=?,from_email=?,from_name=?,use_tls=?,aktiv=? WHERE id=1",
+            (data.get('host',''), int(data.get('port',587)), data.get('username',''),
+             data.get('from_email',''), data.get('from_name','DT-Verwaltung'),
+             1 if data.get('use_tls') else 0, 1 if data.get('aktiv') else 0)
+        )
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+def _send_email(to_addr, subject, html_body):
+    """Send an email using the configured SMTP settings. Returns (ok, error_msg)."""
+    db = get_db()
+    cfg = db.execute("SELECT * FROM smtp_settings WHERE id=1").fetchone()
+    db.close()
+    if not cfg or not cfg['aktiv'] or not cfg['host']:
+        return False, 'SMTP nicht konfiguriert oder deaktiviert'
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = f"{cfg['from_name']} <{cfg['from_email']}>"
+        msg['To'] = to_addr
+        msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+        if cfg['use_tls']:
+            server = smtplib.SMTP(cfg['host'], cfg['port'], timeout=10)
+            server.starttls()
+        else:
+            server = smtplib.SMTP_SSL(cfg['host'], cfg['port'], timeout=10)
+        if cfg['username'] and cfg['password']:
+            server.login(cfg['username'], cfg['password'])
+        server.sendmail(cfg['from_email'], [to_addr], msg.as_string())
+        server.quit()
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
+@app.route('/api/smtp/test', methods=['POST'])
+@require_auth('manageUsers')
+def smtp_test():
+    data = request.json or {}
+    to_addr = data.get('to', '')
+    if not to_addr:
+        return jsonify({'error': 'Empfänger fehlt'}), 400
+    ok, err = _send_email(to_addr, 'DT-Verwaltung SMTP Test', '<p>SMTP-Test erfolgreich! DT-Verwaltung kann E-Mails senden.</p>')
+    if ok:
+        return jsonify({'ok': True})
+    return jsonify({'error': err}), 500
+
+@app.route('/api/mahnungen/<int:mid>/email', methods=['POST'])
+@require_auth('write')
+def send_mahnung_email(mid):
+    data = request.json or {}
+    to_addr = data.get('to', '')
+    if not to_addr:
+        return jsonify({'error': 'Empfänger-E-Mail fehlt'}), 400
+    db = get_db()
+    row = db.execute("SELECT * FROM mahnungen WHERE id=?", (mid,)).fetchone()
+    db.close()
+    if not row:
+        return jsonify({'error': 'Mahnung nicht gefunden'}), 404
+    subject = f"Mahnung {row['rechnung_nr']}"
+    ok, err = _send_email(to_addr, subject, row['html'] or '<p>Mahnung</p>')
+    if ok:
+        token = request.headers.get('X-Token','')
+        sess = session_get(token)
+        uname = 'system'
+        if sess:
+            db2 = get_db()
+            u = db2.execute("SELECT username FROM benutzer WHERE id=?", (sess['user_id'],)).fetchone()
+            db2.close()
+            if u: uname = u['username']
+        log_audit(uname, 'EMAIL_MAHNUNG', 'mahnungen', mid, f'An: {to_addr}, Rechnung: {row["rechnung_nr"]}')
+        return jsonify({'ok': True})
+    return jsonify({'error': err}), 500
+
+# ─── 2FA / TOTP ──────────────────────────────────────────────────────────────
+@app.route('/api/me/totp/setup', methods=['POST'])
+@require_auth()
+def totp_setup():
+    if not PYOTP_AVAILABLE:
+        return jsonify({'error': '2FA nicht verfügbar (pyotp fehlt)'}), 503
+    token = request.headers.get('X-Token','')
+    sess = session_get(token)
+    db = get_db()
+    user = db.execute("SELECT id,username,totp_secret,totp_enabled FROM benutzer WHERE id=?", (sess['user_id'],)).fetchone()
+    # Generate new secret
+    secret = pyotp.random_base32()
+    db.execute("UPDATE benutzer SET totp_secret=? WHERE id=?", (secret, user['id']))
+    db.commit()
+    db.close()
+    totp = pyotp.TOTP(secret)
+    uri = totp.provisioning_uri(name=user['username'], issuer_name='DT-Verwaltung')
+    return jsonify({'secret': secret, 'uri': uri})
+
+@app.route('/api/me/totp/enable', methods=['POST'])
+@require_auth()
+def totp_enable():
+    if not PYOTP_AVAILABLE:
+        return jsonify({'error': '2FA nicht verfügbar'}), 503
+    data = request.json or {}
+    code = data.get('code','').strip()
+    token = request.headers.get('X-Token','')
+    sess = session_get(token)
+    db = get_db()
+    user = db.execute("SELECT id,username,totp_secret FROM benutzer WHERE id=?", (sess['user_id'],)).fetchone()
+    if not user or not user['totp_secret']:
+        db.close()
+        return jsonify({'error': 'Kein TOTP-Secret gesetzt – erst /setup aufrufen'}), 400
+    totp = pyotp.TOTP(user['totp_secret'])
+    if not totp.verify(code, valid_window=1):
+        db.close()
+        return jsonify({'error': 'Falscher Code'}), 400
+    db.execute("UPDATE benutzer SET totp_enabled=1 WHERE id=?", (user['id'],))
+    db.commit()
+    db.close()
+    log_audit(user['username'], '2FA_AKTIVIERT', 'benutzer', user['id'])
+    return jsonify({'ok': True})
+
+@app.route('/api/me/totp', methods=['DELETE'])
+@require_auth()
+def totp_disable():
+    token = request.headers.get('X-Token','')
+    sess = session_get(token)
+    db = get_db()
+    user = db.execute("SELECT id,username FROM benutzer WHERE id=?", (sess['user_id'],)).fetchone()
+    db.execute("UPDATE benutzer SET totp_enabled=0, totp_secret=NULL WHERE id=?", (sess['user_id'],))
+    db.commit()
+    db.close()
+    if user: log_audit(user['username'], '2FA_DEAKTIVIERT', 'benutzer', sess['user_id'])
+    return jsonify({'ok': True})
+
+@app.route('/api/me', methods=['GET'])
+@require_auth()
+def get_me():
+    token = request.headers.get('X-Token','')
+    sess = session_get(token)
+    db = get_db()
+    user = db.execute(
+        "SELECT b.id,b.username,b.name,b.totp_enabled,r.name as rollen_name,r.berechtigungen FROM benutzer b JOIN rollen r ON b.rollen_id=r.id WHERE b.id=?",
+        (sess['user_id'],)
+    ).fetchone()
+    db.close()
+    if not user:
+        return jsonify({'error': 'Nicht gefunden'}), 404
+    return jsonify({
+        'id': user['id'], 'username': user['username'], 'name': user['name'],
+        'rollen_name': user['rollen_name'], 'perms': json.loads(user['berechtigungen']),
+        'totp_enabled': bool(user['totp_enabled'])
+    })
+
+# ─── DASHBOARD CHART ─────────────────────────────────────────────────────────
+@app.route('/api/dashboard/umsatz_monat', methods=['GET'])
+@require_auth('read')
+def dashboard_umsatz_monat():
+    """Return monthly invoiced amounts for the last 12 months."""
+    db = get_db()
+    rows = db.execute(
+        "SELECT dat, netto FROM rechnungen WHERE dat IS NOT NULL ORDER BY ts DESC LIMIT 500"
+    ).fetchall()
+    db.close()
+    from collections import defaultdict
+    buckets = defaultdict(float)
+    for r in rows:
+        try:
+            # dat format: DD.MM.YYYY
+            parts = r['dat'].split('.')
+            if len(parts) == 3:
+                key = f"{parts[2]}-{parts[1]}"
+                val = float(str(r['netto'] or '0').replace(',', '.').replace('€', '').strip())
+                buckets[key] += val
+        except Exception:
+            pass
+    # Return last 12 months sorted
+    from datetime import date
+    today = date.today()
+    result = []
+    for i in range(11, -1, -1):
+        m = today.month - i
+        y = today.year
+        while m <= 0:
+            m += 12
+            y -= 1
+        key = f"{y}-{m:02d}"
+        result.append({'monat': key, 'netto': round(buckets.get(key, 0), 2)})
+    return jsonify(result)
+
+# ─── DT WARTUNG (fällige Check-Termine) ──────────────────────────────────────
+@app.route('/api/datentraeger/wartung_faellig', methods=['GET'])
+@require_auth('read')
+def dt_wartung_faellig():
+    """Return DTs whose scheduled media check is due within 60 days or overdue."""
+    db = get_db()
+    rows = db.execute(
+        "SELECT d.id,d.bezeichnung,d.serial,d.interne_nr,d.letzter_check_datum,d.wartungsintervall_jahre,k.firma FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id WHERE d.wartungsintervall_jahre>0 AND d.status='eingelagert'"
+    ).fetchall()
+    db.close()
+    today = datetime.today().date()
+    result = []
+    for r in rows:
+        d = dict(r)
+        if d['letzter_check_datum']:
+            try:
+                last = datetime.strptime(d['letzter_check_datum'], '%Y-%m-%d').date()
+            except Exception:
+                continue
+            naechster = last.replace(year=last.year + d['wartungsintervall_jahre'])
+        else:
+            # Never checked — use einlagerung as fallback (not available here, skip)
+            continue
+        delta = (naechster - today).days
+        if delta <= 60:
+            d['naechster_check'] = naechster.isoformat()
+            d['tage_bis_check'] = delta
+            d['ueberfaellig'] = delta < 0
+            result.append(d)
+    result.sort(key=lambda x: x['tage_bis_check'])
+    return jsonify(result)
 
 @app.route('/api/health', methods=['GET'])
 def health():

@@ -18,7 +18,8 @@ RUN pip install --no-cache-dir \
     "gunicorn>=21.0" \
     "pysaml2>=7.0" \
     "cryptography>=41.0" \
-    "pysqlcipher3>=1.2"
+    "pysqlcipher3>=1.2" \
+    "pyotp>=2.9"
 
 COPY app/ .
 
