@@ -4,6 +4,13 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.6.03] – 2026-05-23
+
+### Fixed
+- **Login "Verbindungsfehler"**: the 2FA login override called `_saveLogin()` which was never defined — replaced with the correct inline success path (`TOKEN`, `currentUser`, `sessionStorage`, `showApp()`). Login now completes correctly after the server returns a valid token.
+
+---
+
 ## [v1.6.02] – 2026-05-23
 
 ### Fixed
