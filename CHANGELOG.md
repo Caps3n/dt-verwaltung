@@ -4,6 +4,13 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.6.04] – 2026-05-24
+
+### Fixed
+- **Dashboard leer / Admin-Tabs reagieren nicht**: JavaScript-Hoisting-Bug in den Hook-Funktionen `renderDashboard` und `showAdminSub`. Beide waren mit `function`-Deklarationen implementiert — diese werden vom JS-Engine an den Anfang des Skripts gezogen (hoisted), weshalb `_origRenderDashboard` und `_origShowAdminSub` jeweils auf sich selbst zeigten → `RangeError: Maximum call stack size exceeded` → Dashboard-Crash + Admin-Navigation kaputt. Alle drei Hooks (`renderDashboard`, `showAdminSub`, `doLogin`) auf IIFE-Pattern umgestellt (`window.X = function(){...}` innerhalb einer IIFE), das zur Laufzeit ausgeführt wird und kein Hoisting-Problem hat.
+
+---
+
 ## [v1.6.03] – 2026-05-23
 
 ### Fixed
