@@ -4,6 +4,11 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.6.01] – 2026-05-23
+
+### Fixed
+- **Startup crash**: duplicate `GET /api/me` endpoint definition caused Flask to raise `AssertionError: View function mapping is overwriting an existing endpoint function: get_me` on boot. Merged `totp_enabled` field into the existing SAML-compatible endpoint and removed the redundant second definition added in v1.6.0.
+
 ---
 
 ## [1.6.0] – 2026-05-23
