@@ -645,6 +645,7 @@ def login():
     if not user or not verify_pw(pw, user['password_hash']):
         db.close()
         return jsonify({'error': 'Falscher Benutzername oder Passwort'}), 401
+    user = dict(user)  # convert Row → dict so .get() works with pysqlcipher3
     # Check 2FA/TOTP if enabled
     if PYOTP_AVAILABLE and user.get('totp_enabled') and user.get('totp_secret'):
         totp_code = data.get('totp_code', '').strip()
