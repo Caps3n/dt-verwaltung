@@ -1,4 +1,4 @@
-# DT-Verwaltung v1.5.1
+# DT-Verwaltung v1.6.0
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-caps3n-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/caps3n)
 
@@ -13,8 +13,10 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 
 ### Dashboard
 - KPIs: active contracts, stored media, monthly and annual revenue
+- **Monthly revenue bar chart** (last 12 months, SVG)
 - Contract expiry warnings (60-day preview, colour-coded)
 - Safe and cabinet maintenance warnings
+- **Media maintenance warnings** — overdue or upcoming checks
 
 ### Customers & Contracts
 - Full customer CRUD with contact person, address, and salutation
@@ -50,6 +52,9 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 - **Per-customer reminder settings:** maximum number of reminders and reminder fee negotiated per contract
 - Reminder counter shows `X/Y` progress; button is disabled once the limit is reached
 - Final reminder is automatically labelled "Final Notice / Letzte Mahnung"
+- **Send reminders by email** directly from the reminder history (📧 button per reminder)
+- **Payment status tracking** per invoice (paid / unpaid / overdue)
+- **Pagination** for large media lists
 
 ### Safe Management (🔒)
 - CRUD for physical safes and cabinets: name, manufacturer, model, serial number
@@ -88,12 +93,35 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 - User management: create users, reset passwords, assign roles
 - Roles & permissions: fine-grained tab visibility per role
 - SAML 2.0 / SSO: Azure AD, Okta, Keycloak, and other IdPs
+- **SMTP configuration** (host, port, user, password, TLS/SSL) with test-email function
+- **Audit log** — who changed what and when, searchable with pagination
+
+### Email / SMTP
+- Send Mahnungen (payment reminders) directly by email from the reminder history
+- SMTP settings stored in the database, configurable per installation
+- Supports STARTTLS and SSL/TLS
+
+### Search
+- **Global search bar** in the top navigation — searches across media, customers, safes, and invoices simultaneously
+
+### QR Codes
+- Each media record has a **QR code button** that generates a printable QR code overlay
+- QR code encodes the media's internal number for quick identification
+
+### Maintenance Intervals
+- Each media record can store a **maintenance interval (years)** and a **last-check date**
+- Dashboard shows a warning panel for all media with overdue or upcoming maintenance
+
+### 2FA / TOTP
+- Users can enable **two-factor authentication** (TOTP, compatible with Google Authenticator, Authy, etc.)
+- Setup via QR code in the user password modal; disable at any time
 
 ### Security
 - Passwords: PBKDF2-HMAC-SHA256 (600,000 iterations, random salt)
 - Sessions: 64-character cryptographically secure tokens, DB-backed, 8 h TTL
 - Optional SQLite encryption via SQLCipher AES-256 (`DB_KEY` env var)
 - Runs as a non-root container (UID 1000)
+- Optional TOTP second factor per user account
 
 ---
 
@@ -165,7 +193,7 @@ Optional encryption: set `DB_KEY` in the environment **before** the first start.
 
 | Component | Technology |
 |---|---|
-| Backend | Python 3.12, Flask 3.x, Gunicorn |
+| Backend | Python 3.12, Flask 3.x, Gunicorn, pyotp |
 | Database | SQLite (WAL mode), optional SQLCipher |
 | Frontend | Vanilla JS SPA (no framework), HTML5, CSS3 |
 | Auth | Token-based (`X-Token` header), optional SAML 2.0 |
