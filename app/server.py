@@ -1369,12 +1369,21 @@ def generate_cert():
 @app.route('/api/me', methods=['GET'])
 @require_auth('read')
 def get_me():
-    """Return current user's info. Used by SAML flow to get user context after token redirect."""
+    """Return current user's info including 2FA status. Used by SAML flow and frontend."""
     u = request.user
+    token = request.headers.get('X-Token','')
+    sess = session_get(token)
+    totp_enabled = False
+    if sess:
+        db = get_db()
+        row = db.execute("SELECT totp_enabled FROM benutzer WHERE id=?", (sess['user_id'],)).fetchone()
+        db.close()
+        if row:
+            totp_enabled = bool(row['totp_enabled'])
     return jsonify({
         'id': u['id'], 'username': u['username'], 'name': u['name'],
         'rollen_name': u['rollen_name'], 'farbe': u['farbe'],
-        'perms': request.perms
+        'perms': request.perms, 'totp_enabled': totp_enabled
     })
 
 @app.route('/api/saml/config', methods=['GET'])
@@ -1963,24 +1972,6 @@ def totp_disable():
     if user: log_audit(user['username'], '2FA_DEAKTIVIERT', 'benutzer', sess['user_id'])
     return jsonify({'ok': True})
 
-@app.route('/api/me', methods=['GET'])
-@require_auth()
-def get_me():
-    token = request.headers.get('X-Token','')
-    sess = session_get(token)
-    db = get_db()
-    user = db.execute(
-        "SELECT b.id,b.username,b.name,b.totp_enabled,r.name as rollen_name,r.berechtigungen FROM benutzer b JOIN rollen r ON b.rollen_id=r.id WHERE b.id=?",
-        (sess['user_id'],)
-    ).fetchone()
-    db.close()
-    if not user:
-        return jsonify({'error': 'Nicht gefunden'}), 404
-    return jsonify({
-        'id': user['id'], 'username': user['username'], 'name': user['name'],
-        'rollen_name': user['rollen_name'], 'perms': json.loads(user['berechtigungen']),
-        'totp_enabled': bool(user['totp_enabled'])
-    })
 
 # ─── DASHBOARD CHART ─────────────────────────────────────────────────────────
 @app.route('/api/dashboard/umsatz_monat', methods=['GET'])
