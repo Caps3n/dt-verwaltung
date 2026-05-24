@@ -577,6 +577,13 @@ def init_db():
             db.execute(f"ALTER TABLE datentraeger ADD COLUMN {col} {typ}")
         except Exception:
             pass
+    # Migration: fix umlaut encoding in uebergaben.grund (pre-i18n data)
+    try:
+        db.execute("UPDATE uebergaben SET grund='Rückgabe auf Wunsch' WHERE grund='Rueckgabe auf Wunsch'")
+        db.execute("UPDATE uebergaben SET grund='Vertragsende' WHERE grund='Vertragsende'")
+        db.execute("UPDATE uebergaben SET grund='Vernichtung beauftragt' WHERE grund='Vernichtung beauftragt'")
+    except Exception:
+        pass
     db.execute("INSERT OR IGNORE INTO smtp_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO template_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_config(id) VALUES(1)")
@@ -1126,15 +1133,32 @@ def get_uebergaben():
 @require_auth('write')
 def create_uebergabe():
     data = request.json or {}
-    pnr = f"UP-{datetime.now().strftime('%Y%m%d')}-{data.get('kunden_nr', '?')}"
+    kunden_id = data.get('kunden_id')
+    datum = data.get('datum', '')
+    empfaenger = data.get('Empfänger', data.get('empfaenger', ''))
+    grund = data.get('grund', '')
+    dt_ids = sorted(data.get('dt_ids', []))
     db = get_db()
+    # Duplikatschutz: prüfe ob eine identische offene Übergabe bereits existiert
+    existing = db.execute(
+        "SELECT id,protokoll_nr FROM uebergaben WHERE kunden_id=? AND datum=? AND abgeschlossen=0 ORDER BY id DESC LIMIT 1",
+        (kunden_id, datum)
+    ).fetchone()
+    if existing:
+        # Prüfe ob die DT-Liste identisch ist
+        ex_dts = sorted([r['datentraeger_id'] for r in db.execute(
+            "SELECT datentraeger_id FROM uebergabe_positionen WHERE uebergabe_id=?", (existing['id'],)).fetchall()])
+        if ex_dts == dt_ids:
+            db.close()
+            return jsonify({'id': existing['id'], 'protokoll_nr': existing['protokoll_nr']}), 200
+    pnr = f"UP-{datetime.now().strftime('%Y%m%d')}-{data.get('kunden_nr', '?')}"
     db.execute(
         "INSERT INTO uebergaben(kunden_id,datum,empfaenger,grund,protokoll_nr,abgeschlossen) VALUES(?,?,?,?,?,0)",
-        (data['kunden_id'], data.get('datum', ''), data.get('Empfänger', data.get('Empfänger', data.get('Empfänger', data.get('empfaenger', '')))), data.get('grund', ''), pnr)
+        (kunden_id, datum, empfaenger, grund, pnr)
     )
     db.commit()
     uid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
-    for did in data.get('dt_ids', []):
+    for did in dt_ids:
         db.execute("INSERT INTO uebergabe_positionen(uebergabe_id,datentraeger_id) VALUES(?,?)", (uid, did))
     db.commit()
     db.close()

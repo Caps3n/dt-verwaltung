@@ -4,6 +4,26 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.0] – 2026-05-24
+
+### Fixed
+- **Übergabe: Umlaut-Bug** – Bestehende DB-Einträge mit "Rueckgabe auf Wunsch" werden per Migration auf "Rückgabe auf Wunsch" korrigiert. Select-Optionen erhalten explizite `value`-Attribute für korrekte zukünftige Speicherung.
+- **Übergabe: Duplikate** – Frontend-Guard (`_weiterS2Running`-Flag + Button-Disable) verhindert Doppelklicks. Backend prüft zusätzlich ob eine identische offene Übergabe (gleiche Kunden-ID, gleiches Datum, gleiche DT-Liste) bereits existiert und gibt die bestehende zurück statt eine neue anzulegen. Task #27 damit geschlossen.
+
+### Added
+- **Dashboard Schnellzugriff** – Vier Buttons direkt auf dem Dashboard: "Neuer Datenträger", "Rechnung erstellen", "Übergabe starten", "Neuer Kunde". Navigieren mit einem Klick in den jeweiligen Tab.
+- **Dashboard Termin-Widget** – Neues Widget "Anstehende Termine" zeigt alle fälligen Events der nächsten 60 Tage: Tresor-Wartungen, ablaufende Verträge und überfällige Rechnungen. Farblich nach Dringlichkeit (rot = überfällig, gelb = bald fällig).
+- **Spalten-Sortierung** – Alle wichtigen Tabellen (Kundenliste, Datenträgerliste, Rechnungshistorie) sind durch Klick auf Spalten-Header sortierbar (▲/▼). Sortier-Zustand wird im Speicher gehalten.
+- **Tresore: DT-Anzahl anklickbar** – Die DT-Zahl in der Tresore-Liste öffnet ein Modal mit allen eingelagerten Datenträgern des Tresors (Bezeichnung, Seriennummer, Firma, Status).
+- **Hell-/Dunkel-Modus Umschalter** – 🌙/☀️-Button in der Navbar. Wechselt manuell zwischen Light und Dark Mode. Einstellung wird in localStorage gespeichert und bei jedem Seitenaufruf angewendet.
+- **Pflichtfelder markiert** – Labels der Pflichtfelder in allen Formularen (Kunden, Datenträger, Übergabe, Tresor) erhalten ein rotes `*` über CSS-Klasse `.req`.
+
+### Changed
+- **Design: Aktiver Tab** – Aktiver Hauptnavigations-Tab hat jetzt einen blauen Hintergrund (`var(--i-bg)`) statt nur eines Unterstrichs — deutlich besser erkennbar.
+- **Design: Admin-Logo-Background** – Logo-Upload-Zonen erhalten Klasse `.logo-zone`; `has-file`-State zeigt neutralen Hintergrund statt grünem Success-State.
+
+---
+
 ## [v1.6.04] – 2026-05-24
 
 ### Fixed

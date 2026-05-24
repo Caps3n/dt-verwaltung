@@ -17,7 +17,7 @@
   --d-bg:#fee2e2;--d-txt:#991b1b;--d-brd:#fca5a5;
   --rad:8px;--radl:12px;
 }
-@media(prefers-color-scheme:dark){:root{
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#1e1e1e;--surf:#2a2a2a;--surf2:#333;
   --brd:#444;--brd2:#555;--txt:#e8e8e8;--mut:#999;--hint:#666;
   --i-bg:#1e3a5f;--i-txt:#93c5fd;--i-brd:#1d4ed8;
@@ -25,11 +25,19 @@
   --s-bg:#052e16;--s-txt:#6ee7b7;--s-brd:#065f46;
   --d-bg:#450a0a;--d-txt:#fca5a5;--d-brd:#991b1b;
 }}
+:root[data-theme="dark"]{
+  --bg:#1e1e1e;--surf:#2a2a2a;--surf2:#333;
+  --brd:#444;--brd2:#555;--txt:#e8e8e8;--mut:#999;--hint:#666;
+  --i-bg:#1e3a5f;--i-txt:#93c5fd;--i-brd:#1d4ed8;
+  --w-bg:#3d2a00;--w-txt:#fcd34d;--w-brd:#92400e;
+  --s-bg:#052e16;--s-txt:#6ee7b7;--s-brd:#065f46;
+  --d-bg:#450a0a;--d-txt:#fca5a5;--d-brd:#991b1b;
+}
 body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--txt);background:var(--surf2);min-height:100vh}
 .app{max-width:1600px;margin:0 auto;padding:12px 20px}
 .tabs{display:flex;border-bottom:1.5px solid var(--brd2);margin-bottom:1.25rem;flex-wrap:wrap;background:var(--bg);border-radius:var(--radl) var(--radl) 0 0;padding:0 12px}
-.tab{padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-1.5px;background:transparent;border-top:none;border-left:none;border-right:none}
-.tab:hover{color:var(--txt)}.tab.active{color:var(--txt);border-bottom:2px solid var(--txt)}
+.tab{padding:10px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-1.5px;background:transparent;border-top:none;border-left:none;border-right:none;border-radius:var(--rad) var(--rad) 0 0;transition:background .15s,color .15s}
+.tab:hover{color:var(--txt);background:rgba(255,255,255,.04)}.tab.active{color:var(--i-txt);border-bottom:2px solid var(--i-brd);background:var(--i-bg)}
 .page{display:none}.page.active{display:block}
 .card{background:var(--bg);border:1px solid var(--brd);border-radius:var(--radl);padding:1rem 1.25rem;margin-bottom:1rem}
 .g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
@@ -38,7 +46,7 @@ body{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--txt);back
 .metric{background:var(--surf);border:1px solid var(--brd);border-radius:var(--rad);padding:1rem;text-align:center}
 .metric .val{font-size:20px;font-weight:700;color:var(--txt)}
 .metric .lbl{font-size:10px;color:var(--mut);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
-label{font-size:11px;font-weight:600;color:var(--mut);display:block;margin-bottom:4px;margin-top:10px;text-transform:uppercase;letter-spacing:.3px}
+label{font-size:11px;font-weight:600;color:var(--mut);display:block;margin-bottom:4px;margin-top:10px;text-transform:uppercase;letter-spacing:.3px}label.req::after{content:' *';color:var(--d-txt);font-weight:700}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--brd2);border-radius:var(--rad);font-size:13px;background:var(--surf);color:var(--txt);outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--i-brd);background:var(--bg)}
 input::placeholder{color:var(--hint)}
@@ -68,7 +76,7 @@ tr:hover td{background:var(--surf)}
 input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-color:var(--i-txt)}
 .upzone{border:1.5px dashed var(--brd2);border-radius:var(--rad);padding:14px;text-align:center;cursor:pointer;background:var(--surf);color:var(--mut);font-size:12px;margin-top:4px}
 .upzone:hover{background:var(--bg);border-color:var(--i-brd)}
-.upzone.has-file{border-color:var(--s-brd);background:var(--s-bg)}
+.upzone.has-file{border-color:var(--s-brd);background:var(--s-bg)}.upzone.logo-zone.has-file{border-color:var(--i-brd);background:var(--surf)}
 .thumb{width:34px;height:34px;object-fit:cover;border-radius:6px;border:1px solid var(--brd2);cursor:pointer;vertical-align:middle}
 .overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;align-items:flex-start;justify-content:center;padding-top:40px;background:rgba(0,0,0,.6)}
 .overlay.open{display:flex}
@@ -206,6 +214,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <button onclick="openPwModal()" data-i18n="btn_pw" style="padding:4px 10px;font-size:11px">🔑 Passwort</button>
     <button onclick="doLogout()" data-i18n="btn_logout" style="padding:4px 10px;font-size:11px">Abmelden</button>
     <button id="btn-lang" onclick="toggleLang()" title="Sprache / Language" style="padding:4px 8px;font-size:11px;font-weight:700;letter-spacing:.5px">🇩🇪 DE</button>
+    <button id="btn-theme" onclick="toggleTheme()" title="Hell-/Dunkel-Modus" style="padding:4px 8px;font-size:13px;background:none;border:1px solid var(--brd2);border-radius:var(--rad);cursor:pointer;color:var(--txt)">🌙</button>
   </div>
 </div>
 
@@ -250,6 +259,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div style="font-size:12px;color:#dc2626;margin-top:2px" id="db-re-offen-summe"></div>
     </div>
   </div>
+  <!-- Quick Actions -->
+  <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+    <button class="btn-p" style="flex:1;min-width:140px;padding:10px 14px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="showTab('datentraeger');setTimeout(()=>{document.getElementById('dt-erfassen-btn')?.click()},100)">💾 Neuer Datenträger</button>
+    <button class="btn-p" style="flex:1;min-width:140px;padding:10px 14px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="showTab('rechnungen')">🧾 Rechnung erstellen</button>
+    <button class="btn-p" style="flex:1;min-width:140px;padding:10px 14px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="showTab('uebergabe')">📦 Übergabe starten</button>
+    <button class="btn-p" style="flex:1;min-width:140px;padding:10px 14px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="showTab('kunden')">👥 Neuer Kunde</button>
+  </div>
   <div class="g2">
     <div class="card">
       <div class="stitle" data-i18n="st_ablaufen">Verträge die bald ablaufen</div>
@@ -259,6 +275,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="stitle" data-i18n="st_umsatz">Umsatz pro Kunde (Netto/Jahr)</div>
       <div id="db-umsatz-liste"><div class="empty">Laden...</div></div>
     </div>
+  </div>
+  <div class="card">
+    <div class="stitle">📅 Anstehende Termine <span id="db-termine-count" class="badge ba" style="font-size:11px">0</span></div>
+    <div id="db-termine-liste"><div class="empty">Laden…</div></div>
   </div>
   <div class="card">
     <div class="stitle" data-i18n="st_aktive_vt">Aktive Verträge</div>
@@ -289,7 +309,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div id="tr-ebanner" class="ebanner" style="display:none"><span data-i18n="lbl_bearbmodus">Bearbeitungsmodus</span><button onclick="tresorAbbrechen()" style="padding:3px 8px;font-size:11px" data-i18n="lbl_abbrechen">Abbrechen</button></div>
       <div class="stitle" id="tr-form-title">Neuen Tresor anlegen</div>
       <input type="hidden" id="tr-id">
-      <label data-i18n="lbl_tr_bezeichnung">Bezeichnung / Name</label><input id="tr-bezeichnung" placeholder="z.B. Tresor A1, Sicherheitsschrank Nord">
+      <label class="req" data-i18n="lbl_tr_bezeichnung">Bezeichnung / Name</label><input id="tr-bezeichnung" placeholder="z.B. Tresor A1, Sicherheitsschrank Nord">
       <label data-i18n="lbl_tr_hersteller">Hersteller</label><input id="tr-hersteller" placeholder="z.B. Burg Wächter, Hartmann">
       <label data-i18n="lbl_tr_modell">Modell</label><input id="tr-modell">
       <label data-i18n="lbl_tr_seriennummer">Seriennummer</label><input id="tr-seriennummer">
@@ -359,7 +379,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div id="k-ebanner" class="ebanner" style="display:none"><span data-i18n="lbl_bearbmodus">Bearbeitungsmodus</span><button onclick="kundeAbbrechen()" style="padding:3px 8px;font-size:11px" data-i18n="lbl_abbrechen">Abbrechen</button></div>
       <div class="stitle" id="k-form-title">Neue Firma anlegen</div>
       <input type="hidden" id="k-edit-id">
-      <div class="r2"><div><label data-i18n="lbl_firma_name">Firmenname *</label><input id="k-firma" placeholder="Mustermann GmbH"></div><div><label data-i18n="lbl_kundennr">Kundennummer *</label><input id="k-nr" placeholder="K-0042"></div></div>
+      <div class="r2"><div><label class="req" data-i18n="lbl_firma_name">Firmenname</label><input id="k-firma" placeholder="Mustermann GmbH"></div><div><label class="req" data-i18n="lbl_kundennr">Kundennummer</label><input id="k-nr" placeholder="K-0042"></div></div>
       <div class="r2"><div><label data-i18n="lbl_ansprechpartner">Ansprechpartner</label><div style="display:flex;gap:6px"><select id="k-anrede" style="width:110px;flex-shrink:0"><option value="">Anrede</option><option value="Herr">Herr</option><option value="Frau">Frau</option><option value="Dr.">Dr.</option><option value="Prof.">Prof.</option><option value="Divers">Divers</option></select><input id="k-ansprechpartner" placeholder="Max Mustermann" style="flex:1"></div></div><div><label data-i18n="lbl_email">E-Mail</label><input id="k-email"></div></div>
       <div class="r2"><div><label data-i18n="lbl_telefon">Telefon</label><input id="k-tel"></div><div><label data-i18n="lbl_mobil">Mobil</label><input id="k-mobil"></div></div>
       <label data-i18n="lbl_strasse">Strasse</label><input id="k-strasse">
@@ -534,18 +554,18 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div class="g2">
       <div class="card">
         <div class="stitle" data-i18n="st_dt_erfassen">Datenträger erfassen</div>
-        <label data-i18n="lbl_k_firma">Firma</label><select id="dt-kunden_id" onchange="dtKundeGewaehlt()"><option value="">Firma wählen</option></select>
-        <label data-i18n="lbl_bezeichnung">Bezeichnung / Typ</label><input id="dt-bezeichnung" placeholder="z.B. Festplatte, LTO-Tape">
-        <label data-i18n="lbl_seriennr">Seriennummer</label><input id="dt-serial" placeholder="HDD-2024-001">
+        <label class="req" data-i18n="lbl_k_firma">Firma</label><select id="dt-kunden_id" onchange="dtKundeGewaehlt()"><option value="">Firma wählen</option></select>
+        <label class="req" data-i18n="lbl_bezeichnung">Bezeichnung / Typ</label><input id="dt-bezeichnung" placeholder="z.B. Festplatte, LTO-Tape">
+        <label class="req" data-i18n="lbl_seriennr">Seriennummer</label><input id="dt-serial" placeholder="HDD-2024-001">
         <label><span data-i18n="lbl_interne_nr">Interne Nr.</span> <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="dt-interne_nr" placeholder="z.B. INT-001">
         <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="dt-modus" id="dt-modus-einfach" value="einfach" checked onchange="dtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="dt-modus" id="dt-modus-escrow" value="escrow" onchange="dtModusWechseln()"> Escrow / 3-Firmen</label></div>
         <div id="dt-escrow-section" style="display:none"><label><span data-i18n="lbl_haupt_eigentuemer">Haupt-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_haupt_hint_dt">(optional, wenn abweichend von Firma)</span></label><select id="dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
         <label><span data-i18n="lbl_neben_eigentuemer">Neben-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
         <label><span data-i18n="lbl_rechnungsempfaenger">Rechnungsempfänger</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_rech_hint_dt">(optional, wenn abweichend)</span></label><select id="dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
-        <label data-i18n="lbl_preis">Preis</label>
+        <label class="req" data-i18n="lbl_preis">Preis</label>
         <div class="r2"><input id="dt-preis" type="number" value="1.00" step="0.10" min="0"><select id="dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
         <label data-i18n="lbl_rabatt">Rabatt (%)</label><input id="dt-rabatt" type="number" value="0" min="0" max="100" step="0.1">
-        <label data-i18n="lbl_einl_datum">Einlagerungsdatum</label><input id="dt-datum" type="date">
+        <label class="req" data-i18n="lbl_einl_datum">Einlagerungsdatum</label><input id="dt-datum" type="date">
         <label data-i18n="lbl_beschreibung">Beschreibung (optional)</label><input id="dt-beschreibung">
         <label data-i18n="lbl_tresor_select">Tresor / Schrank (optional)</label><select id="dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
         <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:10px">
@@ -685,10 +705,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div class="g2">
       <div class="card">
         <div class="stitle" data-i18n="st_ue_step1">Schritt 1</div>
-        <label data-i18n="lbl_k_firma">Firma</label><select id="u-kunden_id" onchange="renderUebergabeListe()"><option value="" data-i18n="opt_firma_waehlen">Firma wählen</option></select>
-        <label data-i18n="lbl_datum">Datum</label><input id="u-datum" type="date">
+        <label class="req" data-i18n="lbl_k_firma">Firma</label><select id="u-kunden_id" onchange="renderUebergabeListe()"><option value="" data-i18n="opt_firma_waehlen">Firma wählen</option></select>
+        <label class="req" data-i18n="lbl_datum">Datum</label><input id="u-datum" type="date">
         <label data-i18n="lbl_ue_empfaenger">Übergabe an</label><input id="u-empfaenger" placeholder="Name des Empfängers">
-        <label data-i18n="lbl_ue_grund">Grund</label>
+        <label class="req" data-i18n="lbl_ue_grund">Grund</label>
         <select id="u-grund"></select>
         <div style="margin-top:12px;display:flex;gap:8px">
           <button onclick="formularVorschau()" style="flex:1" data-i18n="lbl_vorschau">Vorschau</button>
@@ -737,7 +757,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div style="overflow-y:auto;max-height:90vh">
         <div class="card">
           <div class="stitle" data-i18n="st_logo">Logo & Farbe</div>
-          <div class="upzone" id="logo-zone" onclick="document.getElementById('logo-input').click()" style="margin-bottom:8px"><input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)"><div id="logo-prev">Logo hochladen</div></div>
+          <div class="upzone logo-zone" id="logo-zone" onclick="document.getElementById('logo-input').click()" style="margin-bottom:8px"><input type="file" id="logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)"><div id="logo-prev">Logo hochladen</div></div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><label style="margin:0;white-space:nowrap" data-i18n="lbl_farbe_colon">Farbe:</label><input type="color" id="accent-color" value="#0065A4" oninput="syncBrief()" style="width:40px;height:30px;padding:2px;border-radius:4px;cursor:pointer;flex-shrink:0"><button onclick="resetLogo()" class="btn-d" style="padding:4px 8px;font-size:11px" data-i18n="lbl_entfernen">Entfernen</button></div>
         </div>
         <div class="card" style="background:var(--i-bg);border-color:var(--i-brd)">
@@ -1069,7 +1089,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div style="overflow-y:auto;max-height:90vh">
       <div class="card">
         <div class="stitle" data-i18n="st_logo">Logo &amp; Farbe</div>
-        <div class="upzone" id="adm-logo-zone" onclick="document.getElementById('adm-logo-input').click()" style="margin-bottom:8px"><input type="file" id="adm-logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)"><div id="adm-logo-prev">Logo hochladen</div></div>
+        <div class="upzone logo-zone" id="adm-logo-zone" onclick="document.getElementById('adm-logo-input').click()" style="margin-bottom:8px"><input type="file" id="adm-logo-input" accept="image/*" style="display:none" onchange="handleLogo(event)"><div id="adm-logo-prev">Logo hochladen</div></div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><label style="margin:0;white-space:nowrap" data-i18n="lbl_farbe_colon">Farbe:</label><input type="color" id="adm-accent-color" value="#0065A4" oninput="syncAdmBrief()" style="width:40px;height:30px;padding:2px;border-radius:4px;cursor:pointer;flex-shrink:0"><button onclick="resetLogo()" class="btn-d" style="padding:4px 8px;font-size:11px" data-i18n="lbl_entfernen">Entfernen</button></div>
       </div>
       <div class="card">
@@ -1367,7 +1387,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.6.04
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.0
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1997,7 +2017,7 @@ function applyLang(){
   const grundSel=document.getElementById('u-grund');
   if(grundSel){
     const cur=grundSel.value;
-    grundSel.innerHTML=`<option>${t('grund_rueckgabe')}</option><option>${t('grund_vertragsende')}</option><option>${t('grund_vernichtung')}</option><option>${t('grund_sonstiges')}</option>`;
+    grundSel.innerHTML=`<option value="${t('grund_rueckgabe')}">${t('grund_rueckgabe')}</option><option value="${t('grund_vertragsende')}">${t('grund_vertragsende')}</option><option value="${t('grund_vernichtung')}">${t('grund_vernichtung')}</option><option value="${t('grund_sonstiges')}">${t('grund_sonstiges')}</option>`;
     if(cur)grundSel.value=cur;
   }
   document.querySelectorAll('[data-i18n]').forEach(el=>{
@@ -2052,6 +2072,26 @@ function toggleLang(){
   applyLang();
   renderAlles();
 }
+function toggleTheme(){
+  const root=document.documentElement;
+  const isDark=root.getAttribute('data-theme')==='dark'||
+    (!root.getAttribute('data-theme')&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+  const newTheme=isDark?'light':'dark';
+  root.setAttribute('data-theme',newTheme);
+  localStorage.setItem('dtv_theme',newTheme);
+  document.getElementById('btn-theme').textContent=newTheme==='dark'?'☀️':'🌙';
+}
+// Theme bei Seitenload anwenden
+(function(){
+  const saved=localStorage.getItem('dtv_theme');
+  if(saved){
+    document.documentElement.setAttribute('data-theme',saved);
+    document.addEventListener('DOMContentLoaded',()=>{
+      const btn=document.getElementById('btn-theme');
+      if(btn)btn.textContent=saved==='dark'?'☀️':'🌙';
+    });
+  }
+})();
 function tplEditorLang(tab,lang){
   ['de','en'].forEach(l=>{
     const d=document.getElementById(`tpl-${tab}-fields-${l}`);
@@ -2398,14 +2438,17 @@ async function zeigeDetail(id) {
   document.getElementById('k-detail-card').style.display='block';
 }
 
+function kSortBy(col){if(_kSort.col===col)_kSort.dir*=-1;else{_kSort.col=col;_kSort.dir=1;}renderKunden();}
 function renderKunden() {
   const el=document.getElementById('kunden-liste');
   const q=(document.getElementById('k-search')?.value||'').toLowerCase();
   let list=kunden;
   if(q) list=kunden.filter(k=>(k.firma||'').toLowerCase().includes(q)||(k.nr||'').toLowerCase().includes(q)||(k.ansprechpartner||'').toLowerCase().includes(q));
+  list=_sortList(list,_kSort.col,_kSort.dir);
   if(!list.length){el.innerHTML='<div class="empty">'+(q?t('empty_kunden_suche'):t('empty_kunden'))+'</div>';return;}
   const smap={aktiv:'bg',gekuendigt:'br',abgelaufen:'ba',pausiert:'ba'};
-  el.innerHTML=`<table><thead><tr><th style="width:18%">${t('col_nr')}</th><th style="width:34%">${t('col_firma_vt')}</th><th style="width:10%">${t('col_dt')}</th><th style="width:38%"></th></tr></thead><tbody>`+
+  const th=(lbl,col)=>_thS(lbl,'kSortBy',_kSort,col);
+  el.innerHTML=`<table><thead><tr>${th(t('col_nr'),'nr')}${th(t('col_firma_vt'),'firma')}${th(t('col_dt'),'firma')}<th></th></tr></thead><tbody>`+
     list.map(k=>{
       const dts=datentraeger.filter(d=>d.kunden_id===k.id&&d.status==='eingelagert');
       const sb=k.vertragsstatus?`<span class="badge ${smap[k.vertragsstatus]||'bg'}" style="font-size:10px">${k.vertragsstatus}</span>  `:'';
@@ -2486,6 +2529,13 @@ async function dtLoeschen(id) {
 
 let _dtStatusFilter='alle';
 let _dtPage=0;const _dtPerPage=25;
+// Sort state
+let _kSort={col:'firma',dir:1};
+let _dtSort={col:'bezeichnung',dir:1};
+let _reSort={col:'datum',dir:-1};
+function _sortList(list,col,dir){return [...list].sort((a,b)=>{const va=a[col]??'',vb=b[col]??'';return typeof va==='number'?((va-vb)*dir):(String(va).localeCompare(String(vb),'de'))*dir;});}
+function _sortHdr(id,col,current){const arrow=current.col===col?(current.dir===1?' ▲':' ▼'):'';return`<th style="cursor:pointer;user-select:none" onclick="${id}Sort('${col}')">${col}${arrow}</th>`;}
+function _thS(label,sortId,sortState,col){const arrow=sortState.col===col?(sortState.dir===1?' ▲':' ▼'):'';return`<th style="cursor:pointer;user-select:none;white-space:nowrap" onclick="${sortId}('${col}')">${label}${arrow}</th>`;}
 function dtSetStatus(s){
   _dtStatusFilter=s;_dtPage=0;
   ['alle','eingelagert','uebergeben'].forEach(x=>{
@@ -2494,6 +2544,7 @@ function dtSetStatus(s){
   });
   renderDT();
 }
+function dtSortBy(col){if(_dtSort.col===col)_dtSort.dir*=-1;else{_dtSort.col=col;_dtSort.dir=1;}_dtPage=0;renderDT();}
 function renderDT(){
   const filter=parseInt(document.getElementById('dt-filter')?.value)||0;
   const q=(document.getElementById('dt-search')?.value||'').toLowerCase();
@@ -2501,7 +2552,8 @@ function renderDT(){
   if(_dtStatusFilter==='eingelagert') base=base.filter(d=>d.status==='eingelagert');
   else if(_dtStatusFilter==='uebergeben') base=base.filter(d=>d.status==='uebergeben');
   if(filter) base=base.filter(d=>d.kunden_id===filter);
-  const list=q?base.filter(d=>(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.interne_nr||'').toLowerCase().includes(q)):base;
+  let list=q?base.filter(d=>(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.interne_nr||'').toLowerCase().includes(q)):base;
+  list=_sortList(list,_dtSort.col,_dtSort.dir);
   const el=document.getElementById('dt-tabelle');
   const pgEl=document.getElementById('dt-pagination');
   const total=list.length;
@@ -2509,7 +2561,8 @@ function renderDT(){
   if(_dtPage>=pages)_dtPage=Math.max(0,pages-1);
   const page=list.slice(_dtPage*_dtPerPage,(_dtPage+1)*_dtPerPage);
   if(!page.length){el.innerHTML='<div class="empty">'+t('empty_dt')+'</div>';if(pgEl)pgEl.innerHTML='';return;}
-  el.innerHTML=`<table><thead><tr><th style="width:7%">${t('col_bild')}</th><th style="width:13%">${t('col_firma')}</th><th style="width:17%">${t('col_typ')}</th><th style="width:16%">${t('col_serial')}</th><th style="width:14%">${t('col_preis')}</th><th style="width:8%">Status</th><th style="width:25%"></th></tr></thead><tbody>`+
+  const th=(lbl,col)=>_thS(lbl,'dtSortBy',_dtSort,col);
+  el.innerHTML=`<table><thead><tr><th style="width:7%">${t('col_bild')}</th>${th(t('col_firma'),'kunden_nr')}${th(t('col_typ'),'bezeichnung')}${th(t('col_serial'),'serial')}${th(t('col_preis'),'preis_jahr')}<th style="width:8%">Status</th><th style="width:20%"></th></tr></thead><tbody>`+
     page.map(d=>{
       const imgC=d.hat_bild?`<img src="" class="thumb" style="cursor:pointer" onclick="loadAndShowImg('/api/datentraeger/${d.id}/bild',this)">`:'<div style="width:34px;height:34px;background:var(--surf);border-radius:6px;border:1px dashed var(--brd2)"></div>';
       const scanBtn=d.hat_eingang_doc?`<button onclick="loadAndOpenDoc('/api/datentraeger/${d.id}/eingang_doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Eingangsprotokoll anzeigen">📄 ${_lang==='en'?'Incoming':'Eingang'}</button>`:`<span style="font-size:10px;color:var(--mut)">${t('kein_scan')}</span>`;
@@ -2708,10 +2761,11 @@ async function rechnungHistorieLadenAlle(){
   await _loadReHist();
   renderRechnungHistorie(_reHist);
 }
+function reSortBy(col){if(_reSort.col===col)_reSort.dir*=-1;else{_reSort.col=col;_reSort.dir=1;}renderRechnungHistoriePage();}
 async function renderRechnungHistoriePage(){
   await _loadReHist();
   const q=(document.getElementById('hist-search')?.value||'').toLowerCase();
-  const hist=_reHist;
+  let hist=_sortList(_reHist,_reSort.col,_reSort.dir);
   const filtered=q?hist.filter(r=>(r.firma||'').toLowerCase().includes(q)||(r.nr||'').toLowerCase().includes(q)||(r.zr||'').toLowerCase().includes(q)):hist;
   const el=document.getElementById('r-historie-page');if(!el)return;
   if(!filtered.length){el.innerHTML='<div class="empty">'+(q?t('empty_kunden_suche'):t('empty_rechnungen'))+'</div>';return;}
@@ -2721,14 +2775,13 @@ async function renderRechnungHistoriePage(){
     const ml=await apiJ('/api/mahnungen/'+encodeURIComponent(r.nr));
     mCounts[r.nr]=Array.isArray(ml)?ml.length:0;
   }));
+  const th2=(lbl,col)=>_thS(lbl,'reSortBy',_reSort,col);
   el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr>'+
-    '<th style="text-align:left;font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_nr')+'</th>'+
-    '<th style="text-align:left;font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_firma_header')+'</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_zeitraum')+'</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_netto')+'</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+t('col_datum')+'</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">'+ta('Status','Status')+'</th>'+
-    '<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)"></th>'+
+    th2(t('col_nr'),'nr')+th2(t('col_firma_header'),'firma')+
+    `<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">${t('col_zeitraum')}</th>`+
+    th2(t('col_netto'),'netto')+th2(t('col_datum'),'dat')+
+    `<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">${ta('Status','Status')}</th>`+
+    `<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)"></th>`+
     '</tr></thead><tbody>'+
     filtered.map((r)=>{
       const mCount=mCounts[r.nr]||0;
@@ -2991,15 +3044,23 @@ function formularHerunterladen(){
   printHtml(genUebergabeHtml(k,sel),'Übergabe_'+k.nr+'_'+document.getElementById('u-datum').value.replace(/-/g,'')+'.pdf');
 }
 
+let _weiterS2Running=false;
 async function weiterZuSchritt2(){
+  if(_weiterS2Running)return;
   const k=kunden.find(k=>k.id===parseInt(document.getElementById('u-kunden_id').value));if(!k){alert(t('msg_ue_firma'));return;}
   const sel=getAusgewaehlte();if(!sel.length){alert('Datenträger auswählen.');return;}
-  const result=await apiPost('/api/uebergaben',{kunden_id:k.id,datum:document.getElementById('u-datum').value,empfaenger:document.getElementById('u-empfaenger').value,grund:document.getElementById('u-grund').value,kunden_nr:k.nr,dt_ids:sel.map(d=>d.id)});
-  if(!result)return;
-  const pu={...result,kunden_id:k.id,firma:k.firma,kunden_nr:k.nr,datum:document.getElementById('u-datum').value,empfaenger:document.getElementById('u-empfaenger').value,grund:document.getElementById('u-grund').value,dt_ids:sel.map(d=>d.id),html:genUebergabeHtml(k,sel),abgeschlossen:false};
-  pendingUebergaben.push(pu);activePendingId=pu.id;pendingUDoc=null;
-  document.getElementById('u-doc-prev').innerHTML='Scan / Foto hochladen';document.getElementById('doc-upzone').classList.remove('has-file');
-  gotoStep(2);
+  const btn=document.querySelector('[onclick="weiterZuSchritt2()"]');
+  _weiterS2Running=true;if(btn){btn.disabled=true;btn.textContent='…';}
+  try{
+    const result=await apiPost('/api/uebergaben',{kunden_id:k.id,datum:document.getElementById('u-datum').value,empfaenger:document.getElementById('u-empfaenger').value,grund:document.getElementById('u-grund').value,kunden_nr:k.nr,dt_ids:sel.map(d=>d.id)});
+    if(!result)return;
+    const pu={...result,kunden_id:k.id,firma:k.firma,kunden_nr:k.nr,datum:document.getElementById('u-datum').value,empfaenger:document.getElementById('u-empfaenger').value,grund:document.getElementById('u-grund').value,dt_ids:sel.map(d=>d.id),html:genUebergabeHtml(k,sel),abgeschlossen:false};
+    pendingUebergaben.push(pu);activePendingId=pu.id;pendingUDoc=null;
+    document.getElementById('u-doc-prev').innerHTML='Scan / Foto hochladen';document.getElementById('doc-upzone').classList.remove('has-file');
+    gotoStep(2);
+  }finally{
+    _weiterS2Running=false;if(btn){btn.disabled=false;btn.textContent=t('lbl_ue_weiter');}
+  }
 }
 
 let activePendingId=null;
@@ -3362,7 +3423,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.6.04${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.0${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -4114,7 +4175,8 @@ function renderTresore(){
       const warnCls=t.naechster_wartungstermin&&new Date(t.naechster_wartungstermin)<=new Date(Date.now()+60*86400000)?'br':'bg';
       const warnLbl=t.naechster_wartungstermin?`<span class="badge ${warnCls}">${fmtDate2(t.naechster_wartungstermin)}</span>`:'<span style="color:var(--mut);font-size:11px">—</span>';
       const wvBtn=t.hat_wartungsvertrag?`<button onclick="loadAndOpenDoc('/api/tresore/${t.id}/wartungsvertrag')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Wartungsvertrag öffnen">📄</button>`:'';
-      return`<tr><td><strong style="cursor:pointer;color:var(--i-txt)" onclick="tresorDetail(${t.id})">${t.bezeichnung}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${t.hersteller}${t.modell?' '+t.modell:''}</span>`:''}</td><td style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center"><span class="badge bg">${t.anzahl_dt||0}</span></td><td>${warnLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
+      const dtBadge=t.anzahl_dt?`<span class="badge bg" style="cursor:pointer;text-decoration:underline dotted" title="Datenträger anzeigen" onclick="showTresorDT(${t.id},'${(t.bezeichnung||'').replace(/'/g,"&#39;")}')">${t.anzahl_dt}</span>`:`<span class="badge bg">0</span>`;
+      return`<tr><td><strong style="cursor:pointer;color:var(--i-txt)" onclick="tresorDetail(${t.id})">${t.bezeichnung}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${t.hersteller}${t.modell?' '+t.modell:''}</span>`:''}</td><td style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center">${dtBadge}</td><td>${warnLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
 }
 
@@ -4294,6 +4356,20 @@ function tresorDetail(id){
       ${t.notizen?`<div class="drow"><span class="dlbl">Notizen</span><span style="white-space:pre-wrap">${t.notizen}</span></div>`:''}
     </div>`;
   document.getElementById('tr-detail-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function showTresorDT(tresorId,tresorName){
+  const dts=datentraeger.filter(d=>d.tresor_id===tresorId);
+  const k=id=>kunden.find(x=>x.id===id);
+  let body;
+  if(!dts.length){body='<div class="empty">Keine Datenträger in diesem Tresor.</div>';}
+  else{body='<table style="width:100%;font-size:12px"><thead><tr><th>Bezeichnung</th><th>Seriennummer</th><th>Firma</th><th>Status</th></tr></thead><tbody>'+
+    dts.map(d=>{const firma=k(d.kunden_id);return`<tr><td>${d.bezeichnung||'—'}</td><td style="font-family:monospace;font-size:11px">${d.serial||'—'}</td><td style="font-size:11px">${firma?.firma||'—'}</td><td><span class="badge ${d.status==='aktiv'?'bg':'br'}">${d.status||'—'}</span></td></tr>`;}).join('')+'</tbody></table>';}
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+  overlay.innerHTML=`<div style="background:var(--bg);border:1px solid var(--brd);border-radius:var(--radl);padding:1.5rem;min-width:480px;max-width:680px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.4)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><strong style="font-size:14px">🗄️ ${tresorName} – Eingelagerte Datenträger (${dts.length})</strong><button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:var(--mut);font-size:18px;cursor:pointer;padding:0 4px">✕</button></div>${body}</div>`;
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+  document.body.appendChild(overlay);
 }
 
 // ══ SAML ADMIN ════════════════════════════════════════
@@ -5112,6 +5188,42 @@ async function totpDisable(){
   if(r&&r.ok){alert('2FA deaktiviert.');await totpRefreshStatus();}
 }
 
+function renderTerminWidget(){
+  const el=document.getElementById('db-termine-liste');
+  const countEl=document.getElementById('db-termine-count');
+  if(!el)return;
+  const now=new Date();
+  const in60=new Date(now.getTime()+60*86400000);
+  const items=[];
+  // Tresor-Wartungen
+  tresore.forEach(tr=>{
+    if(!tr.naechster_wartungstermin)return;
+    const d=new Date(tr.naechster_wartungstermin);
+    if(d<=in60)items.push({date:d,label:'🔒 Tresor: '+tr.bezeichnung,typ:d<now?'br':'ba'});
+  });
+  // Vertragsabläufe
+  kunden.forEach(k=>{
+    if(!k.vertragsende)return;
+    const d=new Date(k.vertragsende);
+    if(d<=in60)items.push({date:d,label:'📋 Vertrag: '+k.firma+' ('+k.nr+')',typ:d<now?'br':'ba'});
+  });
+  // Offene Rechnungen (>30 Tage)
+  if(window._reHist){_reHist.forEach(r=>{
+    if(r.bezahlt_am)return;
+    const d=new Date(r.dat);
+    const age=(now-d)/86400000;
+    if(age>30)items.push({date:d,label:'🧾 Rechnung: '+r.firma+' '+r.nr+' ('+Math.floor(age)+' Tage offen)',typ:'br'});
+  });}
+  items.sort((a,b)=>a.date-b.date);
+  if(countEl)countEl.textContent=items.length;
+  if(!items.length){el.innerHTML='<div class="empty" style="padding:8px 0">Keine anstehenden Termine in den nächsten 60 Tagen</div>';return;}
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:4px;padding:4px 0">'+items.map(i=>{
+    const tage=Math.round((i.date-now)/86400000);
+    const tagelbl=tage<0?`<span style="color:var(--d-txt);font-size:10px">${Math.abs(tage)} Tage überfällig</span>`:tage===0?`<span style="color:var(--w-txt);font-size:10px">Heute</span>`:`<span style="font-size:10px;color:var(--mut)">in ${tage} Tagen</span>`;
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 6px;background:var(--surf);border-radius:var(--rad);border-left:3px solid ${i.typ==='br'?'var(--d-brd)':'var(--w-brd)'}"><span style="font-size:12px">${i.label}</span>${tagelbl}</div>`;
+  }).join('')+'</div>';
+}
+
 // ══ HOOK: renderDashboard erweitern ══════════════════════════════════════════
 // IIFE-Pattern verhindert Hoisting-Bug (function-Deklaration würde sich selbst referenzieren)
 (function(){
@@ -5120,6 +5232,7 @@ async function totpDisable(){
     _orig();
     renderUmsatzChart();
     renderDTWartungDashboard();
+    renderTerminWidget();
   };
 })();
 
