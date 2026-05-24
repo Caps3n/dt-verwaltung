@@ -1387,7 +1387,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.02
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.03
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -3423,7 +3423,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.02${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.03${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -4150,7 +4150,7 @@ function renderDashboard(){
     const el=document.getElementById('db-wartung-liste');
     if(!list.length){el.innerHTML='<div class="empty">'+t('empty_db_wartung')+'</div>';return;}
     el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_bezeichnung')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_standort')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_datum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_status')+'</th></tr></thead><tbody>'+
-      list.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');const cls=t.ueberfaellig?'br':(t.tage_bis_wartung<=14?'br':'ba');const lbl=t.ueberfaellig?`${ta('überfällig','overdue')} (${Math.abs(t.tage_bis_wartung)}d)`:ta('in ','in ')+`${t.tage_bis_wartung}d`;return`<tr><td style="padding:5px 6px;font-weight:600">${t.bezeichnung}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${loc||'-'}</td><td style="padding:5px 6px">${fmtDate2(t.naechster_wartungstermin)}</td><td style="padding:5px 6px"><span class="badge ${cls}">${lbl}</span></td></tr>`;}).join('')+'</tbody></table>';
+      list.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');const cls=t.ueberfaellig?'br':'ba';const lbl=t.ueberfaellig?`⚠ ${ta('überfällig','overdue')} (${Math.abs(t.tage_bis_wartung)}d)`:ta('in ','in ')+`${t.tage_bis_wartung}d`;return`<tr style="${t.ueberfaellig?'background:var(--d-bg)':''}"><td style="padding:5px 6px;font-weight:600${t.ueberfaellig?';color:var(--d-txt)':''}">${t.bezeichnung}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${loc||'-'}</td><td style="padding:5px 6px${t.ueberfaellig?';color:var(--d-txt)':''}">${fmtDate2(t.naechster_wartungstermin)}</td><td style="padding:5px 6px"><span class="badge ${cls}">${lbl}</span></td></tr>`;}).join('')+'</tbody></table>';
   });
 }
 
@@ -4172,8 +4172,12 @@ function renderTresore(){
   el.innerHTML='<table><thead><tr><th>'+t('col_bezeichnung')+'</th><th>'+t('col_standort')+'</th><th>DT</th><th>'+t('col_naechste_wartung')+'</th><th></th></tr></thead><tbody>'+
     list.map(t=>{
       const loc=[t.land!='Deutschland'?t.land:'',t.stadt,t.gebaeude,t.etage?t.etage+'.':'' ,t.raum].filter(Boolean).join(', ');
-      const warnCls=t.naechster_wartungstermin&&new Date(t.naechster_wartungstermin)<=new Date(Date.now()+60*86400000)?'br':'bg';
-      const warnLbl=t.naechster_wartungstermin?`<span class="badge ${warnCls}">${fmtDate2(t.naechster_wartungstermin)}</span>`:'<span style="color:var(--mut);font-size:11px">—</span>';
+      const _wNow=new Date();const _wD=t.naechster_wartungstermin?new Date(t.naechster_wartungstermin):null;
+      const _wTage=_wD?Math.round((_wD-_wNow)/86400000):null;
+      const warnLbl=!_wD?'<span style="color:var(--mut);font-size:11px">—</span>':
+        _wTage<0?`<span class="badge br" title="${Math.abs(_wTage)} Tage überfällig">${fmtDate2(t.naechster_wartungstermin)} <small>⚠ ${Math.abs(_wTage)}d</small></span>`:
+        _wTage<=60?`<span class="badge ba">${fmtDate2(t.naechster_wartungstermin)} <small>(${_wTage}d)</small></span>`:
+        `<span class="badge bg">${fmtDate2(t.naechster_wartungstermin)}</span>`;
       const wvBtn=t.hat_wartungsvertrag?`<button onclick="loadAndOpenDoc('/api/tresore/${t.id}/wartungsvertrag')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Wartungsvertrag öffnen">📄</button>`:'';
       const dtBadge=t.anzahl_dt?`<span class="badge bg" style="cursor:pointer;text-decoration:underline dotted" title="Datenträger anzeigen" onclick="showTresorDT(${t.id},'${(t.bezeichnung||'').replace(/'/g,"&#39;")}')">${t.anzahl_dt}</span>`:`<span class="badge bg">0</span>`;
       return`<tr><td><strong style="cursor:pointer;color:var(--i-txt)" onclick="tresorDetail(${t.id})">${t.bezeichnung}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${t.hersteller}${t.modell?' '+t.modell:''}</span>`:''}</td><td style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center">${dtBadge}</td><td>${warnLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;

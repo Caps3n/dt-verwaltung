@@ -4,6 +4,14 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.03] – 2026-05-24
+
+### Changed
+- **Tresor-Liste: Wartungsdatum Farbgebung** – Spalte „Nächste Wartung" im Tresore-Tab zeigt jetzt drei Zustände: grün (weit in der Zukunft), gelb/amber (innerhalb 60 Tage, Termin anstehend) und rot mit Tagesangabe (Termin überfällig/überzogen). Vorher wurde alles ≤60 Tage pauschal rot markiert.
+- **Dashboard Tresor-Wartungstermine-Karte** – Überfällige Zeilen werden mit rotem Zeilenhintergrund und ⚠-Symbol hervorgehoben; anstehende (noch nicht überfällige) Termine bleiben gelb.
+
+---
+
 ## [v1.7.02] – 2026-05-24
 
 ### Changed
