@@ -4,6 +4,13 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.02] – 2026-05-24
+
+### Changed
+- **Termin-Widget: Klare Trennung Termin vs. Überfällig** – Das „Anstehende Termine" Widget auf dem Dashboard unterscheidet jetzt sauber zwischen vereinbarten Terminen (gelber Rand, Countdown in Tagen) und überfälligen Terminen (roter Hintergrund, Abschnitt „🔴 Überfällig", Anzeige der Überschreitung in Tagen). Der Badge-Zähler wird bei überfälligen Einträgen selbst rot. Termine die noch in der Zukunft liegen erscheinen im Abschnitt „📅 Vereinbarte Termine".
+
+---
+
 ## [v1.7.01] – 2026-05-24
 
 ### Fixed

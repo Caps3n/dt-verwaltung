@@ -1387,7 +1387,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.01
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.02
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -3423,7 +3423,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.01${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.02${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -5194,27 +5194,45 @@ function renderTerminWidget(){
   if(!el)return;
   const now=new Date();
   const in60=new Date(now.getTime()+60*86400000);
-  const items=[];
-  // Tresor-Wartungen (nur wenn Datum explizit gesetzt)
+  const ueberfaellig=[];
+  const anstehend=[];
+  // Tresor-Wartungstermine (explizit vereinbarter Termin)
   tresore.forEach(tr=>{
     if(!tr.naechster_wartungstermin)return;
     const d=new Date(tr.naechster_wartungstermin);
-    if(d<=in60)items.push({date:d,label:'🔒 Tresor: '+tr.bezeichnung,typ:d<now?'br':'ba'});
+    const tage=Math.round((d-now)/86400000);
+    if(d<now) ueberfaellig.push({date:d,tage,label:'🔒 Tresor: '+tr.bezeichnung});
+    else if(d<=in60) anstehend.push({date:d,tage,label:'🔒 Tresor: '+tr.bezeichnung});
   });
-  // Vertragsabläufe (nur wenn Datum explizit gesetzt)
+  // Vertragsabläufe (explizit eingetragenes Datum)
   kunden.forEach(k=>{
     if(!k.vertragsende)return;
     const d=new Date(k.vertragsende);
-    if(d<=in60)items.push({date:d,label:'📋 Vertrag: '+k.firma+' ('+k.nr+')',typ:d<now?'br':'ba'});
+    const tage=Math.round((d-now)/86400000);
+    if(d<now) ueberfaellig.push({date:d,tage,label:'📋 Vertrag: '+k.firma+' ('+k.nr+')'});
+    else if(d<=in60) anstehend.push({date:d,tage,label:'📋 Vertrag: '+k.firma+' ('+k.nr+')'});
   });
-  items.sort((a,b)=>a.date-b.date);
-  if(countEl)countEl.textContent=items.length;
-  if(!items.length){el.innerHTML='<div class="empty" style="padding:8px 0">Keine anstehenden Termine in den nächsten 60 Tagen</div>';return;}
-  el.innerHTML='<div style="display:flex;flex-direction:column;gap:4px;padding:4px 0">'+items.map(i=>{
-    const tage=Math.round((i.date-now)/86400000);
-    const tagelbl=tage<0?`<span style="color:var(--d-txt);font-size:10px">${Math.abs(tage)} Tage überfällig</span>`:tage===0?`<span style="color:var(--w-txt);font-size:10px">Heute</span>`:`<span style="font-size:10px;color:var(--mut)">in ${tage} Tagen</span>`;
-    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 6px;background:var(--surf);border-radius:var(--rad);border-left:3px solid ${i.typ==='br'?'var(--d-brd)':'var(--w-brd)'}"><span style="font-size:12px">${i.label}</span>${tagelbl}</div>`;
-  }).join('')+'</div>';
+  ueberfaellig.sort((a,b)=>a.date-b.date);
+  anstehend.sort((a,b)=>a.date-b.date);
+  const total=ueberfaellig.length+anstehend.length;
+  if(countEl){countEl.textContent=total;countEl.className='badge '+(ueberfaellig.length?'br':'ba');}
+  if(!total){el.innerHTML='<div class="empty" style="padding:8px 0">Keine Termine in den nächsten 60 Tagen</div>';return;}
+  const rowStyle=(bg,brd)=>`display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:${bg};border-radius:var(--rad);border-left:3px solid ${brd}`;
+  let html='<div style="display:flex;flex-direction:column;gap:4px;padding:4px 0">';
+  if(ueberfaellig.length){
+    html+=`<div style="font-size:10px;font-weight:700;color:var(--d-txt);text-transform:uppercase;letter-spacing:.5px;margin:4px 2px 2px">🔴 Überfällig</div>`;
+    html+=ueberfaellig.map(i=>`<div style="${rowStyle('var(--d-bg)','var(--d-brd)')}"><span style="font-size:12px;color:var(--d-txt);font-weight:600">${i.label}</span><span style="font-size:10px;color:var(--d-txt);font-weight:700">${Math.abs(i.tage)} Tage überzogen</span></div>`).join('');
+  }
+  if(anstehend.length){
+    if(ueberfaellig.length) html+=`<div style="margin-top:4px"></div>`;
+    html+=`<div style="font-size:10px;font-weight:700;color:var(--w-txt);text-transform:uppercase;letter-spacing:.5px;margin:4px 2px 2px">📅 Vereinbarte Termine</div>`;
+    html+=anstehend.map(i=>{
+      const lbl=i.tage===0?'Heute':i.tage===1?'Morgen':`in ${i.tage} Tagen`;
+      return`<div style="${rowStyle('var(--surf)','var(--w-brd)')}"><span style="font-size:12px">${i.label}</span><span style="font-size:10px;color:var(--w-txt);font-weight:600">${lbl}</span></div>`;
+    }).join('');
+  }
+  html+='</div>';
+  el.innerHTML=html;
 }
 
 // ══ HOOK: renderDashboard erweitern ══════════════════════════════════════════
