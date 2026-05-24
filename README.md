@@ -1,4 +1,4 @@
-# DT-Verwaltung v1.6.01
+# DT-Verwaltung v1.7.0
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-caps3n-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/caps3n)
 
@@ -14,6 +14,8 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 ### Dashboard
 - KPIs: active contracts, stored media, monthly and annual revenue
 - **Monthly revenue bar chart** (last 12 months, SVG)
+- **Quick-action buttons** — one click to create a new media record, invoice, handover, or customer
+- **Upcoming appointments widget** — shows safe maintenance dates, contract expirations, and overdue invoices in the next 60 days, colour-coded by urgency (red = overdue, yellow = soon)
 - Contract expiry warnings (60-day preview, colour-coded)
 - Safe and cabinet maintenance warnings
 - **Media maintenance warnings** — overdue or upcoming checks
@@ -55,6 +57,13 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 - **Send reminders by email** directly from the reminder history (📧 button per reminder)
 - **Payment status tracking** per invoice (paid / unpaid / overdue)
 - **Pagination** for large media lists
+
+### UI & UX
+- **Dark / light mode toggle** (🌙/☀️ button in the top bar) — preference saved in `localStorage`; respects system preference (`prefers-color-scheme`) by default
+- **Active tab highlight** — the current tab is visually emphasised with a border and background
+- **Required field markers** — mandatory form fields are labelled with `*`
+- **Sortable columns** — click any column header in the customer, media, and invoice lists to sort ascending / descending (▲/▼)
+- **Safe media drill-down** — click the media count in the safe list to see all media assigned to that safe
 
 ### Safe Management (🔒)
 - CRUD for physical safes and cabinets: name, manufacturer, model, serial number
