@@ -1387,7 +1387,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.0
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.1
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -3423,7 +3423,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.0${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.1${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -5195,25 +5195,18 @@ function renderTerminWidget(){
   const now=new Date();
   const in60=new Date(now.getTime()+60*86400000);
   const items=[];
-  // Tresor-Wartungen
+  // Tresor-Wartungen (nur wenn Datum explizit gesetzt)
   tresore.forEach(tr=>{
     if(!tr.naechster_wartungstermin)return;
     const d=new Date(tr.naechster_wartungstermin);
     if(d<=in60)items.push({date:d,label:'🔒 Tresor: '+tr.bezeichnung,typ:d<now?'br':'ba'});
   });
-  // Vertragsabläufe
+  // Vertragsabläufe (nur wenn Datum explizit gesetzt)
   kunden.forEach(k=>{
     if(!k.vertragsende)return;
     const d=new Date(k.vertragsende);
     if(d<=in60)items.push({date:d,label:'📋 Vertrag: '+k.firma+' ('+k.nr+')',typ:d<now?'br':'ba'});
   });
-  // Offene Rechnungen (>30 Tage)
-  if(window._reHist){_reHist.forEach(r=>{
-    if(r.bezahlt_am)return;
-    const d=new Date(r.dat);
-    const age=(now-d)/86400000;
-    if(age>30)items.push({date:d,label:'🧾 Rechnung: '+r.firma+' '+r.nr+' ('+Math.floor(age)+' Tage offen)',typ:'br'});
-  });}
   items.sort((a,b)=>a.date-b.date);
   if(countEl)countEl.textContent=items.length;
   if(!items.length){el.innerHTML='<div class="empty" style="padding:8px 0">Keine anstehenden Termine in den nächsten 60 Tagen</div>';return;}

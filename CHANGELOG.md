@@ -4,6 +4,13 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.1] – 2026-05-24
+
+### Fixed
+- **Termin-Widget: Falsche Einträge** – Das "Anstehende Termine" Widget auf dem Dashboard zeigte fälschlicherweise offene Rechnungen (>30 Tage) als "Termine" an, obwohl keine Wartungs- oder Vertragstermine eingetragen waren. Rechnungen werden im Widget nicht mehr angezeigt — es zeigt nur noch explizit gesetzte Termine (Tresor-Wartungsdaten, Vertragsabläufe).
+
+---
+
 ## [v1.7.0] – 2026-05-24
 
 ### Fixed
