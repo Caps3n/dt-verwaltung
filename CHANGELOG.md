@@ -4,6 +4,20 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.16] – 2026-05-25
+
+### Fixed
+- **DT-Liste: Übergeben-Items im Erfassen-Panel** – Datenträger mit Status `uebergeben` erschienen im „Eingelagerte Datenträger"-Panel, wenn „Alle" gewählt war. Die Liste filtert jetzt systematisch alle `uebergeben`-Einträge heraus – diese gehören ausschließlich ins Archiv-Tab. Der „📦 Übergeben"-Filter-Button wurde entfernt. Standard-Filter ist jetzt „Eingelagert".
+- **Version-String im Footer** – Footer zeigte `v1.7.14` statt `v1.7.15` (zwei Stellen: statisches HTML + JS-generierter Footer).
+
+### Security
+- **E-Mail-Header-Injection** – `_send_email()` sanitisiert jetzt `to_addr` und `subject` (Zeilenumbrüche werden entfernt). Zusätzlich: Basis-Format-Validierung der E-Mail-Adresse (muss `@` enthalten, keine Leerzeichen).
+- **Integer-Input-Safety** – `GET /api/audit_log?limit=&offset=` warf bisher einen unbehandelten `ValueError` → HTTP 500. Jetzt try/catch → HTTP 400 mit klarer Fehlermeldung.
+- **SMTP-Port-Validierung** – `PUT /api/smtp_settings` validiert jetzt den Port-Wert (Integer, 1–65535). Ungültige Werte liefern HTTP 400.
+- **Rate-Limit auf `/api/auth/refresh`** – Der Session-Verlängerungs-Endpunkt hatte bisher kein Rate-Limit. Jetzt: max. 20 Anfragen/Minute (via `flask-limiter`).
+
+---
+
 ## [v1.7.15] – 2026-05-25
 
 ### Added

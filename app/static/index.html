@@ -679,9 +679,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <select id="dt-filter" onchange="renderDT()"><option value="">Alle Firmen</option></select>
         <input type="search" id="dt-search" placeholder="Typ, Seriennummer, interne Nr…" oninput="renderDT()" style="margin-top:8px">
         <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-          <button id="dt-status-alle" class="btn-p" onclick="dtSetStatus('alle')" style="padding:4px 10px;font-size:11px">Alle</button>
-          <button id="dt-status-eingelagert" onclick="dtSetStatus('eingelagert')" style="padding:4px 10px;font-size:11px">✅ Eingelagert</button>
-          <button id="dt-status-uebergeben" onclick="dtSetStatus('uebergeben')" style="padding:4px 10px;font-size:11px">📦 Übergeben</button>
+          <button id="dt-status-alle" onclick="dtSetStatus('alle')" style="padding:4px 10px;font-size:11px">Alle</button>
+          <button id="dt-status-eingelagert" class="btn-p" onclick="dtSetStatus('eingelagert')" style="padding:4px 10px;font-size:11px">✅ Eingelagert</button>
         </div>
         <div style="margin-top:10px" id="dt-tabelle"><div class="empty" data-i18n="empty_dt">Keine Datenträger</div></div>
         <div id="dt-pagination" style="display:flex;align-items:center;gap:6px;margin-top:8px;justify-content:center;font-size:12px"></div>
@@ -1481,7 +1480,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.14
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.16
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -2651,7 +2650,7 @@ async function dtLoeschen(id) {
   if(r){datentraeger=datentraeger.filter(d=>d.id!==id);renderAlles();}
 }
 
-let _dtStatusFilter='alle';
+let _dtStatusFilter='eingelagert';
 let _dtPage=0;const _dtPerPage=25;
 // Sort state
 let _kSort={col:'firma',dir:1};
@@ -2662,7 +2661,7 @@ function _sortHdr(id,col,current){const arrow=current.col===col?(current.dir===1
 function _thS(label,sortId,sortState,col){const arrow=sortState.col===col?(sortState.dir===1?' ▲':' ▼'):'';return`<th style="cursor:pointer;user-select:none;white-space:nowrap" onclick="${sortId}('${col}')">${label}${arrow}</th>`;}
 function dtSetStatus(s){
   _dtStatusFilter=s;_dtPage=0;
-  ['alle','eingelagert','uebergeben'].forEach(x=>{
+  ['alle','eingelagert'].forEach(x=>{
     const b=document.getElementById('dt-status-'+x);
     if(b){b.className=x===s?'btn-p':'';b.style.padding='4px 10px';b.style.fontSize='11px';}
   });
@@ -2672,9 +2671,9 @@ function dtSortBy(col){if(_dtSort.col===col)_dtSort.dir*=-1;else{_dtSort.col=col
 function renderDT(){
   const filter=parseInt(document.getElementById('dt-filter')?.value)||0;
   const q=(document.getElementById('dt-search')?.value||'').toLowerCase();
-  let base=datentraeger;
+  // Übergeben-Items gehören ins Archiv-Tab, nie in die Eingelagert-Liste
+  let base=datentraeger.filter(d=>d.status!=='uebergeben');
   if(_dtStatusFilter==='eingelagert') base=base.filter(d=>d.status==='eingelagert');
-  else if(_dtStatusFilter==='uebergeben') base=base.filter(d=>d.status==='uebergeben');
   if(filter) base=base.filter(d=>d.kunden_id===filter);
   let list=q?base.filter(d=>(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.interne_nr||'').toLowerCase().includes(q)):base;
   list=_sortList(list,_dtSort.col,_dtSort.dir);
@@ -3548,7 +3547,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.14${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.16${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';

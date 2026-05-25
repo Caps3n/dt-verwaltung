@@ -753,6 +753,7 @@ def logout():
     return jsonify({'ok': True})
 
 @app.route('/api/auth/refresh', methods=['POST'])
+@_rate_limit('20 per minute')
 def auth_refresh():
     """Extend an active session by another 8 hours."""
     token = request.headers.get('X-Token', '')
@@ -2001,8 +2002,11 @@ def log_audit(user_name, aktion, tabelle=None, datensatz_id=None, details=None):
 @app.route('/api/audit_log', methods=['GET'])
 @require_auth('manageUsers')
 def get_audit_log():
-    limit = min(int(request.args.get('limit', 200)), 500)
-    offset = int(request.args.get('offset', 0))
+    try:
+        limit = min(int(request.args.get('limit', 200)), 500)
+        offset = max(int(request.args.get('offset', 0)), 0)
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Ungültige Parameter'}), 400
     db = get_db()
     rows = db.execute(
         "SELECT id,ts,benutzer,aktion,tabelle,datensatz_id,details FROM audit_log ORDER BY id DESC LIMIT ? OFFSET ?",
@@ -2025,19 +2029,25 @@ def get_smtp_settings():
 @require_auth('manageUsers')
 def update_smtp_settings():
     data = request.json or {}
+    try:
+        port = int(data.get('port', 587))
+        if not (1 <= port <= 65535):
+            raise ValueError()
+    except (ValueError, TypeError):
+        return jsonify({'error': 'Ungültiger SMTP-Port (1–65535)'}), 400
     db = get_db()
     # Store password only if provided (not empty)
     if data.get('password'):
         db.execute(
             "UPDATE smtp_settings SET host=?,port=?,username=?,password=?,from_email=?,from_name=?,use_tls=?,aktiv=? WHERE id=1",
-            (data.get('host',''), int(data.get('port',587)), data.get('username',''),
+            (data.get('host',''), port, data.get('username',''),
              data.get('password',''), data.get('from_email',''), data.get('from_name','DT-Verwaltung'),
              1 if data.get('use_tls') else 0, 1 if data.get('aktiv') else 0)
         )
     else:
         db.execute(
             "UPDATE smtp_settings SET host=?,port=?,username=?,from_email=?,from_name=?,use_tls=?,aktiv=? WHERE id=1",
-            (data.get('host',''), int(data.get('port',587)), data.get('username',''),
+            (data.get('host',''), port, data.get('username',''),
              data.get('from_email',''), data.get('from_name','DT-Verwaltung'),
              1 if data.get('use_tls') else 0, 1 if data.get('aktiv') else 0)
         )
@@ -2045,8 +2055,18 @@ def update_smtp_settings():
     db.close()
     return jsonify({'ok': True})
 
+def _sanitize_header(val):
+    """Strip newlines to prevent e-mail header injection."""
+    return str(val or '').replace('\r', '').replace('\n', '').strip()
+
 def _send_email(to_addr, subject, html_body):
     """Send an email using the configured SMTP settings. Returns (ok, error_msg)."""
+    # Guard against header injection
+    to_addr = _sanitize_header(to_addr)
+    subject = _sanitize_header(subject)
+    # Basic format check – must contain @ and no spaces
+    if not to_addr or '@' not in to_addr or ' ' in to_addr:
+        return False, 'Ungültige E-Mail-Adresse'
     db = get_db()
     cfg = db.execute("SELECT * FROM smtp_settings WHERE id=1").fetchone()
     db.close()
