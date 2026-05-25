@@ -172,7 +172,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   td,th{padding:5px 4px}
   button{font-size:11px}
 }
-/* ── Dashboard v1.7.14 ─────────────────────────────────────────────────────── */
+/* ── Dashboard v1.7.15 ─────────────────────────────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -208,6 +208,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   .db-kpi-val{font-size:20px}
   .db-action-btn{flex:1 1 100%}
 }
+/* ── Session-Timeout Banner ─────────────────────────────────────── */
+#session-warn{display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--w-bg);border-bottom:2px solid var(--w-brd);color:var(--w-txt);padding:10px 16px;font-size:13px;font-weight:600;display:none;align-items:center;gap:10px;justify-content:center}
+#session-warn.show{display:flex}
+#session-warn button{padding:5px 14px;font-size:12px;font-weight:700;border-radius:var(--rad);border:1.5px solid var(--w-brd);background:var(--bg);color:var(--w-txt);cursor:pointer;transition:background .12s}
+#session-warn button:hover{background:var(--w-brd);color:#fff}
 </style>
 </head>
 <body>
@@ -230,6 +235,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <span id="saml-btn-label">Single Sign-On</span>
     </button>
   </div>
+</div>
+
+<!-- SESSION TIMEOUT BANNER -->
+<div id="session-warn" role="alert" aria-live="polite">
+  <span id="session-warn-txt">⚠️ Deine Sitzung läuft in Kürze ab.</span>
+  <button onclick="refreshSession()">Sitzung verlängern</button>
+  <button onclick="document.getElementById('session-warn').classList.remove('show')" style="background:transparent;border:none;opacity:.6;font-size:16px;padding:0 4px">✕</button>
 </div>
 
 <!-- MAIN APP -->
@@ -1508,6 +1520,28 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   </div>
 </div>
 
+<!-- Rechnung per E-Mail Modal -->
+<div id="re-email-modal" class="overlay">
+  <div class="overlay-bg" onclick="closeRechnungEmailModal()"></div>
+  <div class="overlay-box" style="max-width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <strong style="font-size:15px">📧 Rechnung per E-Mail senden</strong>
+      <button onclick="closeRechnungEmailModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--mut)">✕</button>
+    </div>
+    <input type="hidden" id="re-email-rid">
+    <input type="hidden" id="re-email-nr">
+    <label style="font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">Empfänger *</label>
+    <input id="re-email-to" type="email" placeholder="kunde@beispiel.de" style="width:100%;margin:4px 0 12px;box-sizing:border-box">
+    <label style="font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px">Betreff</label>
+    <input id="re-email-subject" type="text" style="width:100%;margin:4px 0 12px;box-sizing:border-box">
+    <div id="re-email-result" style="display:none;padding:8px 10px;border-radius:var(--rad);background:var(--surf);font-size:12px;margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button onclick="closeRechnungEmailModal()" style="flex:1">Abbrechen</button>
+      <button class="btn-p" onclick="sendRechnungEmail()" style="flex:1">📧 Senden</button>
+    </div>
+  </div>
+</div>
+
 <div id="pw-modal" class="overlay">
   <div class="overlay-bg" onclick="closePwModal()"></div>
   <div class="overlay-box" style="max-width:360px">
@@ -2250,8 +2284,10 @@ async function doLogin() {
 
     TOKEN = data.token;
     currentUser = data.user;
+    const _exp = new Date(Date.now() + 8*60*60*1000).toISOString();
     sessionStorage.setItem('dtv_token', TOKEN);
     sessionStorage.setItem('dtv_user', JSON.stringify(currentUser));
+    sessionStorage.setItem('dtv_expires', _exp);
     showApp();
 
   } catch(e) {
@@ -2289,7 +2325,7 @@ async function pwSpeichern(){
 
 function doLogout() {
   api('/api/logout',{method:'POST'});
-  TOKEN=''; sessionStorage.removeItem('dtv_token'); currentUser=null;
+  TOKEN=''; sessionStorage.removeItem('dtv_token'); sessionStorage.removeItem('dtv_expires'); currentUser=null;
   document.getElementById('main-app').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('login-pass').value='';
@@ -2350,6 +2386,7 @@ async function showApp() {
   document.getElementById('u-datum').value=today;
   document.getElementById('r-zeitraum').value=`01.01.${yr} - ${fmtDate(today)}`;
   nextReNr().then(nr=>{ document.getElementById('r-nr').value=nr; });
+  _startSessionWatcher();
 }
 
 // ══ LOAD ALL ═════════════════════════════════════════
@@ -2841,7 +2878,7 @@ function renderRechnungHistorie(list){
   const el=document.getElementById('r-historie');if(!el)return;
   if(!list||!list.length){el.innerHTML='<div class="empty">'+t('empty_rechnungen')+'</div>';return;}
   el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_nr')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_zeitraum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_netto')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_datum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)"></th></tr></thead><tbody>'+
-    list.map((r)=>`<tr><td style="padding:5px 6px;font-weight:600;font-family:monospace;font-size:11px">${esc(r.nr)}</td><td style="padding:5px 6px">${esc(r.firma)}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${esc(r.zr)}</td><td style="padding:5px 6px;font-size:11px">${r.netto?'EUR '+r.netto:'-'}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td><td style="padding:5px 6px"><div style="display:flex;gap:4px"><button onclick="rechnungWiederdrucken(${r.id})" style="padding:2px 8px;font-size:11px">${t('btn_drucken')}</button><button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:2px 8px;font-size:11px">${t('btn_mahnung')}</button></div></td></tr>`).join('')+
+    list.map((r)=>{const rK=kunden.find(x=>x.id===r.kunden_id)||{};return`<tr><td style="padding:5px 6px;font-weight:600;font-family:monospace;font-size:11px">${esc(r.nr)}</td><td style="padding:5px 6px">${esc(r.firma)}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${esc(r.zr)}</td><td style="padding:5px 6px;font-size:11px">${r.netto?'EUR '+r.netto:'-'}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td><td style="padding:5px 6px"><div style="display:flex;gap:4px"><button onclick="rechnungWiederdrucken(${r.id})" style="padding:2px 8px;font-size:11px">${t('btn_drucken')}</button><button onclick="openRechnungEmailModal(${r.id},${JSON.stringify(r.nr)},${JSON.stringify(r.firma)},${JSON.stringify(rK.email||'')})" style="padding:2px 8px;font-size:11px" title="Per E-Mail senden">📧</button><button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:2px 8px;font-size:11px">${t('btn_mahnung')}</button></div></td></tr>`}).join('')+
     '</tbody></table>';
 }
 async function rechnungHistorieLadenAlle(){
@@ -2899,6 +2936,7 @@ async function renderRechnungHistoriePage(){
       <td style="padding:7px 8px"><div style="display:flex;gap:4px;flex-wrap:wrap">
         ${bezahltBtn}
         <button onclick="rechnungWiederdrucken(${r.id})" style="padding:3px 8px;font-size:11px" title="Rechnung als PDF drucken">PDF</button>
+        <button onclick="openRechnungEmailModal(${r.id},${JSON.stringify(r.nr)},${JSON.stringify(r.firma)},${JSON.stringify(rKunde.email||'')})" style="padding:3px 8px;font-size:11px" title="${ta('Per E-Mail senden','Send by email')}">📧</button>
         <button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:3px 8px;font-size:11px"${(mahnVoll||bezahlt)?' disabled title="'+(bezahlt?ta('Rechnung bereits bezahlt','Invoice already paid'):ta('Maximale Mahnanzahl erreicht','Maximum reminders reached'))+'" style="padding:3px 8px;font-size:11px;opacity:0.45;cursor:not-allowed"':''}>${mahnBtnLabel}</button>
         <button onclick="toggleMahnungenRow('${esc(r.nr)}')" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="${ta('Mahnungen anzeigen','Show reminders')}">📋 ${mCount}/${maxMahn}</button>
         <button onclick="rechnungLoeschen(${r.id})" class="btn-d" style="padding:3px 7px;font-size:11px">✕</button>
@@ -5000,10 +5038,11 @@ async function checkSamlTokenInUrl(){
   const match=hash.match(/saml_token=([a-f0-9]+)/);
   if(match){
     const token=match[1];TOKEN=token;sessionStorage.setItem('dtv_token',token);
+    sessionStorage.setItem('dtv_expires',new Date(Date.now()+8*60*60*1000).toISOString());
     history.replaceState(null,'',window.location.pathname);
     const r=await fetch('/api/me',{headers:{'X-Token':token}}).catch(()=>null);
     if(r&&r.ok){currentUser=await r.json();sessionStorage.setItem('dtv_user',JSON.stringify(currentUser));await showApp();return true;}
-    TOKEN='';sessionStorage.removeItem('dtv_token');return false;
+    TOKEN='';sessionStorage.removeItem('dtv_token');sessionStorage.removeItem('dtv_expires');return false;
   }
   const errMatch=window.location.search.match(/saml_error=([^&]+)/);
   if(errMatch){
@@ -5304,6 +5343,63 @@ async function sendMahnungEmail(mid,to){
   const r=await apiPost(`/api/mahnungen/${mid}/email`,{to});
   if(r&&!r.error)alert('✅ Mahnung per E-Mail gesendet an '+to);
   else alert('❌ Fehler: '+(r?.error||'Unbekannt'));
+}
+// ── Rechnung per E-Mail ──────────────────────────────────────────────────────
+function openRechnungEmailModal(rid, nr, firma, kundeEmail){
+  const modal=document.getElementById('re-email-modal');
+  if(!modal)return;
+  document.getElementById('re-email-rid').value=rid;
+  document.getElementById('re-email-nr').value=nr;
+  document.getElementById('re-email-to').value=kundeEmail||'';
+  document.getElementById('re-email-subject').value='Rechnung '+nr+(firma?' – '+firma:'');
+  document.getElementById('re-email-result').style.display='none';
+  modal.classList.add('open');
+  setTimeout(()=>document.getElementById('re-email-to').focus(),80);
+}
+function closeRechnungEmailModal(){document.getElementById('re-email-modal')?.classList.remove('open');}
+async function sendRechnungEmail(){
+  const rid=document.getElementById('re-email-rid').value;
+  const to=document.getElementById('re-email-to').value.trim();
+  const subject=document.getElementById('re-email-subject').value.trim();
+  const res=document.getElementById('re-email-result');
+  if(!to){res.textContent='⚠️ Bitte E-Mail-Adresse eingeben.';res.style.color='var(--w-txt)';res.style.display='block';return;}
+  res.textContent='Sende…';res.style.color='var(--mut)';res.style.display='block';
+  const r=await apiPost(`/api/rechnungen/${rid}/email`,{to,subject});
+  if(r&&!r.error){res.textContent='✅ Rechnung erfolgreich gesendet an '+to;res.style.color='var(--s-txt)';}
+  else{res.textContent='❌ Fehler: '+(r?.error||'Unbekannt');res.style.color='var(--d-txt)';}
+}
+// ── Session-Timeout Warnung ──────────────────────────────────────────────────
+let _sessionWarnTimer=null;
+function _startSessionWatcher(){
+  clearInterval(_sessionWarnTimer);
+  _sessionWarnTimer=setInterval(()=>{
+    const exp=sessionStorage.getItem('dtv_expires');
+    if(!exp)return;
+    const msLeft=new Date(exp)-Date.now();
+    const banner=document.getElementById('session-warn');
+    const txt=document.getElementById('session-warn-txt');
+    if(!banner)return;
+    if(msLeft<=0){
+      banner.classList.add('show');
+      if(txt)txt.textContent='⚠️ Deine Sitzung ist abgelaufen. Bitte neu einloggen.';
+      clearInterval(_sessionWarnTimer);
+    } else if(msLeft<=10*60*1000){
+      const mins=Math.ceil(msLeft/60000);
+      if(txt)txt.textContent=`⚠️ Deine Sitzung läuft in ${mins} Minute${mins!==1?'n':''} ab.`;
+      banner.classList.add('show');
+    } else {
+      banner.classList.remove('show');
+    }
+  },30000);// check every 30s
+}
+async function refreshSession(){
+  const r=await apiPost('/api/auth/refresh',{});
+  if(r&&r.expires){
+    sessionStorage.setItem('dtv_expires',r.expires);
+    document.getElementById('session-warn')?.classList.remove('show');
+  } else {
+    alert('Sitzung konnte nicht verlängert werden. Bitte neu einloggen.');
+  }
 }
 
 // ══ AUDIT LOG ════════════════════════════════════════════════════════════════

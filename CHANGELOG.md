@@ -4,6 +4,14 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.15] – 2026-05-25
+
+### Added
+- **Rechnung per E-Mail senden** – Jede Rechnung in der Rechnungshistorie hat jetzt einen 📧-Button. Klick öffnet ein Modal mit vorausgefülltem Empfänger (aus Kundenstammdaten) und Betreff. Sendet die gespeicherte Rechnungs-HTML per SMTP. Neuer Backend-Endpunkt `POST /api/rechnungen/<id>/email`. Audit-Log-Eintrag `EMAIL_RECHNUNG` wird geschrieben.
+- **Session-Timeout Warnung** – Ein gelbes Banner am Bildschirmrand erscheint automatisch, wenn die Sitzung in weniger als 10 Minuten abläuft (z. B. „Deine Sitzung läuft in 7 Minuten ab."). Über den Button „Sitzung verlängern" kann die Sitzung um weitere 8 Stunden verlängert werden (`POST /api/auth/refresh`). Die Ablaufzeit wird beim Login in `sessionStorage` gespeichert und alle 30 Sekunden geprüft.
+
+---
+
 ## [v1.7.14] – 2026-05-25
 
 ### Fixed

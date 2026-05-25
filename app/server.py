@@ -752,6 +752,22 @@ def logout():
     session_delete(request.headers.get('X-Token', ''))
     return jsonify({'ok': True})
 
+@app.route('/api/auth/refresh', methods=['POST'])
+def auth_refresh():
+    """Extend an active session by another 8 hours."""
+    token = request.headers.get('X-Token', '')
+    sess = session_get(token)
+    if not sess or datetime.fromisoformat(sess['expires']) < datetime.now():
+        return jsonify({'error': 'Sitzung abgelaufen'}), 401
+    new_expires = (datetime.now() + timedelta(hours=8)).isoformat()
+    sess['expires'] = new_expires
+    SESSIONS[token] = sess
+    db = get_db()
+    db.execute("UPDATE sessions SET expires=? WHERE token=?", (new_expires, token))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True, 'expires': new_expires})
+
 @app.route('/api/emergency-pw-reset', methods=['POST'])
 def emergency_pw_reset():
     """Emergency admin password reset — only works if RESET_ADMIN_PASSWORD env var is set."""
@@ -1884,6 +1900,34 @@ def delete_all_rechnungen():
     db.close()
     _cache_del('rechnungen')
     return jsonify({'ok': True})
+
+@app.route('/api/rechnungen/<int:rid>/email', methods=['POST'])
+@require_auth('write')
+def send_rechnung_email(rid):
+    data = request.json or {}
+    to_addr = data.get('to', '')
+    if not to_addr:
+        return jsonify({'error': 'Empfänger-E-Mail fehlt'}), 400
+    db = get_db()
+    row = db.execute("SELECT * FROM rechnungen WHERE id=?", (rid,)).fetchone()
+    db.close()
+    if not row:
+        return jsonify({'error': 'Rechnung nicht gefunden'}), 404
+    subject = data.get('subject') or f"Rechnung {row['nr']}"
+    html_body = row['html'] or f'<p>Rechnung {row["nr"]}</p>'
+    ok, err = _send_email(to_addr, subject, html_body)
+    if ok:
+        token = request.headers.get('X-Token', '')
+        sess = session_get(token)
+        uname = 'system'
+        if sess:
+            db2 = get_db()
+            u = db2.execute("SELECT username FROM benutzer WHERE id=?", (sess['user_id'],)).fetchone()
+            db2.close()
+            if u: uname = u['username']
+        log_audit(uname, 'EMAIL_RECHNUNG', 'rechnungen', rid, f'An: {to_addr}, Nr: {row["nr"]}')
+        return jsonify({'ok': True})
+    return jsonify({'error': err}), 500
 
 # ─── MAHNUNGEN ───────────────────────────────────────────────────────────────
 @app.route('/api/mahnungen/<rechnung_nr>', methods=['GET'])
