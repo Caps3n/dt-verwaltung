@@ -4,7 +4,7 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [v1.8.0] – 2026-05-25
+## [v1.7.10] – 2026-05-25
 
 ### Added
 - **Tresore: Zwei separate Terminfelder** – Das Formular unterscheidet jetzt zwischen „Wartung fällig am" (`naechster_wartungstermin`, Fälligkeit laut Wartungsvertrag) und „Vereinbarter Termin (Wartungsfirma)" (`termin_wartungsfirma`, konkreter Termin mit der externen Wartungsfirma). Beide Felder sind unabhängig voneinander setzbar.
