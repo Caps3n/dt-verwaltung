@@ -577,6 +577,24 @@ def init_db():
             db.execute(f"ALTER TABLE datentraeger ADD COLUMN {col} {typ}")
         except Exception:
             pass
+    # Migration: termin_wartungsfirma Feld in tresore
+    try:
+        db.execute("ALTER TABLE tresore ADD COLUMN termin_wartungsfirma TEXT")
+    except Exception:
+        pass
+    # Migration: tresor_wartungen Historie-Tabelle
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS tresor_wartungen (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tresor_id INTEGER NOT NULL REFERENCES tresore(id) ON DELETE CASCADE,
+            datum TEXT NOT NULL,
+            notizen TEXT,
+            protokoll_doc BLOB,
+            protokoll_doc_type TEXT,
+            protokoll_doc_name TEXT,
+            erstellt TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
     # Migration: fix umlaut encoding in uebergaben.grund (pre-i18n data)
     try:
         db.execute("UPDATE uebergaben SET grund='Rückgabe auf Wunsch' WHERE grund='Rueckgabe auf Wunsch'")
@@ -1577,11 +1595,11 @@ def create_tresor():
         return jsonify({'error': 'Bezeichnung erforderlich'}), 400
     db = get_db()
     db.execute(
-        "INSERT INTO tresore(bezeichnung,hersteller,modell,seriennummer,land,stadt,gebaeude,etage,raum,kaufdatum,kaufpreis,wartungskosten_jaehrlich,letzter_wartungstermin,naechster_wartungstermin,notizen) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO tresore(bezeichnung,hersteller,modell,seriennummer,land,stadt,gebaeude,etage,raum,kaufdatum,kaufpreis,wartungskosten_jaehrlich,letzter_wartungstermin,naechster_wartungstermin,termin_wartungsfirma,notizen) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (data['bezeichnung'], data.get('hersteller'), data.get('modell'), data.get('seriennummer'),
          data.get('land', 'Deutschland'), data.get('stadt'), data.get('gebaeude'), data.get('etage'), data.get('raum'),
          data.get('kaufdatum'), data.get('kaufpreis', 0), data.get('wartungskosten_jaehrlich', 0),
-         data.get('letzter_wartungstermin'), data.get('naechster_wartungstermin'), data.get('notizen'))
+         data.get('letzter_wartungstermin'), data.get('naechster_wartungstermin'), data.get('termin_wartungsfirma'), data.get('notizen'))
     )
     db.commit()
     tid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
@@ -1612,20 +1630,20 @@ def update_tresor(tid):
     db = get_db()
     if data.get('wartungsvertrag_doc'):
         db.execute(
-            "UPDATE tresore SET bezeichnung=?,hersteller=?,modell=?,seriennummer=?,land=?,stadt=?,gebaeude=?,etage=?,raum=?,kaufdatum=?,kaufpreis=?,wartungskosten_jaehrlich=?,letzter_wartungstermin=?,naechster_wartungstermin=?,notizen=?,wartungsvertrag_doc=?,wartungsvertrag_doc_type=?,wartungsvertrag_doc_name=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
+            "UPDATE tresore SET bezeichnung=?,hersteller=?,modell=?,seriennummer=?,land=?,stadt=?,gebaeude=?,etage=?,raum=?,kaufdatum=?,kaufpreis=?,wartungskosten_jaehrlich=?,letzter_wartungstermin=?,naechster_wartungstermin=?,termin_wartungsfirma=?,notizen=?,wartungsvertrag_doc=?,wartungsvertrag_doc_type=?,wartungsvertrag_doc_name=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
             (data['bezeichnung'], data.get('hersteller'), data.get('modell'), data.get('seriennummer'),
              data.get('land', 'Deutschland'), data.get('stadt'), data.get('gebaeude'), data.get('etage'), data.get('raum'),
              data.get('kaufdatum'), data.get('kaufpreis', 0), data.get('wartungskosten_jaehrlich', 0),
-             data.get('letzter_wartungstermin'), data.get('naechster_wartungstermin'), data.get('notizen'),
+             data.get('letzter_wartungstermin'), data.get('naechster_wartungstermin'), data.get('termin_wartungsfirma'), data.get('notizen'),
              data.get('wartungsvertrag_doc'), data.get('wartungsvertrag_doc_type'), data.get('wartungsvertrag_doc_name'), tid)
         )
     else:
         db.execute(
-            "UPDATE tresore SET bezeichnung=?,hersteller=?,modell=?,seriennummer=?,land=?,stadt=?,gebaeude=?,etage=?,raum=?,kaufdatum=?,kaufpreis=?,wartungskosten_jaehrlich=?,letzter_wartungstermin=?,naechster_wartungstermin=?,notizen=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
+            "UPDATE tresore SET bezeichnung=?,hersteller=?,modell=?,seriennummer=?,land=?,stadt=?,gebaeude=?,etage=?,raum=?,kaufdatum=?,kaufpreis=?,wartungskosten_jaehrlich=?,letzter_wartungstermin=?,naechster_wartungstermin=?,termin_wartungsfirma=?,notizen=?,geaendert=CURRENT_TIMESTAMP WHERE id=?",
             (data['bezeichnung'], data.get('hersteller'), data.get('modell'), data.get('seriennummer'),
              data.get('land', 'Deutschland'), data.get('stadt'), data.get('gebaeude'), data.get('etage'), data.get('raum'),
              data.get('kaufdatum'), data.get('kaufpreis', 0), data.get('wartungskosten_jaehrlich', 0),
-             data.get('letzter_wartungstermin'), data.get('naechster_wartungstermin'), data.get('notizen'), tid)
+             data.get('letzter_wartungstermin'), data.get('naechster_wartungstermin'), data.get('termin_wartungsfirma'), data.get('notizen'), tid)
         )
     db.commit()
     row = db.execute("SELECT * FROM tresore WHERE id=?", (tid,)).fetchone()
@@ -1645,6 +1663,62 @@ def delete_tresor(tid):
     db.commit()
     db.close()
     return jsonify({'ok': True})
+
+# ─── TRESOR WARTUNGS-HISTORIE ────────────────────────────────────────────────
+@app.route('/api/tresore/<int:tid>/wartungen', methods=['GET'])
+@require_auth('read')
+def get_tresor_wartungen(tid):
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, tresor_id, datum, notizen, protokoll_doc_name, protokoll_doc_type, erstellt FROM tresor_wartungen WHERE tresor_id=? ORDER BY datum DESC",
+        (tid,)
+    ).fetchall()
+    db.close()
+    return jsonify([dict(r) for r in rows])
+
+@app.route('/api/tresore/<int:tid>/wartungen', methods=['POST'])
+@require_auth('write')
+def create_tresor_wartung(tid):
+    data = request.json or {}
+    if not data.get('datum'):
+        return jsonify({'error': 'Datum erforderlich'}), 400
+    db = get_db()
+    doc = data.get('protokoll_doc')
+    doc_type = data.get('protokoll_doc_type')
+    doc_name = data.get('protokoll_doc_name')
+    db.execute(
+        "INSERT INTO tresor_wartungen(tresor_id,datum,notizen,protokoll_doc,protokoll_doc_type,protokoll_doc_name) VALUES(?,?,?,?,?,?)",
+        (tid, data['datum'], data.get('notizen'), doc, doc_type, doc_name)
+    )
+    # Auto-update letzter_wartungstermin in tresore
+    db.execute("UPDATE tresore SET letzter_wartungstermin=?,geaendert=CURRENT_TIMESTAMP WHERE id=?", (data['datum'], tid))
+    # Auto-calculate next due date if interval is set
+    tresor = db.execute("SELECT wartungsintervall_jahre FROM tresore WHERE id=?", (tid,)).fetchone() if False else None
+    # (interval field not in tresore, skip auto-calc for now — done via frontend suggestion)
+    db.commit()
+    wid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+    row = db.execute("SELECT id,tresor_id,datum,notizen,protokoll_doc_name,protokoll_doc_type,erstellt FROM tresor_wartungen WHERE id=?", (wid,)).fetchone()
+    db.close()
+    return jsonify(dict(row)), 201
+
+@app.route('/api/tresore/<int:tid>/wartungen/<int:wid>', methods=['DELETE'])
+@require_auth('delete')
+def delete_tresor_wartung(tid, wid):
+    db = get_db()
+    db.execute("DELETE FROM tresor_wartungen WHERE id=? AND tresor_id=?", (wid, tid))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+@app.route('/api/tresore/<int:tid>/wartungen/<int:wid>/protokoll', methods=['GET'])
+@require_auth('read')
+def get_tresor_wartung_protokoll(tid, wid):
+    db = get_db()
+    row = db.execute("SELECT protokoll_doc,protokoll_doc_type,protokoll_doc_name FROM tresor_wartungen WHERE id=? AND tresor_id=?", (wid, tid)).fetchone()
+    db.close()
+    if not row or not row['protokoll_doc']:
+        return jsonify({'error': 'Kein Protokoll'}), 404
+    return jsonify({'data': row['protokoll_doc'], 'type': row['protokoll_doc_type'], 'name': row['protokoll_doc_name'] or 'Wartungsprotokoll'})
 
 @app.route('/api/tresore/<int:tid>/wartungsvertrag', methods=['GET'])
 @require_auth('read')

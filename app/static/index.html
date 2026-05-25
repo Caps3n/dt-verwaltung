@@ -320,7 +320,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <label data-i18n="lbl_wartungskosten">Wartungskosten jährlich (€)</label><input id="tr-wartungskosten" type="number" min="0" step="0.01" value="0">
       <div class="r2">
         <div><label data-i18n="lbl_tr_letzter_wartung">Letzter Wartungstermin</label><input id="tr-letzter-wartung" type="date"></div>
-        <div><label data-i18n="lbl_naechster_wartung">Nächster Wartungstermin</label><input id="tr-naechster-wartung" type="date"></div>
+        <div><label data-i18n="lbl_naechster_wartung">Wartung fällig am</label><input id="tr-naechster-wartung" type="date"></div>
+      </div>
+      <div class="r2">
+        <div><label style="color:var(--i-txt);font-weight:600">📅 Vereinbarter Termin (Wartungsfirma)</label><input id="tr-termin-wartungsfirma" type="date"></div>
+        <div></div>
       </div>
       <div style="border-top:1px solid var(--brd);margin-top:12px;padding-top:12px">
         <div class="stitle" style="font-size:12px;margin-bottom:8px" data-i18n="st_standort">Standort</div>
@@ -1387,7 +1391,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.03
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.8.0
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -3423,7 +3427,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.03${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.8.0${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -4169,7 +4173,7 @@ function renderTresore(){
   const list=q?tresore.filter(t=>(t.bezeichnung||'').toLowerCase().includes(q)||(t.stadt||'').toLowerCase().includes(q)):tresore;
   const el=document.getElementById('tr-liste');
   if(!list.length){el.innerHTML='<div class="empty">'+t('empty_tresore')+'</div>';return;}
-  el.innerHTML='<table><thead><tr><th>'+t('col_bezeichnung')+'</th><th>'+t('col_standort')+'</th><th>DT</th><th>'+t('col_naechste_wartung')+'</th><th></th></tr></thead><tbody>'+
+  el.innerHTML='<table><thead><tr><th>'+t('col_bezeichnung')+'</th><th>'+t('col_standort')+'</th><th>DT</th><th>🔧 Wartung fällig</th><th>📅 Termin</th><th></th></tr></thead><tbody>'+
     list.map(t=>{
       const loc=[t.land!='Deutschland'?t.land:'',t.stadt,t.gebaeude,t.etage?t.etage+'.':'' ,t.raum].filter(Boolean).join(', ');
       const _wNow=new Date();const _wD=t.naechster_wartungstermin?new Date(t.naechster_wartungstermin):null;
@@ -4180,7 +4184,11 @@ function renderTresore(){
         `<span class="badge bg">${fmtDate2(t.naechster_wartungstermin)}</span>`;
       const wvBtn=t.hat_wartungsvertrag?`<button onclick="loadAndOpenDoc('/api/tresore/${t.id}/wartungsvertrag')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Wartungsvertrag öffnen">📄</button>`:'';
       const dtBadge=t.anzahl_dt?`<span class="badge bg" style="cursor:pointer;text-decoration:underline dotted" title="Datenträger anzeigen" onclick="showTresorDT(${t.id},'${(t.bezeichnung||'').replace(/'/g,"&#39;")}')">${t.anzahl_dt}</span>`:`<span class="badge bg">0</span>`;
-      return`<tr><td><strong style="cursor:pointer;color:var(--i-txt)" onclick="tresorDetail(${t.id})">${t.bezeichnung}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${t.hersteller}${t.modell?' '+t.modell:''}</span>`:''}</td><td style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center">${dtBadge}</td><td>${warnLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
+      const _tNow=new Date();const _tD=t.termin_wartungsfirma?new Date(t.termin_wartungsfirma):null;
+      const terminLbl=!_tD?'<span style="color:var(--mut);font-size:11px">—</span>':
+        _tD<_tNow?`<span class="badge br" title="Termin überfällig">${fmtDate2(t.termin_wartungsfirma)}</span>`:
+        `<span class="badge bi">${fmtDate2(t.termin_wartungsfirma)}</span>`;
+      return`<tr><td><strong style="cursor:pointer;color:var(--i-txt)" onclick="tresorDetail(${t.id})">${t.bezeichnung}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${t.hersteller}${t.modell?' '+t.modell:''}</span>`:''}</td><td style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center">${dtBadge}</td><td>${warnLbl}</td><td>${terminLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
 }
 
@@ -4195,6 +4203,7 @@ function tresorAbbrechen(){
   document.getElementById('tr-wartungskosten').value='0';
   document.getElementById('tr-letzter-wartung').value='';
   document.getElementById('tr-naechster-wartung').value='';
+  document.getElementById('tr-termin-wartungsfirma').value='';
   document.getElementById('tr-land').value='Deutschland';
   document.getElementById('tr-stadt').value='';
   document.getElementById('tr-gebaeude').value='';
@@ -4219,6 +4228,7 @@ function tresorBearbeiten(id){
   document.getElementById('tr-wartungskosten').value=t.wartungskosten_jaehrlich||0;
   document.getElementById('tr-letzter-wartung').value=t.letzter_wartungstermin||'';
   document.getElementById('tr-naechster-wartung').value=t.naechster_wartungstermin||'';
+  document.getElementById('tr-termin-wartungsfirma').value=t.termin_wartungsfirma||'';
   document.getElementById('tr-land').value=t.land||'Deutschland';
   document.getElementById('tr-stadt').value=t.stadt||'';
   document.getElementById('tr-gebaeude').value=t.gebaeude||'';
@@ -4246,6 +4256,7 @@ async function tresorSpeichern(){
     wartungskosten_jaehrlich:parseFloat(document.getElementById('tr-wartungskosten').value)||0,
     letzter_wartungstermin:document.getElementById('tr-letzter-wartung').value||null,
     naechster_wartungstermin:document.getElementById('tr-naechster-wartung').value||null,
+    termin_wartungsfirma:document.getElementById('tr-termin-wartungsfirma').value||null,
     land:document.getElementById('tr-land').value.trim()||'Deutschland',
     stadt:document.getElementById('tr-stadt').value.trim(),
     gebaeude:document.getElementById('tr-gebaeude').value.trim(),
@@ -4345,6 +4356,10 @@ function tresorDetail(id){
   else{wvBtn.style.display='none';}
   const dl=(l,v)=>v?`<div class="drow"><span class="dlbl">${l}</span><span>${v}</span></div>`:'';
   const loc=[t.land,t.stadt,t.gebaeude,t.etage?'Etage '+t.etage:'',t.raum?'Raum '+t.raum:''].filter(Boolean).join(' / ');
+  // Fälligkeitsfarbe
+  const _wNow=new Date();
+  const fLbl=v=>{if(!v)return'—';const d=new Date(v);const tg=Math.round((d-_wNow)/86400000);return tg<0?`<span class="badge br">${fmtDate(v)} (${Math.abs(tg)}d überfällig)</span>`:tg<=60?`<span class="badge ba">${fmtDate(v)} (in ${tg}d)</span>`:`<span class="badge bg">${fmtDate(v)}</span>`;};
+  const tLbl=v=>v?`<span class="badge bi">${fmtDate(v)}</span>`:'—';
   document.getElementById('tr-detail-body').innerHTML=`
     <div>
       ${dl('Hersteller',t.hersteller)}${dl('Modell',t.modell)}${dl('Seriennummer',t.seriennummer)}
@@ -4352,14 +4367,109 @@ function tresorDetail(id){
       ${dl('Kaufdatum',t.kaufdatum?fmtDate(t.kaufdatum):'')}
       ${dl('Kaufpreis',t.kaufpreis?eur(t.kaufpreis):'')}
       ${dl(ta('Wartungskosten/J.','Maint. Cost/Y.'),t.wartungskosten_jaehrlich?eur(t.wartungskosten_jaehrlich):'')}
-    </div>
-    <div>
-      ${dl(ta('Letzter Wartungstermin','Last Maintenance Date'),t.letzter_wartungstermin?fmtDate(t.letzter_wartungstermin):'')}
-      ${dl(ta('Nächster Wartungstermin','Next Maintenance Date'),t.naechster_wartungstermin?fmtDate(t.naechster_wartungstermin):'')}
       ${dl('Eingelagerte DT',String(t.anzahl_dt||0))}
       ${t.notizen?`<div class="drow"><span class="dlbl">Notizen</span><span style="white-space:pre-wrap">${t.notizen}</span></div>`:''}
+    </div>
+    <div>
+      ${dl(ta('Letzter Wartungstermin','Last Maintenance'),t.letzter_wartungstermin?fmtDate(t.letzter_wartungstermin):'')}
+      <div class="drow"><span class="dlbl">🔧 Wartung fällig am</span><span>${fLbl(t.naechster_wartungstermin)}</span></div>
+      <div class="drow"><span class="dlbl">📅 Vereinbarter Termin</span><span>${tLbl(t.termin_wartungsfirma)}</span></div>
     </div>`;
+  // Wartungs-Historie laden und anhängen
+  _loadTresorWartungHistorie(id);
   document.getElementById('tr-detail-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+let _twPendingDoc=null,_twPendingDocType=null,_twPendingDocName=null;
+
+async function _loadTresorWartungHistorie(tid){
+  const container=document.getElementById('tr-detail-body');
+  if(!container)return;
+  const list=await apiJ(`/api/tresore/${tid}/wartungen`)||[];
+  // Suggestion für nächste Fälligkeit aus letzter Wartung
+  const tr=tresore.find(x=>x.id===tid);
+  let suggHtml='';
+  if(list.length&&tr&&tr.wartungskosten_jaehrlich){/* skip auto-suggest for now */}
+  const historieHtml=`
+    <div style="grid-column:1/-1;margin-top:16px;border-top:1px solid var(--brd);padding-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="stitle" style="margin:0">🔧 Wartungs-Historie</div>
+        ${can('write')?`<button class="btn-p" onclick="_showWartungEintragForm(${tid})" style="padding:4px 10px;font-size:12px">+ Wartung eintragen</button>`:''}
+      </div>
+      <div id="tw-hist-${tid}">
+        ${!list.length?'<div class="empty">Noch keine Wartungen eingetragen</div>':
+          '<table style="width:100%;font-size:12px;border-collapse:collapse"><thead><tr>'+
+          '<th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--brd);color:var(--mut)">Datum</th>'+
+          '<th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--brd);color:var(--mut)">Notizen</th>'+
+          '<th style="padding:4px 6px;border-bottom:1px solid var(--brd);color:var(--mut)">Protokoll</th>'+
+          '<th style="padding:4px 6px;border-bottom:1px solid var(--brd)"></th>'+
+          '</tr></thead><tbody>'+
+          list.map(w=>`<tr>
+            <td style="padding:5px 6px;font-weight:600;white-space:nowrap">${fmtDate(w.datum)}</td>
+            <td style="padding:5px 6px;font-size:11px;color:var(--mut)">${w.notizen||'—'}</td>
+            <td style="padding:5px 6px;text-align:center">${w.protokoll_doc_name?`<button onclick="loadAndOpenDoc('/api/tresore/${tid}/wartungen/${w.id}/protokoll')" style="padding:2px 6px;font-size:10px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:3px;cursor:pointer">📄 ${w.protokoll_doc_name}</button>`:'—'}</td>
+            <td style="padding:5px 6px;text-align:center">${can('delete')?`<button class="btn-d" onclick="_deleteTresorWartung(${tid},${w.id})" style="padding:2px 5px;font-size:10px">✕</button>`:''}</td>
+          </tr>`).join('')+
+          '</tbody></table>'}
+      </div>
+      <div id="tw-form-${tid}" style="display:none;margin-top:10px;padding:10px;background:var(--surf);border-radius:var(--rad);border:1px solid var(--brd)">
+        <div style="font-weight:600;font-size:12px;margin-bottom:8px">Wartung eintragen</div>
+        <div class="r2">
+          <div><label style="font-size:11px">Datum *</label><input type="date" id="tw-datum-${tid}" style="width:100%"></div>
+          <div><label style="font-size:11px">Notizen</label><input type="text" id="tw-notizen-${tid}" placeholder="z.B. Techniker: Müller, alles OK" style="width:100%"></div>
+        </div>
+        <div style="margin-top:6px">
+          <label style="font-size:11px">Wartungsprotokoll (PDF)</label>
+          <div class="upzone" style="padding:8px;margin-top:4px" onclick="document.getElementById('tw-doc-${tid}').click()">
+            <input type="file" id="tw-doc-${tid}" accept="application/pdf,image/*" style="display:none" onchange="_handleTwDoc(event,${tid})">
+            <div id="tw-doc-prev-${tid}" style="font-size:11px;color:var(--mut)">📎 Protokoll hochladen (optional)</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button onclick="document.getElementById('tw-form-${tid}').style.display='none'" style="flex:1;padding:5px">Abbrechen</button>
+          <button class="btn-p" onclick="_saveTresorWartung(${tid})" style="flex:2;padding:5px">💾 Speichern</button>
+        </div>
+      </div>
+    </div>`;
+  container.innerHTML+=historieHtml;
+}
+
+function _showWartungEintragForm(tid){
+  const f=document.getElementById('tw-form-'+tid);
+  if(!f)return;
+  document.getElementById('tw-datum-'+tid).value=new Date().toISOString().slice(0,10);
+  document.getElementById('tw-notizen-'+tid).value='';
+  document.getElementById('tw-doc-prev-'+tid).textContent='📎 Protokoll hochladen (optional)';
+  _twPendingDoc=null;_twPendingDocType=null;_twPendingDocName=null;
+  f.style.display='block';
+  f.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function _handleTwDoc(e,tid){
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=ev=>{_twPendingDoc=ev.target.result.split(',')[1];_twPendingDocType=f.type;_twPendingDocName=f.name;document.getElementById('tw-doc-prev-'+tid).textContent='📎 '+f.name;};
+  rd.readAsDataURL(f);
+}
+
+async function _saveTresorWartung(tid){
+  const datum=document.getElementById('tw-datum-'+tid).value;
+  if(!datum){alert('Datum ist erforderlich.');return;}
+  const notizen=document.getElementById('tw-notizen-'+tid).value.trim();
+  const body={datum,notizen:notizen||null};
+  if(_twPendingDoc){body.protokoll_doc=_twPendingDoc;body.protokoll_doc_type=_twPendingDocType;body.protokoll_doc_name=_twPendingDocName;}
+  const res=await apiJ(`/api/tresore/${tid}/wartungen`,{method:'POST',headers:{'Content-Type':'application/json','X-Token':TOKEN},body:JSON.stringify(body)});
+  if(res?.error){alert('Fehler: '+res.error);return;}
+  // Letzten Wartungstermin im lokalen tresore-Array aktualisieren
+  const tr=tresore.find(x=>x.id===tid);if(tr)tr.letzter_wartungstermin=datum;
+  // Detail neu laden
+  tresorDetail(tid);
+}
+
+async function _deleteTresorWartung(tid,wid){
+  if(!confirm('Wartungseintrag löschen?'))return;
+  await apiJ(`/api/tresore/${tid}/wartungen/${wid}`,{method:'DELETE',headers:{'X-Token':TOKEN}});
+  tresorDetail(tid);
 }
 
 function showTresorDT(tresorId,tresorName){
@@ -5200,13 +5310,13 @@ function renderTerminWidget(){
   const in60=new Date(now.getTime()+60*86400000);
   const ueberfaellig=[];
   const anstehend=[];
-  // Tresor-Wartungstermine (explizit vereinbarter Termin)
+  // Vereinbarte Termine mit Wartungsfirma (explizit gesetzter Termin)
   tresore.forEach(tr=>{
-    if(!tr.naechster_wartungstermin)return;
-    const d=new Date(tr.naechster_wartungstermin);
+    if(!tr.termin_wartungsfirma)return;
+    const d=new Date(tr.termin_wartungsfirma);
     const tage=Math.round((d-now)/86400000);
-    if(d<now) ueberfaellig.push({date:d,tage,label:'🔒 Tresor: '+tr.bezeichnung});
-    else if(d<=in60) anstehend.push({date:d,tage,label:'🔒 Tresor: '+tr.bezeichnung});
+    if(d<now) ueberfaellig.push({date:d,tage,label:'🔒 Tresor-Termin: '+tr.bezeichnung});
+    else if(d<=in60) anstehend.push({date:d,tage,label:'🔒 Tresor-Termin: '+tr.bezeichnung});
   });
   // Vertragsabläufe (explizit eingetragenes Datum)
   kunden.forEach(k=>{

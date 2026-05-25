@@ -4,6 +4,19 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.8.0] – 2026-05-25
+
+### Added
+- **Tresore: Zwei separate Terminfelder** – Das Formular unterscheidet jetzt zwischen „Wartung fällig am" (`naechster_wartungstermin`, Fälligkeit laut Wartungsvertrag) und „Vereinbarter Termin (Wartungsfirma)" (`termin_wartungsfirma`, konkreter Termin mit der externen Wartungsfirma). Beide Felder sind unabhängig voneinander setzbar.
+- **Tresore: Wartungs-Historie** – Neue Tabelle `tresor_wartungen` speichert alle abgeschlossenen Wartungseinsätze je Tresor (Datum, Notizen, optional PDF-Wartungsprotokoll). Beim Erfassen eines neuen Eintrags wird `letzter_wartungstermin` automatisch aktualisiert. Einträge können gelöscht und Protokolle als PDF heruntergeladen werden.
+- **Tresor-Liste: Termin-Spalte** – Die Tresore-Tabelle zeigt jetzt zusätzlich zur Fälligkeitsspalte eine eigene „📅 Termin"-Spalte mit dem vereinbarten Wartungstermin (blauer Badge).
+- **Anstehende Termine: Tresor-Termine** – Das Dashboard-Widget „Anstehende Termine" verwendet jetzt `termin_wartungsfirma` (explizit vereinbarter Termin) statt der allgemeinen Fälligkeitsdate — keine Phantom-Einträge mehr wenn nur eine Fälligkeit, aber kein konkreter Termin gesetzt ist.
+
+### Changed
+- **Tresor-Detailansicht** – Vollständig überarbeitet: zeigt beide Datumsfelder farblich kodiert (rot = überfällig, amber = bald, grün = OK), gefolgt von der Wartungs-Historie als sortierte Tabelle mit Inline-Formular zum Erfassen neuer Einträge und PDF-Upload.
+
+---
+
 ## [v1.7.03] – 2026-05-24
 
 ### Changed
