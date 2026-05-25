@@ -4,6 +4,14 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.18] – 2026-05-25
+
+### Added
+- **Hamburger-Menü auf Mobilgeräten** – Ab Bildschirmbreite ≤640px wird die horizontale Tab-Leiste ausgeblendet und durch ein ☰-Symbol in der Topbar ersetzt. Klick öffnet ein animiertes Seitenmenü (Slide-in von links) mit allen Tabs, Benutzername, Rolle und Schnellzugriffen (Passwort, Sprache, Hell/Dunkel, Abmelden). Der aktive Tab wird farblich hervorgehoben. Schließen: Klick auf ✕, Tippen auf den abgedunkelten Hintergrund oder Wechsel zum Tab.
+- **Mobile Layout-Anpassungen** – Auf Mobilgeräten: Grid-Layouts (2-, 3-, 4-spaltig) werden auf 1 Spalte reduziert, App-Padding verkleinert, Benutzername/Rolle in der Topbar ausgeblendet (erscheinen im Seitenmenü).
+
+---
+
 ## [v1.7.17] – 2026-05-25
 
 ### Added

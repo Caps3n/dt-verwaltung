@@ -173,7 +173,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   td,th{padding:5px 4px}
   button{font-size:11px}
 }
-/* ── Dashboard v1.7.17 ─────────────────────────────────────────────────────── */
+/* ── Dashboard v1.7.18 ─────────────────────────────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -232,6 +232,27 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 /* ── Mobile DT Highlight ────────────────────────────────────────── */
 @keyframes dtHighlight{0%{box-shadow:0 0 0 0 rgba(59,130,246,.6)}70%{box-shadow:0 0 0 10px rgba(59,130,246,0)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}
 .dt-highlight-row{animation:dtHighlight 1.2s ease 3;background:var(--i-bg)!important}
+/* ── Hamburger Menu (Mobile) ─────────────────────────────────────── */
+#hamburger-btn{display:none;background:none;border:1px solid var(--brd2);border-radius:var(--rad);padding:5px 10px;font-size:18px;cursor:pointer;color:var(--txt);line-height:1}
+#mobile-nav{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:2000;background:rgba(0,0,0,.5)}
+#mobile-nav-panel{position:absolute;top:0;left:0;bottom:0;width:min(280px,85vw);background:var(--bg);border-right:1px solid var(--brd);overflow-y:auto;transform:translateX(-100%);transition:transform .22s cubic-bezier(.4,0,.2,1)}
+#mobile-nav.open #mobile-nav-panel{transform:translateX(0)}
+#mobile-nav-panel .mob-tab{display:flex;align-items:center;gap:10px;padding:13px 18px;font-size:14px;font-weight:600;color:var(--txt);cursor:pointer;border-bottom:1px solid var(--brd);transition:background .12s}
+#mobile-nav-panel .mob-tab:hover,#mobile-nav-panel .mob-tab.active{background:var(--i-bg);color:var(--i-txt)}
+#mobile-nav-panel .mob-header{padding:14px 18px 10px;font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+#mobile-nav-panel .mob-close{font-size:20px;cursor:pointer;background:none;border:none;color:var(--mut);line-height:1;padding:0}
+#mobile-nav-panel .mob-user{padding:10px 18px 12px;font-size:12px;border-bottom:1px solid var(--brd);color:var(--mut)}
+#mobile-nav-panel .mob-user strong{display:block;font-size:13px;color:var(--txt);margin-bottom:2px}
+#mobile-nav-panel .mob-actions{padding:12px 18px;display:flex;flex-direction:column;gap:8px}
+#mobile-nav-panel .mob-actions button{padding:8px 14px;font-size:13px;text-align:left;border:1px solid var(--brd2);border-radius:var(--rad);background:var(--surf);cursor:pointer;color:var(--txt)}
+@media(max-width:640px){
+  #hamburger-btn{display:block}
+  .tabs#main-tabs{display:none}
+  .app{padding:8px 12px}
+  #topbar-user,#topbar-role{display:none}
+  .g2,.g3,.g4{grid-template-columns:1fr!important}
+  .db-wrap{max-width:100%}
+}
 </style>
 </head>
 <body>
@@ -298,11 +319,37 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <div id="main-app" style="display:none">
 <div class="app">
 
+<!-- MOBILE NAV DRAWER -->
+<div id="mobile-nav" onclick="closeMobileNav(event)">
+  <div id="mobile-nav-panel">
+    <div class="mob-header">
+      <span>DT-Verwaltung</span>
+      <button class="mob-close" onclick="closeMobileNav()">✕</button>
+    </div>
+    <div class="mob-user">
+      <strong id="mob-user-name">—</strong>
+      <span id="mob-user-role"></span>
+    </div>
+    <div id="mob-tabs-list">
+      <!-- populated by buildMobileNav() -->
+    </div>
+    <div class="mob-actions">
+      <button onclick="openPwModal();closeMobileNav()" data-i18n="btn_pw">🔑 Passwort ändern</button>
+      <button onclick="toggleLang();closeMobileNav()" id="mob-btn-lang">🇩🇪 DE / EN</button>
+      <button onclick="toggleTheme();closeMobileNav()" id="mob-btn-theme">🌙 Hell/Dunkel</button>
+      <button onclick="doLogout()" data-i18n="btn_logout" style="background:var(--d-bg);color:var(--d-txt);border-color:var(--d-brd)">🚪 Abmelden</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOP BAR -->
 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px;flex-wrap:wrap;gap:6px">
-  <div style="font-size:12px;font-weight:700;color:var(--txt)">DT-Verwaltung</div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button id="hamburger-btn" onclick="openMobileNav()" title="Menü" aria-label="Menü öffnen">☰</button>
+    <div style="font-size:12px;font-weight:700;color:var(--txt)">DT-Verwaltung</div>
+  </div>
   <!-- Globale Suche -->
-  <div style="position:relative;flex:1;max-width:340px;min-width:140px">
+  <div style="position:relative;flex:1;max-width:340px;min-width:120px">
     <input id="global-search" type="search" placeholder="🔍 Suche Kunde, DT, Seriennr., Rechnung…" oninput="globalSuche(this.value)" style="width:100%;padding:5px 10px;font-size:12px;border:1px solid var(--brd2);border-radius:var(--rad);background:var(--surf);color:var(--txt)" autocomplete="off">
     <div id="global-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg);border:1px solid var(--brd2);border-radius:var(--rad);z-index:500;max-height:320px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.15)"></div>
   </div>
@@ -1531,7 +1578,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.17
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.18
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -2934,6 +2981,48 @@ function stopScan(){
   document.getElementById('scan-modal').classList.remove('show');
 }
 
+// ── Mobile Hamburger Navigation ───────────────────────────────────────────────
+const _mobTabs=[
+  {tab:'dashboard',icon:'📊',label:'Übersicht',labelEn:'Overview'},
+  {tab:'kunden',icon:'👥',label:'Kunden & Verträge',labelEn:'Clients & Contracts'},
+  {tab:'datentraeger',icon:'💾',label:'Datenträger',labelEn:'Media'},
+  {tab:'uebergabe',icon:'🔄',label:'Übergabe',labelEn:'Transfer'},
+  {tab:'rechnung',icon:'🧾',label:'Rechnungen',labelEn:'Invoices'},
+  {tab:'tresore',icon:'🔒',label:'Tresore',labelEn:'Vaults'},
+  {tab:'templates',icon:'🎨',label:'Templates',labelEn:'Templates',perm:'editTemplate'},
+  {tab:'admin',icon:'⚙️',label:'Admin',labelEn:'Admin',perm:'manageUsers'},
+  {tab:'hilfe',icon:'❓',label:'Hilfe',labelEn:'Help'},
+];
+function buildMobileNav(){
+  const list=document.getElementById('mob-tabs-list');
+  if(!list)return;
+  const activeTab=document.querySelector('.tab.active')?.dataset?.tab||'dashboard';
+  list.innerHTML=_mobTabs.filter(t=>!t.perm||can(t.perm)).map(t=>`
+    <div class="mob-tab${t.tab===activeTab?' active':''}" onclick="showTab('${t.tab}');closeMobileNav()">
+      <span style="font-size:18px">${t.icon}</span>
+      <span>${_lang==='en'?t.labelEn:t.label}</span>
+    </div>`).join('');
+  // Update user info
+  const uname=document.getElementById('mob-user-name');
+  const urole=document.getElementById('mob-user-role');
+  if(uname)uname.textContent=currentUser?.name||'';
+  if(urole)urole.textContent=currentUser?.rollen_name||'';
+}
+function openMobileNav(){
+  buildMobileNav();
+  const nav=document.getElementById('mobile-nav');
+  nav.style.display='block';
+  requestAnimationFrame(()=>nav.classList.add('open'));
+}
+function closeMobileNav(e){
+  if(e&&e.target!==document.getElementById('mobile-nav'))return;
+  const nav=document.getElementById('mobile-nav');
+  nav.classList.remove('open');
+  setTimeout(()=>nav.style.display='none',230);
+}
+// Update active highlight in mobile nav when tab changes
+const _origShowTab=window.showTab;
+
 // ── Deep-Link Handler (#dt=<id>) ──────────────────────────────────────────────
 function checkDeepLink(){
   const m=window.location.hash.match(/#dt=(\d+)/);
@@ -3765,7 +3854,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.17${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.18${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -4652,6 +4741,10 @@ function showTab(t,e){
   if(t==='templates'){buildPhBars();loadTemplates();}
   if(t==='admin')loadAdmin();
   if(t==='hilfe')renderHilfe();
+  // Update active state in mobile nav (if open)
+  document.querySelectorAll('#mob-tabs-list .mob-tab').forEach(el=>{
+    el.classList.toggle('active', el.getAttribute('onclick')?.includes(`'${t}'`)||false);
+  });
 }
 
 function gotoStep(n){document.querySelectorAll('#page-uebergabe .step-panel').forEach(el=>el.classList.remove('active'));document.querySelectorAll('#page-uebergabe .step').forEach(el=>el.classList.remove('active'));document.getElementById('step-'+n).classList.add('active');document.getElementById('step-tab-'+n).classList.add('active');if(n===2){renderPendingList();updateS2Info();}}
