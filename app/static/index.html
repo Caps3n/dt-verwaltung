@@ -173,7 +173,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   td,th{padding:5px 4px}
   button{font-size:11px}
 }
-/* ── Dashboard v1.7.19 ─────────────────────────────────────────────────────── */
+/* ── Dashboard v1.7.20 ─────────────────────────────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -348,9 +348,12 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <button id="hamburger-btn" onclick="openMobileNav()" title="Menü" aria-label="Menü öffnen">☰</button>
     <div style="font-size:12px;font-weight:700;color:var(--txt)">DT-Verwaltung</div>
   </div>
-  <!-- Globale Suche -->
+  <!-- Globale Suche + QR-Scan -->
   <div style="position:relative;flex:1;max-width:340px;min-width:120px">
-    <input id="global-search" type="search" placeholder="🔍 Suche Kunde, DT, Seriennr., Rechnung…" oninput="globalSuche(this.value)" style="width:100%;padding:5px 10px;font-size:12px;border:1px solid var(--brd2);border-radius:var(--rad);background:var(--surf);color:var(--txt)" autocomplete="off">
+    <div style="position:relative;display:flex;align-items:center">
+      <input id="global-search" type="search" placeholder="🔍 Suche Kunde, DT, Seriennr., Rechnung…" oninput="globalSuche(this.value)" style="width:100%;padding:5px 36px 5px 10px;font-size:12px;border:1px solid var(--brd2);border-radius:var(--rad);background:var(--surf);color:var(--txt)" autocomplete="off">
+      <button onclick="startSearchScan()" title="QR-Code scannen" style="position:absolute;right:4px;background:none;border:none;cursor:pointer;font-size:16px;padding:2px 4px;color:var(--mut);line-height:1" aria-label="QR-Code scannen">📷</button>
+    </div>
     <div id="global-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg);border:1px solid var(--brd2);border-radius:var(--rad);z-index:500;max-height:320px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.15)"></div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -1578,7 +1581,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.19
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.20
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -2897,7 +2900,7 @@ function _scanTick(){
   if(window.BarcodeDetector){
     window.BarcodeDetector.getSupportedFormats?.().then(()=>{});
     const bd=new BarcodeDetector({formats:['qr_code']});
-    bd.detect(vid).then(codes=>{
+    bd.detect(cvs).then(codes=>{
       if(codes.length){_handleScanData(codes[0].rawValue);}
       else{_scanRaf=requestAnimationFrame(_scanTick);}
     }).catch(()=>{
@@ -2936,7 +2939,27 @@ function _handleScanData(rawValue){
   _scanFoundId=found.id;
   // Stop scanning
   if(_scanRaf){cancelAnimationFrame(_scanRaf);_scanRaf=null;}
-  // Fill result
+
+  // ── Search-scan Modus: Suchfeld befüllen + direkt navigieren ──
+  if(_searchScanMode){
+    stopScan();
+    const searchTerm=found.interne_nr||found.serial||found.typ||String(found.id);
+    const gs=document.getElementById('global-search');
+    if(gs){gs.value=searchTerm;globalSuche(searchTerm);}
+    // Direkt zum DT springen + highlight
+    showTab('datentraeger');
+    _dtStatusFilter='alle';
+    document.querySelectorAll('[id^="dt-status-"]').forEach(b=>b.classList.remove('btn-p'));
+    const ab=document.getElementById('dt-status-alle');if(ab)ab.classList.add('btn-p');
+    renderDT();
+    setTimeout(()=>{
+      const row=document.querySelector(`tr[data-dtid="${found.id}"]`);
+      if(row){row.classList.add('dt-highlight-row');row.scrollIntoView({behavior:'smooth',block:'center'});}
+    },300);
+    return;
+  }
+
+  // ── Normal Scan-Panel Modus ──
   const kunde=kunden.find(k=>k.id===found.kunden_id);
   document.getElementById('sr-bezeichnung').textContent=found.typ||'—';
   document.getElementById('sr-interne-nr').textContent=found.interne_nr||'—';
@@ -2953,7 +2976,7 @@ function scanGoToDT(){
   if(!_scanFoundId)return;
   stopScan();
   // Navigate to DT tab, reset filter, highlight row
-  showTab('dt');
+  showTab('datentraeger');
   // Set filter to show all so we can find it
   _dtStatusFilter='alle';
   document.querySelectorAll('[id^="dt-status-"]').forEach(b=>b.classList.remove('btn-p'));
@@ -2973,7 +2996,16 @@ function scanAgain(){
   _scanTick();
 }
 
+// QR-Scan aus der Suchleiste – navigiert direkt zum DT ohne extra Panel
+let _searchScanMode=false;
+function startSearchScan(){
+  _searchScanMode=true;
+  startScan();
+  // Override: nach Scan Suchfeld befüllen statt Ergebnis-Panel zeigen
+}
+
 function stopScan(){
+  _searchScanMode=false;
   if(_scanRaf){cancelAnimationFrame(_scanRaf);_scanRaf=null;}
   if(_scanStream){_scanStream.getTracks().forEach(t=>t.stop());_scanStream=null;}
   const vid=document.getElementById('scan-video');
@@ -3020,9 +3052,6 @@ function closeMobileNav(e){
   nav.classList.remove('open');
   setTimeout(()=>nav.style.display='none',230);
 }
-// Update active highlight in mobile nav when tab changes
-const _origShowTab=window.showTab;
-
 // ── Deep-Link Handler (#dt=<id>) ──────────────────────────────────────────────
 function checkDeepLink(){
   const m=window.location.hash.match(/#dt=(\d+)/);
@@ -3031,7 +3060,7 @@ function checkDeepLink(){
   history.replaceState(null,'',window.location.pathname);
   if(!TOKEN)return; // not logged in, can't navigate
   setTimeout(()=>{
-    showTab('dt');
+    showTab('datentraeger');
     _dtStatusFilter='alle';
     document.querySelectorAll('[id^="dt-status-"]').forEach(b=>b.classList.remove('btn-p'));
     const ab=document.getElementById('dt-status-alle');if(ab)ab.classList.add('btn-p');
@@ -3854,7 +3883,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.19${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.20${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -4723,27 +4752,28 @@ async function tresorLoeschen(id){
   renderSelects();
 }
 
-function showTab(t,e){
-  if(t==='templates'&&!can('editTemplate')){alert(t('msg_no_perm'));return;}
-  if(t==='admin'&&!can('manageUsers')){alert(t('msg_no_perm'));return;}
+function showTab(tab,e){
+  // NOTE: parameter renamed from 't' to 'tab' to avoid shadowing the global t() translation function
+  if(tab==='templates'&&!can('editTemplate')){alert(t('msg_no_perm'));return;}
+  if(tab==='admin'&&!can('manageUsers')){alert(t('msg_no_perm'));return;}
   const tabKeyMap={kunden:'tab_kunden',vertraege:'tab_vertraege',datentraeger:'tab_datentraeger',uebergabe:'tab_uebergabe',rechnung:'tab_rechnung',historie:'tab_historie',tresore:'tab_tresore'};
-  if(tabKeyMap[t]&&!can(tabKeyMap[t])){alert(t('msg_no_perm_area'));return;}
+  if(tabKeyMap[tab]&&!can(tabKeyMap[tab])){alert(t('msg_no_perm_area'));return;}
   document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
-  const tabEl=document.querySelector(`.tab[data-tab="${t}"]`);if(tabEl)tabEl.classList.add('active');
-  document.getElementById('page-'+t).classList.add('active');
-  if(t==='dashboard')renderDashboard();
-  if(t==='kunden'){renderKunden();showKundenSub('kunden');}
-  if(t==='datentraeger'){renderSelects();renderDT();dtGotoStep(1);showDTSub('erfassen');}
-  if(t==='uebergabe'){renderSelects();renderUebergabeListe();renderPendingList();gotoStep(1);}
-  if(t==='tresore'){renderTresore();}
-  if(t==='rechnung'){renderSelects();showRechnungSub('neu');}
-  if(t==='templates'){buildPhBars();loadTemplates();}
-  if(t==='admin')loadAdmin();
-  if(t==='hilfe')renderHilfe();
+  const tabEl=document.querySelector(`.tab[data-tab="${tab}"]`);if(tabEl)tabEl.classList.add('active');
+  document.getElementById('page-'+tab).classList.add('active');
+  if(tab==='dashboard')renderDashboard();
+  if(tab==='kunden'){renderKunden();showKundenSub('kunden');}
+  if(tab==='datentraeger'){renderSelects();renderDT();dtGotoStep(1);showDTSub('erfassen');}
+  if(tab==='uebergabe'){renderSelects();renderUebergabeListe();renderPendingList();gotoStep(1);}
+  if(tab==='tresore'){renderTresore();}
+  if(tab==='rechnung'){renderSelects();showRechnungSub('neu');}
+  if(tab==='templates'){buildPhBars();loadTemplates();}
+  if(tab==='admin')loadAdmin();
+  if(tab==='hilfe')renderHilfe();
   // Update active state in mobile nav (if open)
   document.querySelectorAll('#mob-tabs-list .mob-tab').forEach(el=>{
-    el.classList.toggle('active', el.getAttribute('onclick')?.includes(`'${t}'`)||false);
+    el.classList.toggle('active', el.getAttribute('onclick')?.includes(`'${tab}'`)||false);
   });
 }
 

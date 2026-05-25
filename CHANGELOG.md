@@ -4,6 +4,19 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.20] – 2026-05-25
+
+### Added
+- **QR-Scanner in der Suchleiste** – Kleines 📷-Icon rechts im globalen Suchfeld. Klick startet die Kamera, scannt den QR-Code und navigiert direkt zum Datenträger: Tab wechselt automatisch, Zeile wird hervorgehoben, Suchfeld wird mit der internen Nummer/Seriennummer befüllt.
+
+### Fixed
+- **BarcodeDetector.detect(vid → cvs)** – `BarcodeDetector.detect()` akzeptiert kein Video-Element, nur Canvas/ImageBitmap. Der Scanner übergab `vid` statt `cvs` → QR-Erkennung schlug immer fehl, jsQR-Fallback wurde nie korrekt getriggert.
+- **showTab('dt') → showTab('datentraeger')** – Deep-Link-Handler und Scanner-Navigation riefen `showTab('dt')` auf, aber der Tab hat `data-tab="datentraeger"`. Die Navigation zum DT-Tab funktionierte gar nicht (stiller Fehler).
+- **showTab(t, e) Parameter-Shadowing** – Der Parameter `t` überschrieb die globale `t()`-Übersetzungsfunktion. Dadurch warf `alert(t('msg_no_perm'))` einen TypeError statt die Meldung anzuzeigen. Parameter umbenannt zu `tab`.
+- **`_origShowTab` undefined** – Toter Code-Stub wurde 3000 Zeilen vor der eigentlichen `showTab()`-Definition zugewiesen und war immer `undefined`. Entfernt.
+
+---
+
 ## [v1.7.19] – 2026-05-25
 
 ### Changed
