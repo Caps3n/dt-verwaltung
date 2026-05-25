@@ -4,6 +4,15 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.14] – 2026-05-25
+
+### Fixed
+- **3-Parteien-Vertrag: Fehlende Felder ergänzt** – Das Escrow-Formular hatte bisher deutlich weniger Felder als der 2-Parteien-Vertrag. Hinzugefügt: `Vertragsbeginn`, `Vertragsende (optional)`, `Laufzeit / Verlängerung`, `Kündigungsfrist`.
+- **§ 2 Vertragslaufzeit im Escrow-Dokument** – Der gedruckte Escrow-Vertrag enthält jetzt einen eigenen `§ 2 Vertragslaufzeit`-Abschnitt mit Beginn, Ende, Laufzeit und Kündigungsfrist. Die bisherigen §§ 2–4 wurden zu §§ 3–5 verschoben.
+- **Paragraphen-Nummerierung** – Freigabebedingungen: § 2 → § 3, Vergütung: § 3 → § 4, Haftung: § 4 → § 5.
+
+---
+
 ## [v1.7.13] – 2026-05-25
 
 ### Changed

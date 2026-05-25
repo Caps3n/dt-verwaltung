@@ -172,7 +172,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   td,th{padding:5px 4px}
   button{font-size:11px}
 }
-/* ── Dashboard v1.7.13 ─────────────────────────────────────────────────────── */
+/* ── Dashboard v1.7.14 ─────────────────────────────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -578,6 +578,14 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <select id="vt-e-neben_id" onchange="vtEscrowVorschauUpdate()"><option value="">— keine Firma —</option></select>
           <label data-i18n="lbl_vt_e_nr">Vertragsnummer</label>
           <input id="vt-e-nr" placeholder="ESC-2026-001" oninput="vtEscrowVorschauUpdate()">
+          <div class="r2">
+            <div><label data-i18n="lbl_vt_beginn">Vertragsbeginn</label><input id="vt-e-beginn" type="date" oninput="vtEscrowVorschauUpdate()"></div>
+            <div><label data-i18n="lbl_vt_ende">Vertragsende (optional)</label><input id="vt-e-ende" type="date" oninput="vtEscrowVorschauUpdate()"></div>
+          </div>
+          <label data-i18n="lbl_vt_laufzeit">Laufzeit / Verlängerung</label>
+          <input id="vt-e-laufzeit" placeholder="z.B. 12 Monate, automatische Verlängerung" oninput="vtEscrowVorschauUpdate()">
+          <label data-i18n="lbl_vt_kfrist">Kündigungsfrist</label>
+          <input id="vt-e-kfrist" placeholder="z.B. 4 Wochen zum Monatsende" oninput="vtEscrowVorschauUpdate()">
           <label data-i18n="lbl_vt_e_freigabe">Freigabebedingungen / Besondere Vereinbarungen</label>
           <textarea id="vt-e-notiz" rows="3" oninput="vtEscrowVorschauUpdate()"></textarea>
           <div style="margin-top:14px;display:flex;gap:8px">
@@ -1461,7 +1469,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.13
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.14
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -3502,7 +3510,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.13${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.14${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -4076,8 +4084,12 @@ function vtEscrowVorschauUpdate(){
   const nbId=parseInt(document.getElementById('vt-e-neben_id')?.value)||0;
   const nb=nbId?kunden.find(x=>x.id===nbId):null;
   const vtnr=document.getElementById('vt-e-nr')?.value||'ESC-____-___';
+  const beginn=document.getElementById('vt-e-beginn')?.value||'';
+  const ende=document.getElementById('vt-e-ende')?.value||'';
+  const laufzeit=document.getElementById('vt-e-laufzeit')?.value||'';
+  const kfrist=document.getElementById('vt-e-kfrist')?.value||'';
   const notiz=document.getElementById('vt-e-notiz')?.value||'';
-  el.innerHTML=genVertragEscrowHtml(ag,eig,nb,vtnr,notiz);
+  el.innerHTML=genVertragEscrowHtml(ag,eig,nb,vtnr,beginn,ende,laufzeit,kfrist,notiz);
   el.querySelectorAll('.brief-hr').forEach(e=>e.style.background=accentColor||'#0065A4');
 }
 function vtEscrowDrucken(){
@@ -4090,10 +4102,14 @@ function vtEscrowDrucken(){
   const nbId=parseInt(document.getElementById('vt-e-neben_id')?.value)||0;
   const nb=nbId?kunden.find(x=>x.id===nbId):null;
   const vtnr=document.getElementById('vt-e-nr')?.value||'ESC-____-___';
+  const beginn=document.getElementById('vt-e-beginn')?.value||'';
+  const ende=document.getElementById('vt-e-ende')?.value||'';
+  const laufzeit=document.getElementById('vt-e-laufzeit')?.value||'';
+  const kfrist=document.getElementById('vt-e-kfrist')?.value||'';
   const notiz=document.getElementById('vt-e-notiz')?.value||'';
-  printHtml(genVertragEscrowHtml(ag,eig,nb,vtnr,notiz),vtnr.replace(/[^A-Za-z0-9-]/g,'_')+'.pdf');
+  printHtml(genVertragEscrowHtml(ag,eig,nb,vtnr,beginn,ende,laufzeit,kfrist,notiz),vtnr.replace(/[^A-Za-z0-9-]/g,'_')+'.pdf');
 }
-function genVertragEscrowHtml(ag,eig,nb,vtnr,notiz){
+function genVertragEscrowHtml(ag,eig,nb,vtnr,beginn,ende,laufzeit,kfrist,notiz){
   const T=window._T||{};
   const TV=window._TV||{};
   const ac=accentColor||'#0065A4';
@@ -4135,11 +4151,13 @@ function genVertragEscrowHtml(ag,eig,nb,vtnr,notiz){
 </table>
 <div class="brief-txt" style="margin-top:16px"><strong>${_lang==='en'?'§ 1 Subject Matter':'§ 1 Vertragsgegenstand'}</strong></div>
 <div class="brief-txt">${_lang==='en'?(TV.escrowPar1_en||`Party 1 (${T.firmenname||'Safe Operator'}) agrees to securely store data carriers on behalf of Party 2 (${esc(ag.firma)}). The data carriers are the property of Party 3 (${esc(eig.firma)}). Party 2 is authorised by Party 3 to instruct storage. Party 1 shall only release the data carriers upon joint written instruction by Party 2 and Party 3.`):(TV.escrowPar1||`Firma 1 (${T.firmenname||'Tresor-Betreiber'}) verpflichtet sich, im Auftrag von Firma 2 (${esc(ag.firma)}) Datenträger sicher einzulagern. Die Datenträger stehen im Eigentum von Firma 3 (${esc(eig.firma)}). Firma 2 ist von Firma 3 zur Einlagerungsbeauftragung berechtigt. Firma 1 gibt die Datenträger nur auf gemeinsame schriftliche Weisung von Firma 2 und Firma 3 heraus.`)}</div>
-<div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 2 Release Conditions':'§ 2 Freigabebedingungen'}</strong></div>
+<div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 2 Contract Duration':'§ 2 Vertragslaufzeit'}</strong></div>
+<div class="brief-txt">${_lang==='en'?'Start':'Beginn'}: ${beginn?fmtDate(beginn):'<span class="phc">TT.MM.JJJJ</span>'}&nbsp;&nbsp;${ende?(_lang==='en'?'End: ':'Ende: ')+fmtDate(ende):''}<br>${_lang==='en'?'Duration / Renewal':'Laufzeit / Verlängerung'}: ${laufzeit||'<span class="phc">z.B. 12 Monate</span>'}<br>${_lang==='en'?'Notice period':'Kündigungsfrist'}: ${kfrist||'<span class="phc">z.B. 4 Wochen</span>'}</div>
+<div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 3 Release Conditions':'§ 3 Freigabebedingungen'}</strong></div>
 <div class="brief-txt">${notiz?notiz.replace(/\n/g,'<br>'):(_lang==='en'?(TV.escrowPar2_en||'Release requires written consent of both Party 2 and Party 3. Unilateral release is excluded.'):(TV.escrowPar2||'Die Herausgabe setzt die schriftliche Zustimmung von Firma 2 und Firma 3 voraus. Eine einseitige Herausgabe ist ausgeschlossen.'))}</div>
-<div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 3 Remuneration':'§ 3 Vergütung'}</strong></div>
+<div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 4 Remuneration':'§ 4 Vergütung'}</strong></div>
 <div class="brief-txt">${_lang==='en'?(TV.escrowPar3_en||'Remuneration is invoiced annually to Party 2 according to the agreed price list.'):(TV.escrowPar3||'Die Vergütung wird jährlich an Firma 2 nach dem vereinbarten Preisblatt abgerechnet.')}</div>
-<div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 4 Liability':'§ 4 Haftung'}</strong></div>
+<div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 5 Liability':'§ 5 Haftung'}</strong></div>
 <div class="brief-txt">${_lang==='en'?(TV.escrowPar4_en||'Party 1 is liable for careful handling. Liability for data content is excluded.'):(TV.escrowPar4||'Firma 1 haftet für sorgfältigen Umgang. Eine Haftung für den Inhalt der Datenträger ist ausgeschlossen.')}</div>
 <div style="display:flex;gap:20px;padding:28px 20px 8px">
   <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Place, Date':'Ort, Datum'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
