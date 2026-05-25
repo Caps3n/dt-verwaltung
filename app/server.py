@@ -15,6 +15,13 @@ except ImportError:
     print("[2FA] pyotp not installed – TOTP disabled")
 from flask import Flask, request, jsonify, send_from_directory, send_file, redirect
 from flask_cors import CORS
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    LIMITER_AVAILABLE = True
+except ImportError:
+    LIMITER_AVAILABLE = False
+    print("[SEC] flask-limiter not installed – rate limiting disabled")
 
 # ─── ENCRYPTION SETUP ────────────────────────────────────────────────────────
 DB_KEY = os.environ.get('DB_KEY', '').strip()
@@ -42,7 +49,21 @@ except ImportError:
     def is_saml_enabled(): return False
 
 app = Flask(__name__, static_folder='static')
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# ─── CORS: restrict to own domain (or allow all in dev mode) ─────────────────
+_ALLOWED_ORIGIN = os.environ.get('ALLOWED_ORIGIN', '*')
+CORS(app, resources={r"/api/*": {"origins": _ALLOWED_ORIGIN}})
+
+# ─── RATE LIMITER ─────────────────────────────────────────────────────────────
+if LIMITER_AVAILABLE:
+    limiter = Limiter(
+        key_func=get_remote_address,
+        app=app,
+        default_limits=[],
+        storage_uri="memory://"
+    )
+else:
+    limiter = None
 
 # DB in persistent volume /data
 DATA_DIR = os.environ.get('DATA_DIR', '/data')
@@ -610,6 +631,27 @@ def init_db():
     db.close()
     print(f"[DB] Initialized at {DB_PATH}")
 
+# ─── SECURITY HEADERS ────────────────────────────────────────────────────────
+@app.after_request
+def add_security_headers(resp):
+    resp.headers['X-Frame-Options'] = 'DENY'
+    resp.headers['X-Content-Type-Options'] = 'nosniff'
+    resp.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    resp.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    # HSTS only meaningful over HTTPS – gunicorn hinter Reverse-Proxy
+    resp.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    # CSP: allow self + inline styles (needed for SPA) + cdnjs for QR-code lib
+    resp.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: blob:; "
+        "font-src 'self'; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none'"
+    )
+    return resp
+
 # ─── AUTH ─────────────────────────────────────────────────────────────────────
 def hash_pw(pw):
     """Hash password with PBKDF2-HMAC-SHA256 + 32-byte random salt (600k iterations)."""
@@ -657,7 +699,16 @@ def require_auth(perm=None):
         return wrapper
     return decorator
 
+def _rate_limit(limit_str):
+    """Conditional rate-limit decorator — no-op if flask-limiter not installed."""
+    def decorator(f):
+        if LIMITER_AVAILABLE:
+            return limiter.limit(limit_str)(f)
+        return f
+    return decorator
+
 @app.route('/api/login', methods=['POST'])
+@_rate_limit("10 per minute; 30 per hour")
 def login():
     clean_sessions()
     data = request.json or {}
@@ -728,8 +779,8 @@ def change_own_password():
     password_neu = data.get('password', '')
     if not password_alt or not password_neu:
         return jsonify({'error': 'Altes und neues Passwort erforderlich'}), 400
-    if len(password_neu) < 4:
-        return jsonify({'error': 'Neues Passwort zu kurz'}), 400
+    if len(password_neu) < 8:
+        return jsonify({'error': 'Passwort muss mindestens 8 Zeichen lang sein'}), 400
     db = get_db()
     user = db.execute(
         "SELECT * FROM benutzer WHERE id=?",

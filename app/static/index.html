@@ -1391,7 +1391,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.10
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.11
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1546,6 +1546,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 </div>
 
 <script>
+// ─── XSS ESCAPE HELPER ───────────────────────────────────────────────────────
+function esc(s){
+  if(s===null||s===undefined)return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 // ══ i18n ═══════════════════════════════════════
 const TRANS={
   // ── Tabs ─────────────────────────────────────────────
@@ -2429,7 +2434,7 @@ async function zeigeDetail(id) {
     `<div class="drow"><span class="dlbl">DT</span><span class="badge bg">${dts.length}</span></div>`+dl('Netto/J.',eur(netto));
   document.getElementById('k-det-r').innerHTML=
     dl('Strasse',k.strasse)+dl('PLZ',k.plz)+dl('Ort',k.ort)+dl('Land',k.land||'Deutschland')+
-    (k.vertragsnr?`<div class="drow"><span class="dlbl">Vertrag-Nr.</span><span style="font-weight:600">${k.vertragsnr}${k.vertrag_doc_name?` <button onclick="loadAndOpenDoc('/api/kunden/${id}/vertrag_doc')" style="padding:1px 6px;font-size:10px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:3px;cursor:pointer">PDF</button>`:''}</span></div>`:'')+
+    (k.vertragsnr?`<div class="drow"><span class="dlbl">Vertrag-Nr.</span><span style="font-weight:600">${esc(k.vertragsnr)}${k.vertrag_doc_name?` <button onclick="loadAndOpenDoc('/api/kunden/${id}/vertrag_doc')" style="padding:1px 6px;font-size:10px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:3px;cursor:pointer">PDF</button>`:''}</span></div>`:'')+
     (k.vertragsstatus?`<div class="drow"><span class="dlbl">Status</span><span class="badge ${smap[k.vertragsstatus]||'bg'}">${k.vertragsstatus}</span></div>`:'')+
     dl('Beginn',k.vertragsbeginn?fmtDate2(k.vertragsbeginn):'')+dl('Ende',k.vertragsende?fmtDate2(k.vertragsende):'')+dl('Notiz',k.vertragsnotiz);
   // Load contract history
@@ -2456,7 +2461,7 @@ function renderKunden() {
     list.map(k=>{
       const dts=datentraeger.filter(d=>d.kunden_id===k.id&&d.status==='eingelagert');
       const sb=k.vertragsstatus?`<span class="badge ${smap[k.vertragsstatus]||'bg'}" style="font-size:10px">${k.vertragsstatus}</span>  `:'';
-      return`<tr><td style="color:var(--mut);font-size:11px">${k.nr}</td><td style="cursor:pointer;color:var(--i-txt);font-weight:600" onclick="zeigeDetail(${k.id})">${k.firma}<br><span style="font-size:10px;color:var(--mut);font-weight:400">${k.vertragsnr||''}</span></td><td><span class="badge bg">${dts.length}</span></td>
+      return`<tr><td style="color:var(--mut);font-size:11px">${esc(k.nr)}</td><td style="cursor:pointer;color:var(--i-txt);font-weight:600" onclick="zeigeDetail(${k.id})">${esc(k.firma)}<br><span style="font-size:10px;color:var(--mut);font-weight:400">${k.vertragsnr||''}</span></td><td><span class="badge bg">${dts.length}</span></td>
       <td><div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">${sb}<button class="btn-w" onclick="kundeBearbeiten(${k.id})" style="padding:3px 7px;font-size:11px">${can('write')?t('bearb_btn'):ta('Ansehen','View')}</button>${can('delete')?`<button class="btn-d" onclick="kundeLoeschen(${k.id})" style="padding:3px 7px;font-size:11px">X</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
 }
@@ -2490,7 +2495,7 @@ async function dtHinzufuegen() {
 async function dtBearbeiten(id) {
   const d=datentraeger.find(d=>d.id===id); if(!d) return;
   document.getElementById('ov-dt-id').value=id;
-  const opts='<option value="">-</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
+  const opts='<option value="">-</option>'+kunden.map(k=>`<option value="${k.id}">${esc(k.nr)} - ${esc(k.firma)}</option>`).join('');
   document.getElementById('ov-dt-kunden_id').innerHTML=opts; document.getElementById('ov-dt-kunden_id').value=d.kunden_id;
   document.getElementById('ov-dt-bezeichnung').value=d.bezeichnung;
   document.getElementById('ov-dt-serial').value=d.serial;
@@ -2574,7 +2579,7 @@ function renderDT(){
       const tresorInfo=d.tresor_bezeichnung?`<br><span style="font-size:10px;color:var(--mut)">🔒 ${d.tresor_bezeichnung}${d.tresor_raum?', Raum '+d.tresor_raum:''}</span>`:'';
       const statusBadge=d.status==='eingelagert'?`<span class="badge bg" style="font-size:10px">✅</span>`:`<span class="badge ba" style="font-size:10px">📦</span>`;
       const qrBtn=`<button onclick="showQR(${d.id},'${(d.interne_nr||d.serial).replace(/'/g,"\\'")}',this)" style="padding:2px 6px;font-size:10px;border:1px solid var(--brd2);border-radius:3px;background:var(--surf);cursor:pointer" title="QR-Code">QR</button>`;
-      return`<tr><td>${imgC}</td><td style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${d.bezeichnung}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${d.serial}${d.interne_nr?`<br><span style="color:var(--mut)">${d.interne_nr}</span>`:''}</td><td style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${statusBadge}</td><td><div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">${scanBtn}${qrBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">✎</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">✕</button>`:''}</div></td></tr>`;
+      return`<tr><td>${imgC}</td><td style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${esc(d.bezeichnung)}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${esc(d.serial)}${d.interne_nr?`<br><span style="color:var(--mut)">${esc(d.interne_nr)}</span>`:''}</td><td style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${statusBadge}</td><td><div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">${scanBtn}${qrBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">✎</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">✕</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
   // Pagination
   if(pgEl){
@@ -2618,17 +2623,17 @@ function printQR(){
 }
 
 function renderSelects(){
-  const opts='<option value="">'+t('opt_firma_waehlen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
+  const opts='<option value="">'+t('opt_firma_waehlen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${esc(k.nr)} - ${esc(k.firma)}</option>`).join('');
   ['dt-kunden_id','r-kunden_id','u-kunden_id'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
-  const f=document.getElementById('dt-filter');if(f)f.innerHTML='<option value="">'+t('opt_alle_firmen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
-  const af=document.getElementById('archiv-filter');if(af)af.innerHTML='<option value="">'+t('opt_alle_firmen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
+  const f=document.getElementById('dt-filter');if(f)f.innerHTML='<option value="">'+t('opt_alle_firmen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${esc(k.nr)} - ${esc(k.firma)}</option>`).join('');
+  const af=document.getElementById('archiv-filter');if(af)af.innerHTML='<option value="">'+t('opt_alle_firmen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${esc(k.nr)} - ${esc(k.firma)}</option>`).join('');
   // Tresor dropdown in DT form and edit overlay
-  const tresorOpts='<option value="">'+t('opt_kein_tresor')+'</option>'+tresore.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');return`<option value="${t.id}">${t.bezeichnung}${loc?' ('+loc+')':''}</option>`;}).join('');
+  const tresorOpts='<option value="">'+t('opt_kein_tresor')+'</option>'+tresore.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');return`<option value="${t.id}">${esc(t.bezeichnung)}${loc?' ('+loc+')':''}</option>`;}).join('');
   const tsel=document.getElementById('dt-tresor_id');
   if(tsel)tsel.innerHTML=tresorOpts;
   const tselOv=document.getElementById('ov-dt-tresor_id');
   if(tselOv)tselOv.innerHTML=tresorOpts;
-  const kOptsExt='<option value="">'+t('opt_gleiche_firma')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} - ${k.firma}</option>`).join('');
+  const kOptsExt='<option value="">'+t('opt_gleiche_firma')+'</option>'+kunden.map(k=>`<option value="${k.id}">${esc(k.nr)} - ${esc(k.firma)}</option>`).join('');
   ['dt-eigentuemer_id','dt-neben_eigentuemer_id','dt-rechnungsempfaenger_id','ov-dt-eigentuemer_id','ov-dt-neben_eigentuemer_id','ov-dt-rechnungsempfaenger_id','k-haupt_eigentuemer_id','k-neben_eigentuemer_id'].forEach(sid=>{
     const sel=document.getElementById(sid);
     if(sel){const cur=sel.value;sel.innerHTML=kOptsExt;sel.value=cur;}
@@ -2675,11 +2680,11 @@ function genRechnungHtml(k){
       if(!a.voll)info+=`<br><span style="font-size:9px;color:#888">eingelag. ${fmtDate(d.einlagerungs_datum)}: ${a.tageAnteil} von ${a.tagePeriode} Tagen</span>`;
     }
     if(d.rabatt>0)info+=`<br><span style="font-size:9px;color:#888">Rabatt ${d.rabatt}%</span>`;
-    if(d.rechnungsempfaenger_id&&d.kunden_id!==k.id&&d.firma)info+=`<br><span style="font-size:9px;color:#888">Einlagerer: ${d.firma}</span>`;
+    if(d.rechnungsempfaenger_id&&d.kunden_id!==k.id&&d.firma)info+=`<br><span style="font-size:9px;color:#888">Einlagerer: ${esc(d.firma)}</span>`;
     if(d.eigentuemer_id&&d.eigentuemer_firma)info+=`<br><span style="font-size:9px;color:#888">Eigentümer: ${d.eigentuemer_firma}</span>`;
     gesamtNetto+=betrag;
     const pi=d.einheit==='monat'?`${eur(d.preis)}/Mo`:`${eur(d.preis)}/J`;
-    return`<tr><td>${i+1}</td><td>${d.bezeichnung}${info}</td><td style="font-family:monospace;font-size:10px">${d.serial}</td><td class="r">${pi}</td><td class="r">${d.rabatt>0?d.rabatt+'%':'-'}</td><td class="r">${eur(betrag)}</td></tr>`;
+    return`<tr><td>${i+1}</td><td>${esc(d.bezeichnung)}${info}</td><td style="font-family:monospace;font-size:10px">${esc(d.serial)}</td><td class="r">${pi}</td><td class="r">${d.rabatt>0?d.rabatt+'%':'-'}</td><td class="r">${eur(betrag)}</td></tr>`;
   }).filter(Boolean);
   if(!rows.length)rows.push('<tr><td colspan="6" style="text-align:center;color:#888;padding:12px">'+ta('(Keine Datenträger im Abrechnungszeitraum)','(No media in billing period)')+'</td></tr>');
   // Mengenrabatt (kundenspezifisch)
@@ -2707,8 +2712,8 @@ function genRechnungHtml(k){
 <div class="brief-hr" style="background:${ac}"></div>
 <div class="brief-abs-mini">${T.firmenname||''}${T.firmaAdr?' | '+(T.firmaAdr||'').split('\n')[0]:''}</div>
 <div class="brief-main">
-  <div class="brief-empf"><div class="brief-empf-block"><strong>${k.firma}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${adr}</div></div>
-  <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${T.tel}<br>`:''}${T.email?`${T.email}<br>`:''}${k.nr?`Kd-Nr. ${k.nr}`:''}</div>
+  <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${adr}</div></div>
+  <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${esc(T.tel)}<br>`:''}${T.email?`${esc(T.email)}<br>`:''}${k.nr?`Kd-Nr. ${esc(k.nr)}`:''}</div>
 </div>
 <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
 <div class="brief-betreff">Rechnung Nr. ${nr}</div>
@@ -2758,7 +2763,7 @@ function renderRechnungHistorie(list){
   const el=document.getElementById('r-historie');if(!el)return;
   if(!list||!list.length){el.innerHTML='<div class="empty">'+t('empty_rechnungen')+'</div>';return;}
   el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_nr')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_zeitraum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_netto')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_datum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)"></th></tr></thead><tbody>'+
-    list.map((r)=>`<tr><td style="padding:5px 6px;font-weight:600;font-family:monospace;font-size:11px">${r.nr}</td><td style="padding:5px 6px">${r.firma}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${r.zr}</td><td style="padding:5px 6px;font-size:11px">${r.netto?'EUR '+r.netto:'-'}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td><td style="padding:5px 6px"><div style="display:flex;gap:4px"><button onclick="rechnungWiederdrucken(${r.id})" style="padding:2px 8px;font-size:11px">${t('btn_drucken')}</button><button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:2px 8px;font-size:11px">${t('btn_mahnung')}</button></div></td></tr>`).join('')+
+    list.map((r)=>`<tr><td style="padding:5px 6px;font-weight:600;font-family:monospace;font-size:11px">${esc(r.nr)}</td><td style="padding:5px 6px">${esc(r.firma)}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${esc(r.zr)}</td><td style="padding:5px 6px;font-size:11px">${r.netto?'EUR '+r.netto:'-'}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td><td style="padding:5px 6px"><div style="display:flex;gap:4px"><button onclick="rechnungWiederdrucken(${r.id})" style="padding:2px 8px;font-size:11px">${t('btn_drucken')}</button><button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:2px 8px;font-size:11px">${t('btn_mahnung')}</button></div></td></tr>`).join('')+
     '</tbody></table>';
 }
 async function rechnungHistorieLadenAlle(){
@@ -2807,9 +2812,9 @@ async function renderRechnungHistoriePage(){
         ?`<button onclick="rechnungUnbezahlt(${r.id})" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="${ta('Als offen markieren','Mark as open')}">↩</button>`
         :`<button onclick="rechnungBezahlt(${r.id})" style="padding:3px 8px;font-size:11px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0" title="${ta('Als bezahlt markieren','Mark as paid')}">✓ ${ta('Bezahlt','Paid')}</button>`;
       return`<tr style="border-bottom:1px solid var(--brd)">
-      <td style="padding:7px 8px;font-weight:600;font-family:monospace;font-size:12px">${r.nr}</td>
-      <td style="padding:7px 8px;font-weight:600">${r.firma}</td>
-      <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${r.zr}</td>
+      <td style="padding:7px 8px;font-weight:600;font-family:monospace;font-size:12px">${esc(r.nr)}</td>
+      <td style="padding:7px 8px;font-weight:600">${esc(r.firma)}</td>
+      <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${esc(r.zr)}</td>
       <td style="padding:7px 8px;font-size:12px">${r.netto?'EUR '+r.netto:'-'}</td>
       <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td>
       <td style="padding:7px 8px">${statusBadge}</td>
@@ -2817,12 +2822,12 @@ async function renderRechnungHistoriePage(){
         ${bezahltBtn}
         <button onclick="rechnungWiederdrucken(${r.id})" style="padding:3px 8px;font-size:11px" title="Rechnung als PDF drucken">PDF</button>
         <button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:3px 8px;font-size:11px"${(mahnVoll||bezahlt)?' disabled title="'+(bezahlt?ta('Rechnung bereits bezahlt','Invoice already paid'):ta('Maximale Mahnanzahl erreicht','Maximum reminders reached'))+'" style="padding:3px 8px;font-size:11px;opacity:0.45;cursor:not-allowed"':''}>${mahnBtnLabel}</button>
-        <button onclick="toggleMahnungenRow('${r.nr}')" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="${ta('Mahnungen anzeigen','Show reminders')}">📋 ${mCount}/${maxMahn}</button>
+        <button onclick="toggleMahnungenRow('${esc(r.nr)}')" style="padding:3px 8px;font-size:11px;background:var(--surf)" title="${ta('Mahnungen anzeigen','Show reminders')}">📋 ${mCount}/${maxMahn}</button>
         <button onclick="rechnungLoeschen(${r.id})" class="btn-d" style="padding:3px 7px;font-size:11px">✕</button>
       </div></td>
     </tr>
-    <tr id="mahnung-row-${r.nr}" style="display:none;background:var(--surf)">
-      <td colspan="7" style="padding:8px 16px" id="mahnung-cell-${r.nr}"></td>
+    <tr id="mahnung-row-${esc(r.nr)}" style="display:none;background:var(--surf)">
+      <td colspan="7" style="padding:8px 16px" id="mahnung-cell-${esc(r.nr)}"></td>
     </tr>`;
     }).join('')+
     '</tbody></table>';
@@ -2883,18 +2888,18 @@ async function rechnungMahnung(id){
 <div class="brief-hr" style="background:${ac}"></div>
 <div class="brief-abs-mini">${T.firmenname||''}${T.firmaAdr?' | '+(T.firmaAdr||'').split('\n')[0]:''}</div>
 <div class="brief-main">
-  <div class="brief-empf"><div class="brief-empf-block"><strong>${r.firma}</strong></div></div>
-  <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${T.tel}<br>`:''}${T.email?`${T.email}<br>`:''}${r.kunden_nr?`Kd-Nr. ${r.kunden_nr}`:''}</div>
+  <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(r.firma)}</strong></div></div>
+  <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${esc(T.tel)}<br>`:''}${T.email?`${esc(T.email)}<br>`:''}${r.kunden_nr?`Kd-Nr. ${r.kunden_nr}`:''}</div>
 </div>
 <div class="brief-ort-dat">${T.ort||''}, ${heute}</div>
-<div class="brief-betreff" style="color:#dc2626">${mahnTitel} – Rechnung ${r.nr}</div>
-<div class="brief-sub">Ursprüngliche Rechnung vom ${fmtDate(r.dat)} | Zeitraum: ${r.zr}</div>
+<div class="brief-betreff" style="color:#dc2626">${mahnTitel} – Rechnung ${esc(r.nr)}</div>
+<div class="brief-sub">Ursprüngliche Rechnung vom ${fmtDate(r.dat)} | Zeitraum: ${esc(r.zr)}</div>
 <div class="brief-txt">${T.anrede||'Sehr geehrte Damen und Herren,'}</div>
 <div class="brief-txt">trotz unserer Zahlungserinnerung haben wir bis heute keinen Zahlungseingang für die oben genannte Rechnung feststellen können. Wir bitten Sie, den ausstehenden Betrag umgehend zu begleichen.</div>
 <table class="brief-tbl" style="margin-top:12px">
   <thead><tr><th>Position</th><th class="r">Betrag</th></tr></thead>
   <tbody>
-    <tr><td>Offener Rechnungsbetrag (Rechnung ${r.nr}, Zeitraum ${r.zr})</td><td class="r">EUR ${r.netto} netto</td></tr>
+    <tr><td>Offener Rechnungsbetrag (Rechnung ${esc(r.nr)}, Zeitraum ${esc(r.zr)})</td><td class="r">EUR ${r.netto} netto</td></tr>
     <tr><td>Mahngebühr</td><td class="r">EUR ${mahngebühr.toFixed(2)}</td></tr>
   </tbody>
 </table>
@@ -2980,14 +2985,14 @@ function renderUebergabeListe(){
   if(!kid){el.innerHTML='<div class="empty">'+t('opt_firma_waehlen')+'</div>';return;}
   const dts=datentraeger.filter(d=>d.kunden_id===kid&&d.status==='eingelagert');
   if(!dts.length){el.innerHTML='<div class="empty">'+t('msg_ue_keine_dt')+'</div>';return;}
-  el.innerHTML=dts.map(d=>`<div class="cb-row"><input type="checkbox" id="uc-${d.id}"><label for="uc-${d.id}" style="font-size:13px;color:var(--txt);margin:0;cursor:pointer"><strong>${d.serial}</strong> - ${d.bezeichnung}<br><span style="color:var(--mut);font-size:11px">eingelagert ${fmtDate(d.einlagerungs_datum)}</span></label></div>`).join('');
+  el.innerHTML=dts.map(d=>`<div class="cb-row"><input type="checkbox" id="uc-${d.id}"><label for="uc-${d.id}" style="font-size:13px;color:var(--txt);margin:0;cursor:pointer"><strong>${esc(d.serial)}</strong> - ${esc(d.bezeichnung)}<br><span style="color:var(--mut);font-size:11px">eingelagert ${fmtDate(d.einlagerungs_datum)}</span></label></div>`).join('');
 }
 
 function getAusgewaehlte(){return datentraeger.filter(d=>{const cb=document.getElementById('uc-'+d.id);return cb&&cb.checked;});}
 
 function genUebergabeHtml(k,sel){
   const dat=fmtDate(document.getElementById('u-datum').value),person=document.getElementById('u-empfaenger').value||'___',grund=document.getElementById('u-grund').value;
-  const pnr=`UP-${dat.replace(/\./g,'')}-${k.nr}`;
+  const pnr=`UP-${dat.replace(/\./g,'')}-${esc(k.nr)}`;
   const T=window._T||{};const TU=window._TU||{};
   const fillPh=(txt,map)=>{let o=txt;Object.entries(map).forEach(([k,v])=>{o=o.split(k).join(v||'');});return o;};
   const map={'{{ANZAHL}}':String(sel.length),'{{UEBERGABE_DATUM}}':dat,'{{EMPFAENGER}}':person,'{{GRUND}}':grund,'{{PROTOKOLL_NR}}':pnr,'{{KUNDE_NAME}}':k.firma};
@@ -2996,7 +3001,7 @@ function genUebergabeHtml(k,sel){
   const bline=T.bearbeiter?(T.bearbeiter+(T.kuerzel?'/'+T.kuerzel:'')):'';
   const ac=accentColor||'#0065A4';
   const logoHtml=logoData?`<img src="${logoData}" style="max-height:60px;max-width:160px;object-fit:contain">`:'<div style="width:80px;height:40px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:10px">Logo</div>';
-  const rows=sel.map((d,i)=>`<tr><td>${i+1}</td><td>${d.bezeichnung}</td><td style="font-family:monospace;font-size:10px">${d.serial}</td><td>${fmtDate(d.einlagerungs_datum)}</td></tr>`).join('');
+  const rows=sel.map((d,i)=>`<tr><td>${i+1}</td><td>${esc(d.bezeichnung)}</td><td style="font-family:monospace;font-size:10px">${esc(d.serial)}</td><td>${fmtDate(d.einlagerungs_datum)}</td></tr>`).join('');
   return`<div class="brief-header">
   <div class="brief-header-left">
     <div class="brief-firma-name">${T.firmenname||''}</div>
@@ -3008,8 +3013,8 @@ function genUebergabeHtml(k,sel){
 <div class="brief-hr" style="background:${ac}"></div>
 <div class="brief-abs-mini">${T.firmenname||''}${T.firmaAdr?' | '+(T.firmaAdr||'').split('\n')[0]:''}</div>
 <div class="brief-main">
-  <div class="brief-empf"><div class="brief-empf-block"><strong>${k.firma}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${adr}</div></div>
-  <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${T.tel}<br>`:''}${T.email?`${T.email}<br>`:''}${k.nr?`Kd-Nr. ${k.nr}`:''}</div>
+  <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${adr}</div></div>
+  <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${esc(T.tel)}<br>`:''}${T.email?`${esc(T.email)}<br>`:''}${k.nr?`Kd-Nr. ${esc(k.nr)}`:''}</div>
 </div>
 <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
 <div class="brief-betreff">${_lang==='en'?'Handover Protocol':'Übergabeprotokoll'} ${pnr}</div>
@@ -3068,7 +3073,7 @@ async function weiterZuSchritt2(){
 }
 
 let activePendingId=null;
-function updateS2Info(){const el=document.getElementById('s2-info');if(!activePendingId){el.textContent='-';return;}const pu=pendingUebergaben.find(p=>p.id===activePendingId);if(!pu){el.textContent='-';return;}el.innerHTML=`<strong>${pu.firma}</strong> - ${pu.datum} - ${pu.dt_ids.length} DT - ${pu.grund}`;}
+function updateS2Info(){const el=document.getElementById('s2-info');if(!activePendingId){el.textContent='-';return;}const pu=pendingUebergaben.find(p=>p.id===activePendingId);if(!pu){el.textContent='-';return;}el.innerHTML=`<strong>${esc(pu.firma)}</strong> - ${pu.datum} - ${pu.dt_ids.length} DT - ${esc(pu.grund)}`;}
 
 function renderPendingList(){
   const el=document.getElementById('pending-list');
@@ -3149,7 +3154,7 @@ function renderArchiv(){
     const rows=dts.map(d=>{
       const ueb=Übergaben.find(u=>u.dt_ids&&u.dt_ids.includes(d.id)&&u.abgeschlossen);
       const docBtn=ueb?`<button onclick="loadAndOpenDoc('/api/uebergaben/${ueb.id}/doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd)">Dok.</button>`:'-';
-      return`<tr><td style="width:18%">${d.bezeichnung}</td><td style="width:20%;font-family:monospace;font-size:11px">${d.serial}</td><td style="width:14%;font-size:11px">${fmtDate(d.einlagerungs_datum)}</td><td style="width:14%;font-size:11px">${ueb?ueb.datum:'-'}</td><td style="width:24%;font-size:11px">${ueb?ueb.grund:'-'}</td><td style="width:10%">${docBtn}</td></tr>`;
+      return`<tr><td style="width:18%">${esc(d.bezeichnung)}</td><td style="width:20%;font-family:monospace;font-size:11px">${esc(d.serial)}</td><td style="width:14%;font-size:11px">${fmtDate(d.einlagerungs_datum)}</td><td style="width:14%;font-size:11px">${ueb?ueb.datum:'-'}</td><td style="width:24%;font-size:11px">${ueb?ueb.grund:'-'}</td><td style="width:10%">${docBtn}</td></tr>`;
     }).join('');
     return`<div class="archiv-karte"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-weight:700;font-size:13px">${k?k.firma+' ('+k.nr+')':'?'}</span><span class="badge br">${dts.length} ${t('lbl_uebergeben')}</span></div><table><thead><tr><th>${t('col_typ_header')}</th><th>${t('col_serial_header')}</th><th>${t('col_eingelagert')}</th><th>${t('col_uebergeben_h')}</th><th>${t('col_grund')}</th><th>${t('col_dok')}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }).join('');
@@ -3290,7 +3295,7 @@ function syncBrief(){
   const adrShort=adrLines.slice(0,2).join(' | ');
   document.getElementById('b-abs-mini').textContent=(T.firmenname||'')+(adrShort?' | '+adrShort:'');
   const bline=T.bearbeiter?(T.bearbeiter+(T.kuerzel?'/'+T.kuerzel:'')):'';
-  document.getElementById('b-kontakt-r').innerHTML=(bline?`<strong>${bline}</strong>`:'')+( T.tel?`<div>Tel. ${T.tel}</div>`:'')+( T.fax?`<div>Fax ${T.fax}</div>`:'')+( T.email?`<div>Mail ${T.email}</div>`:'');
+  document.getElementById('b-kontakt-r').innerHTML=(bline?`<strong>${bline}</strong>`:'')+( T.tel?`<div>Tel. ${esc(T.tel)}</div>`:'')+( T.fax?`<div>Fax ${T.fax}</div>`:'')+( T.email?`<div>Mail ${esc(T.email)}</div>`:'');
   document.getElementById('b-ort-dat').textContent=(T.ort||'Musterort')+', TT.MM.JJJJ';
   document.getElementById('b-anrede').textContent=T.anrede||'';
   document.getElementById('b-intro').textContent=T.intro||'';
@@ -3324,7 +3329,7 @@ function syncVBrief(){
   vb('vb-firma-adr').textContent=T.firmaAdr||'';
   const adrLines=(T.firmaAdr||'').split('\n').filter(Boolean);
   vb('vb-abs-mini').textContent=(T.firmenname||'')+(adrLines[0]?' | '+adrLines[0]:'');
-  vb('vb-kontakt-r').innerHTML=(T.bearbeiter?`<strong>${T.bearbeiter}</strong>`:'')+( T.tel?`<div>Tel. ${T.tel}</div>`:'')+( T.email?`<div>Mail ${T.email}</div>`:'');
+  vb('vb-kontakt-r').innerHTML=(T.bearbeiter?`<strong>${T.bearbeiter}</strong>`:'')+( T.tel?`<div>Tel. ${esc(T.tel)}</div>`:'')+( T.email?`<div>Mail ${esc(T.email)}</div>`:'');
   vb('vb-ort-dat').textContent=(T.ort||'Musterort')+', TT.MM.JJJJ';
   vb('vb-firma-kurz').textContent=T.firmenname||'Lagerbetreiber';
   vb('vb-par1').textContent=TV.par1||'';
@@ -3349,7 +3354,7 @@ function syncEVorschau(){
   eb('eb-firma-adr').textContent=T.firmaAdr||'';
   const adrLines=(T.firmaAdr||'').split('\n').filter(Boolean);
   eb('eb-abs-mini').textContent=(T.firmenname||'')+(adrLines[0]?' | '+adrLines[0]:'');
-  eb('eb-kontakt-r').innerHTML=(T.bearbeiter?`<strong>${T.bearbeiter}</strong>`:'')+( T.tel?`<div>Tel. ${T.tel}</div>`:'')+( T.email?`<div>Mail ${T.email}</div>`:'');
+  eb('eb-kontakt-r').innerHTML=(T.bearbeiter?`<strong>${T.bearbeiter}</strong>`:'')+( T.tel?`<div>Tel. ${esc(T.tel)}</div>`:'')+( T.email?`<div>Mail ${esc(T.email)}</div>`:'');
   eb('eb-ort-dat').textContent=(T.ort||'Musterort')+', TT.MM.JJJJ';
   eb('eb-intro').textContent=TE.intro||'';
   eb('eb-nach').textContent=TE.nach||'';
@@ -3392,7 +3397,7 @@ async function loadAdmin(){
   renderRollenListe();
   // Fill rolle select
   const sel=document.getElementById('new-rolle-id');
-  if(sel)sel.innerHTML=rollen.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  if(sel)sel.innerHTML=rollen.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('');
   // Load support contact + company data
   const tpl=await apiJ('/api/templates');
   if(tpl){
@@ -3427,7 +3432,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.10${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.11${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -3439,7 +3444,7 @@ function renderUserListe(users){
   const el=document.getElementById('user-liste');if(!el)return;
   if(!users||!users.length){el.innerHTML='<div class="empty">'+t('empty_users')+'</div>';return;}
   el.innerHTML='<table><thead><tr><th style="width:20%">'+t('col_user')+'</th><th style="width:25%">'+t('col_name')+'</th><th style="width:20%">'+t('col_rolle')+'</th><th style="width:15%">'+t('col_status')+'</th><th style="width:20%"></th></tr></thead><tbody>'+
-    users.map(u=>`<tr data-uid="${u.id}" data-uname="${u.name}" data-uusername="${u.username}" data-urollen="${u.rollen_id}" data-uaktiv="${u.aktiv}"><td style="font-weight:600">${u.username}</td><td>${u.name}</td><td><span class="badge ${u.farbe||'bg'}">${u.rollen_name}</span></td><td>${u.aktiv?'<span class="badge bg">'+t('lbl_aktiv')+'</span>':'<span class="badge br">'+t('lbl_inaktiv')+'</span>'}</td><td><div style="display:flex;gap:3px">${can('manageUsers')?`<button onclick="userBearbeiten(${u.id})" style="padding:3px 6px;font-size:11px" title="Bearbeiten">✎</button><button onclick="userPwReset(${u.id})" style="padding:3px 6px;font-size:11px" title="Passwort setzen">🔑</button>`:''} ${u.id!==1&&u.id!==currentUser?.id&&can('manageUsers')?`<button class="btn-d" onclick="userLoeschen(${u.id})" style="padding:3px 6px;font-size:11px">✕</button>`:''}</div></td></tr>`).join('')+'</tbody></table>';
+    users.map(u=>`<tr data-uid="${u.id}" data-uname="${esc(u.name)}" data-uusername="${esc(u.username)}" data-urollen="${u.rollen_id}" data-uaktiv="${u.aktiv}"><td style="font-weight:600">${esc(u.username)}</td><td>${esc(u.name)}</td><td><span class="badge ${u.farbe||'bg'}">${u.rollen_name}</span></td><td>${u.aktiv?'<span class="badge bg">'+t('lbl_aktiv')+'</span>':'<span class="badge br">'+t('lbl_inaktiv')+'</span>'}</td><td><div style="display:flex;gap:3px">${can('manageUsers')?`<button onclick="userBearbeiten(${u.id})" style="padding:3px 6px;font-size:11px" title="Bearbeiten">✎</button><button onclick="userPwReset(${u.id})" style="padding:3px 6px;font-size:11px" title="Passwort setzen">🔑</button>`:''} ${u.id!==1&&u.id!==currentUser?.id&&can('manageUsers')?`<button class="btn-d" onclick="userLoeschen(${u.id})" style="padding:3px 6px;font-size:11px">✕</button>`:''}</div></td></tr>`).join('')+'</tbody></table>';
 }
 
 function renderRollenListe(){
@@ -3451,7 +3456,7 @@ function renderRollenListe(){
     const permBadges=Object.entries(permNames).map(([k,label])=>`<span class="badge ${perms[k]?'bg':'br'}" style="font-size:10px;margin-right:2px">${label}</span>`).join('')+
       ['tab_kunden','tab_datentraeger','tab_uebergabe','tab_rechnung','tab_tresore'].filter(k=>k in perms&&!perms[k]).map(k=>`<span class="badge br" style="font-size:10px;margin-right:2px">${ta('Kein ','No ')}${k.replace('tab_','')}</span>`).join('');
     return`<div style="border:1px solid var(--brd);border-radius:var(--rad);padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <div><span class="badge ${r.farbe||'bg'}" style="margin-right:8px">${r.name}</span>${permBadges}</div>
+      <div><span class="badge ${r.farbe||'bg'}" style="margin-right:8px">${esc(r.name)}</span>${permBadges}</div>
       <button onclick="bearbeiteRolle(${r.id})" style="padding:3px 8px;font-size:11px">Bearbeiten</button>
     </div>`;
   }).join('');
@@ -3475,7 +3480,7 @@ function userBearbeiten(id){
   document.getElementById('ue-aktiv').value=row.dataset.uaktiv==='1'?'1':'0';
   // Rollen-Select befüllen
   const sel=document.getElementById('ue-rollen_id');
-  sel.innerHTML=rollen.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  sel.innerHTML=rollen.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('');
   sel.value=row.dataset.urollen||'';
   document.getElementById('ue-err').style.display='none';
   document.getElementById('user-edit-modal').classList.add('open');
@@ -3612,9 +3617,9 @@ function printHtml(html,fn){const w=window.open('','_blank');if(!w){alert('Popup
 async function loadAndShowImg(url, imgEl){const d=await apiJ(url);if(d&&d.data){imgEl.src=d.data;imgEl.onclick=()=>{document.getElementById('ov-img').src=d.data;document.getElementById('img-ov').classList.add('open');}}}
 async function loadAndOpenDoc(url){const d=await apiJ(url);if(d){if(d.type==='application/pdf'){const w=window.open('','_blank');if(w){w.document.write(`<iframe src="${d.data}" style="width:100%;height:100vh;border:none"></iframe>`);w.document.close();}}else{document.getElementById('ov-img').src=d.data;document.getElementById('img-ov').classList.add('open');}}}
 
-function handleDtBild(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingDtBild={data:ev.target.result,type:f.type};document.getElementById('dt-bild-zone').classList.add('has-file');document.getElementById('dt-bild-prev').innerHTML=`<img src="${ev.target.result}" style="max-height:50px;max-width:100%;border-radius:4px;object-fit:contain"><span style="font-size:11px;display:block;color:var(--s-txt)">${f.name}</span>`;};r.readAsDataURL(f);}
+function handleDtBild(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingDtBild={data:ev.target.result,type:f.type};document.getElementById('dt-bild-zone').classList.add('has-file');document.getElementById('dt-bild-prev').innerHTML=`<img src="${ev.target.result}" style="max-height:50px;max-width:100%;border-radius:4px;object-fit:contain"><span style="font-size:11px;display:block;color:var(--s-txt)">${esc(f.name)}</span>`;};r.readAsDataURL(f);}
 let pendingDtScan=null;
-function handleDtScan(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingDtScan={data:ev.target.result,type:f.type,name:f.name};document.getElementById('dt-scan-zone').classList.add('has-file');document.getElementById('dt-scan-prev').innerHTML=`<span style="font-size:12px;color:var(--s-txt)">✓ ${f.name}</span>`;};r.readAsDataURL(f);}
+function handleDtScan(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingDtScan={data:ev.target.result,type:f.type,name:f.name};document.getElementById('dt-scan-zone').classList.add('has-file');document.getElementById('dt-scan-prev').innerHTML=`<span style="font-size:12px;color:var(--s-txt)">✓ ${esc(f.name)}</span>`;};r.readAsDataURL(f);}
 function druckeEingangFromForm(){
   const _escV=document.getElementById('dt-modus-escrow')?.checked||false;const _eigIdV=_escV?parseInt(document.getElementById('dt-eigentuemer_id')?.value)||0:0;const _eigKV=_eigIdV?kunden.find(x=>x.id===_eigIdV):null;const _nbEigIdV=_escV?parseInt(document.getElementById('dt-neben_eigentuemer_id')?.value)||0:0;const _nbEigKV=_nbEigIdV?kunden.find(x=>x.id===_nbEigIdV):null;
   const kid=parseInt(document.getElementById('dt-kunden_id').value);
@@ -3650,9 +3655,9 @@ function druckeEingangFromForm(){
     ${absKurz?`<div class="brief-abs-mini">${absKurz}</div>`:''}
     <div class="brief-main">
       <div class="brief-empf">
-        <div class="brief-empf-block"><strong>${k.firma}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${kAdr}</div>
+        <div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${kAdr}</div>
       </div>
-      <div class="brief-meta-r">${T.bearbeiter?`<strong>${T.bearbeiter}</strong>`:''} ${T.tel?`<div>Tel. ${T.tel}</div>`:''} ${T.email?`<div>Mail ${T.email}</div>`:''}</div>
+      <div class="brief-meta-r">${T.bearbeiter?`<strong>${T.bearbeiter}</strong>`:''} ${T.tel?`<div>Tel. ${esc(T.tel)}</div>`:''} ${T.email?`<div>Mail ${esc(T.email)}</div>`:''}</div>
     </div>
     <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
     <div class="brief-betreff">${_lang==='en'?'Incoming Inspection Report – Media Storage':'Eingangsprotokoll – Datenträger-Einlagerung'}</div>
@@ -3665,7 +3670,7 @@ function druckeEingangFromForm(){
         <tr><td>${_lang==='en'?'Serial Number':'Seriennummer'}</td><td>${serial}</td></tr>
         <tr><td>${_lang==='en'?'Storage Date':'Einlagerungsdatum'}</td><td>${dat}</td></tr>
         <tr><td>${_lang==='en'?'Price':'Preis'}</td><td>${pl}</td></tr>
-        ${_escV?`<tr><td>${_lang==='en'?'Depositor':'Einlagerer'}</td><td>${k.firma}</td></tr>${_eigKV?`<tr><td>${_lang==='en'?'Main Owner':'Haupt-Eigentümer'}</td><td>${_eigKV.firma}</td></tr>`:''}${_nbEigKV?`<tr><td>${_lang==='en'?'Co-Owner':'Neben-Eigentümer'}</td><td>${_nbEigKV.firma}</td></tr>`:''}`:''}        <tr><td>${_lang==='en'?'Storage Location':'Lagerplatz'}</td><td style="color:#ccc">________________________</td></tr>
+        ${_escV?`<tr><td>${_lang==='en'?'Depositor':'Einlagerer'}</td><td>${esc(k.firma)}</td></tr>${_eigKV?`<tr><td>${_lang==='en'?'Main Owner':'Haupt-Eigentümer'}</td><td>${esc(_eigKV.firma)}</td></tr>`:''}${_nbEigKV?`<tr><td>${_lang==='en'?'Co-Owner':'Neben-Eigentümer'}</td><td>${esc(_nbEigKV.firma)}</td></tr>`:''}`:''}        <tr><td>${_lang==='en'?'Storage Location':'Lagerplatz'}</td><td style="color:#ccc">________________________</td></tr>
       </tbody>
     </table>
     ${((_lang==='en'&&TE.nach_en)||TE.nach)?`<div class="brief-txt">${((_lang==='en'&&TE.nach_en)||TE.nach).replace(/\n/g,'<br>')}</div>`:`<div class="brief-txt">${_lang==='en'?'Both parties confirm the proper handover and storage of the above-mentioned data carrier.':'Beide Parteien bestätigen die ordnungsgemäße Übergabe und Einlagerung des oben genannten Datenträgers.'}</div>`}
@@ -3727,9 +3732,9 @@ function drucke3ParteienVertrag(){
       <thead><tr><th style="width:18%">${_lang==='en'?'Party':'Partei'}</th><th style="width:30%">${_lang==='en'?'Role':'Rolle'}</th><th>${_lang==='en'?'Company / Contact':'Firma / Kontakt'}</th></tr></thead>
       <tbody>
         <tr><td><strong>${_lang==='en'?'Party 1':'Firma 1'}</strong></td><td>${_lang==='en'?'Custodian / Safe Operator':'Einlagerer / Tresor-Betreiber'}</td><td>${T.firmenname||''}${T.firmaAdr?'<br><small>'+(T.firmaAdr||'').replace(/\n/g,'<br>')+'</small>':''}</td></tr>
-        <tr><td><strong>${_lang==='en'?'Party 2':'Firma 2'}</strong></td><td>${_lang==='en'?'Principal / Depositor':'Auftraggeber / Einlagerer'}</td><td><strong>${k.firma}</strong>${k.ansprechpartner?'<br><small>z.Hd. '+k.ansprechpartner+'</small>':''}<br><small>${kAdr3}</small></td></tr>
-        <tr><td><strong>${_lang==='en'?'Party 3':'Firma 3'}</strong></td><td>${_lang==='en'?'Main Owner':'Haupt-Eigentümer'}</td><td><strong>${eigK.firma}</strong>${eigK.ansprechpartner?'<br><small>z.Hd. '+eigK.ansprechpartner+'</small>':''}<br><small>${eigAdr3}</small></td></tr>
-        ${nbEigK?`<tr><td><strong>${_lang==='en'?'Party 3b':'Firma 3b'}</strong></td><td>${_lang==='en'?'Co-Owner':'Neben-Eigentümer'}</td><td><strong>${nbEigK.firma}</strong></td></tr>`:''}
+        <tr><td><strong>${_lang==='en'?'Party 2':'Firma 2'}</strong></td><td>${_lang==='en'?'Principal / Depositor':'Auftraggeber / Einlagerer'}</td><td><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br><small>z.Hd. '+k.ansprechpartner+'</small>':''}<br><small>${kAdr3}</small></td></tr>
+        <tr><td><strong>${_lang==='en'?'Party 3':'Firma 3'}</strong></td><td>${_lang==='en'?'Main Owner':'Haupt-Eigentümer'}</td><td><strong>${esc(eigK.firma)}</strong>${eigK.ansprechpartner?'<br><small>z.Hd. '+eigK.ansprechpartner+'</small>':''}<br><small>${eigAdr3}</small></td></tr>
+        ${nbEigK?`<tr><td><strong>${_lang==='en'?'Party 3b':'Firma 3b'}</strong></td><td>${_lang==='en'?'Co-Owner':'Neben-Eigentümer'}</td><td><strong>${esc(nbEigK.firma)}</strong></td></tr>`:''}
       </tbody>
     </table>
     <div class="brief-txt" style="margin-top:16px"><strong>${_lang==='en'?'Stored Data Carrier':'Eingelagerter Datenträger'}</strong></div>
@@ -3745,8 +3750,8 @@ function drucke3ParteienVertrag(){
     </table>
     <div class="brief-txt" style="margin-top:16px"><strong>${_lang==='en'?'Agreement':'Vereinbarung'}</strong></div>
     <div class="brief-txt">${_lang==='en'
-      ?`Party 1 (<em>${T.firmenname||'Safe Operator'}</em>) confirms, on behalf of Party 2 (<em>${k.firma}</em>), to securely store the above-mentioned data carrier. This data carrier is the property of Party 3 (<em>${eigK.firma}</em>). Storage is carried out on the instruction of Party 2, who in turn acts on behalf of Party 3.`
-      :`Firma 1 (<em>${T.firmenname||'Tresor-Betreiber'}</em>) bestätigt, auf Beauftragung von Firma 2 (<em>${k.firma}</em>) den oben genannten Datenträger sicher einzulagern. Dieser Datenträger steht im Eigentum von Firma 3 (<em>${eigK.firma}</em>). Die Einlagerung erfolgt im Auftrag und auf Weisung von Firma 2, welche ihrerseits im Auftrag von Firma 3 handelt.`
+      ?`Party 1 (<em>${T.firmenname||'Safe Operator'}</em>) confirms, on behalf of Party 2 (<em>${esc(k.firma)}</em>), to securely store the above-mentioned data carrier. This data carrier is the property of Party 3 (<em>${esc(eigK.firma)}</em>). Storage is carried out on the instruction of Party 2, who in turn acts on behalf of Party 3.`
+      :`Firma 1 (<em>${T.firmenname||'Tresor-Betreiber'}</em>) bestätigt, auf Beauftragung von Firma 2 (<em>${esc(k.firma)}</em>) den oben genannten Datenträger sicher einzulagern. Dieser Datenträger steht im Eigentum von Firma 3 (<em>${esc(eigK.firma)}</em>). Die Einlagerung erfolgt im Auftrag und auf Weisung von Firma 2, welche ihrerseits im Auftrag von Firma 3 handelt.`
     }</div>
     <div class="brief-txt">${_lang==='en'
       ?`The data carrier remains in the custody of Party 1 until explicit joint release by Party 2 and Party 3. Unilateral release is excluded.`
@@ -3757,10 +3762,10 @@ function drucke3ParteienVertrag(){
       <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 1':'Firma 1'} – ${T.firmenname||(_lang==='en'?'Safe Operator':'Tresor-Betreiber')}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
     </div>
     <div class="brief-sig-row" style="margin-top:16px">
-      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 2 – Principal':'Firma 2 – Auftraggeber'}: ${k.firma}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
+      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 2 – Principal':'Firma 2 – Auftraggeber'}: ${esc(k.firma)}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
     </div>
     <div class="brief-sig-row" style="margin-top:16px">
-      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 3 – Main Owner':'Firma 3 – Haupt-Eigentümer'}: ${eigK.firma}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
+      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 3 – Main Owner':'Firma 3 – Haupt-Eigentümer'}: ${esc(eigK.firma)}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
     </div>
     <div class="brief-foot">
       ${fA3?`<div class="brief-foot-col">${fA3}</div>`:''}
@@ -3802,8 +3807,8 @@ function drucke2ParteienVertrag(){
     <div class="brief-hr"></div>
     ${absK2?`<div class="brief-abs-mini">${absK2}</div>`:''}
     <div class="brief-main">
-      <div class="brief-empf"><div class="brief-empf-block"><strong>${k.firma}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${kAdr2}</div></div>
-      <div class="brief-meta-r">${T.bearbeiter?`<strong>${T.bearbeiter}</strong><br>`:''}${T.tel?`Tel. ${T.tel}<br>`:''}${T.email?`${T.email}<br>`:''}${k.nr?`Kd-Nr. ${k.nr}`:''}</div>
+      <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${kAdr2}</div></div>
+      <div class="brief-meta-r">${T.bearbeiter?`<strong>${T.bearbeiter}</strong><br>`:''}${T.tel?`Tel. ${esc(T.tel)}<br>`:''}${T.email?`${esc(T.email)}<br>`:''}${k.nr?`Kd-Nr. ${esc(k.nr)}`:''}</div>
     </div>
     <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
     <div class="brief-betreff">${_lang==='en'?'Storage Agreement':'Einlagerungsvertrag'}</div>
@@ -3812,7 +3817,7 @@ function drucke2ParteienVertrag(){
     <table class="brief-tbl" style="margin-top:6px">
       <tbody>
         <tr><td style="width:35%"><strong>${_lang==='en'?'Custodian (Party 1)':'Aufbewahrer (Firma 1)'}</strong></td><td>${T.firmenname||''}${T.firmaAdr?'<br><small>'+(T.firmaAdr||'').replace(/\n/g,'<br>')+'</small>':''}</td></tr>
-        <tr><td><strong>${_lang==='en'?'Depositor (Party 2)':'Einlagerer (Firma 2)'}</strong></td><td><strong>${k.firma}</strong>${k.ansprechpartner?'<br><small>z.Hd. '+k.ansprechpartner+'</small>':''}<br><small>${kAdr2}</small></td></tr>
+        <tr><td><strong>${_lang==='en'?'Depositor (Party 2)':'Einlagerer (Firma 2)'}</strong></td><td><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br><small>z.Hd. '+k.ansprechpartner+'</small>':''}<br><small>${kAdr2}</small></td></tr>
       </tbody>
     </table>
     <div class="brief-txt" style="margin-top:14px"><strong>§ 2 ${_lang==='en'?'Subject Matter':'Vertragsgegenstand'}</strong></div>
@@ -3850,7 +3855,7 @@ function drucke2ParteienVertrag(){
       <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 1':'Firma 1'} – ${T.firmenname||(_lang==='en'?'Custodian':'Aufbewahrer')}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
     </div>
     <div class="brief-sig-row" style="margin-top:16px">
-      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 2 – Depositor':'Firma 2 – Einlagerer'}: ${k.firma}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
+      <div class="brief-sig-box"><div class="brief-sig-label">${_lang==='en'?'Party 2 – Depositor':'Firma 2 – Einlagerer'}: ${esc(k.firma)}</div><div class="brief-sig-line">${_lang==='en'?'Signature':'Unterschrift'} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${_lang==='en'?'Date':'Datum'}: ___________</div></div>
     </div>
     <div class="brief-foot">
       ${fA2?`<div class="brief-foot-col">${fA2}</div>`:''}
@@ -3860,8 +3865,8 @@ function drucke2ParteienVertrag(){
   printHtml(html2V,pnr2+'.pdf');
 }
 function handleOvBild(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingOvBild={data:ev.target.result,type:f.type};document.getElementById('ov-bild-zone').classList.add('has-file');document.getElementById('ov-bild-prev').innerHTML=`<img src="${ev.target.result}" style="max-height:50px;max-width:100%;border-radius:4px;object-fit:contain">`;};r.readAsDataURL(f);}
-function handleUebergabeDoc(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingUDoc={data:ev.target.result,name:f.name,type:f.type};document.getElementById('doc-upzone').classList.add('has-file');document.getElementById('u-doc-prev').innerHTML=f.type.startsWith('image/')?`<img src="${ev.target.result}" style="max-height:60px;max-width:100%;border-radius:4px;object-fit:contain"><br><span style="font-size:11px;color:var(--s-txt)">${f.name}</span>`:`<div style="font-size:20px">PDF</div><span style="font-size:11px;color:var(--s-txt)">${f.name}</span>`;};r.readAsDataURL(f);}
-function handleVtDoc(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingVtDoc={data:ev.target.result,name:f.name,type:f.type};document.getElementById('vt-doc-zone').classList.add('has-file');document.getElementById('vt-doc-prev').innerHTML=`<span style="font-size:11px;color:var(--s-txt)">${f.name}</span>`;};r.readAsDataURL(f);}
+function handleUebergabeDoc(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingUDoc={data:ev.target.result,name:f.name,type:f.type};document.getElementById('doc-upzone').classList.add('has-file');document.getElementById('u-doc-prev').innerHTML=f.type.startsWith('image/')?`<img src="${ev.target.result}" style="max-height:60px;max-width:100%;border-radius:4px;object-fit:contain"><br><span style="font-size:11px;color:var(--s-txt)">${esc(f.name)}</span>`:`<div style="font-size:20px">PDF</div><span style="font-size:11px;color:var(--s-txt)">${esc(f.name)}</span>`;};r.readAsDataURL(f);}
+function handleVtDoc(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingVtDoc={data:ev.target.result,name:f.name,type:f.type};document.getElementById('vt-doc-zone').classList.add('has-file');document.getElementById('vt-doc-prev').innerHTML=`<span style="font-size:11px;color:var(--s-txt)">${esc(f.name)}</span>`;};r.readAsDataURL(f);}
 
 // ── Verträge ─────────────────────────────────────────
 function renderVertraegeListe(){
@@ -3893,7 +3898,7 @@ function renderVertraegeListe(){
       if(k.vertragsende){const tage=Math.ceil((new Date(k.vertragsende)-heute)/86400000);if(tage>=0&&tage<=60)tageBadge=`<span class="badge ${tage<=14?'br':'ba'}" style="font-size:10px;margin-left:4px">${tage}d</span>`;}
       const docBtn=k.vertrag_doc_name?`<button onclick="loadAndOpenDoc('/api/kunden/${k.id}/vertrag_doc')" style="padding:2px 7px;font-size:10px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:3px;cursor:pointer">PDF</button>`:'';
       return`<tr style="border-bottom:1px solid var(--brd)">
-        <td style="padding:7px 8px;font-weight:600">${k.firma}<br><span style="font-size:10px;color:var(--mut);font-weight:400">${k.nr}</span></td>
+        <td style="padding:7px 8px;font-weight:600">${esc(k.firma)}<br><span style="font-size:10px;color:var(--mut);font-weight:400">${esc(k.nr)}</span></td>
         <td style="padding:7px 8px;font-family:monospace;font-size:11px">${k.vertragsnr||'-'}</td>
         <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${k.vertragsbeginn?fmtDate2(k.vertragsbeginn):'-'}</td>
         <td style="padding:7px 8px;font-size:11px">${k.vertragsende?fmtDate2(k.vertragsende)+tageBadge:'-'}</td>
@@ -3947,7 +3952,7 @@ function genVertragHtml(k){
 <div class="brief-abs-mini">${T.firmenname||''}${T.firmaAdr?' | '+(T.firmaAdr||'').split('\n')[0]:''}</div>
 <div class="brief-main">
   <div class="brief-empf"><div class="brief-empf-block"><strong>${k?.firma||''}</strong>${k?.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${adr}</div></div>
-  <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${T.tel}<br>`:''}${T.email?`${T.email}<br>`:''}${k?.nr?`Kd-Nr. ${k.nr}`:''}</div>
+  <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${esc(T.tel)}<br>`:''}${T.email?`${esc(T.email)}<br>`:''}${k?.nr?`Kd-Nr. ${esc(k.nr)}`:''}</div>
 </div>
 <div class="brief-ort-dat">${T.ort||''}, ${fmtDate(today)}</div>
 <div class="brief-betreff">Einlagerungsvertrag Nr. ${vtnr}</div>
@@ -4042,8 +4047,8 @@ function genVertragEscrowHtml(ag,eig,nb,vtnr,notiz){
 <div class="brief-hr" style="background:${ac}"></div>
 <div class="brief-abs-mini">${T.firmenname||''}${T.firmaAdr?' | '+(T.firmaAdr||'').split('\n')[0]:''}</div>
 <div class="brief-main">
-  <div class="brief-empf"><div class="brief-empf-block"><strong>${ag.firma}</strong>${ag.ansprechpartner?'<br>z.Hd. '+ag.ansprechpartner:''}<br>${agAdr}</div></div>
-  <div class="brief-meta-r">${T.tel?`Tel. ${T.tel}<br>`:''} ${T.email?`${T.email}<br>`:''}</div>
+  <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(ag.firma)}</strong>${ag.ansprechpartner?'<br>z.Hd. '+ag.ansprechpartner:''}<br>${agAdr}</div></div>
+  <div class="brief-meta-r">${T.tel?`Tel. ${esc(T.tel)}<br>`:''} ${T.email?`${esc(T.email)}<br>`:''}</div>
 </div>
 <div class="brief-ort-dat">${T.ort||''}, ${fmtDate(today)}</div>
 <div class="brief-betreff">${_lang==='en'?'Three-Party Escrow Agreement':'Dreiseitiger Escrow-Einlagerungsvertrag'}</div>
@@ -4053,13 +4058,13 @@ function genVertragEscrowHtml(ag,eig,nb,vtnr,notiz){
   <thead><tr><th style="width:18%">${_lang==='en'?'Party':'Partei'}</th><th style="width:28%">${_lang==='en'?'Role':'Rolle'}</th><th>${_lang==='en'?'Company':'Firma'}</th></tr></thead>
   <tbody>
     <tr><td><strong>${_lang==='en'?'Party 1':'Firma 1'}</strong></td><td>${_lang==='en'?'Safe Operator':'Tresor-Betreiber / Einlagerer'}</td><td>${T.firmenname||''}${T.firmaAdr?'<br><small>'+(T.firmaAdr||'').replace(/\n/g,'<br>')+'</small>':''}</td></tr>
-    <tr><td><strong>${_lang==='en'?'Party 2':'Firma 2'}</strong></td><td>${_lang==='en'?'Principal / Depositor':'Auftraggeber / Hinterleger'}</td><td><strong>${ag.firma}</strong>${ag.ansprechpartner?'<br><small>z.Hd. '+ag.ansprechpartner+'</small>':''}<br><small>${agAdr}</small></td></tr>
-    <tr><td><strong>${_lang==='en'?'Party 3':'Firma 3'}</strong></td><td>${_lang==='en'?'Main Owner / Beneficiary':'Haupt-Eigentümer / Begünstigter'}</td><td><strong>${eig.firma}</strong>${eig.ansprechpartner?'<br><small>z.Hd. '+eig.ansprechpartner+'</small>':''}<br><small>${eigAdr}</small></td></tr>
-    ${nb?`<tr><td><strong>${_lang==='en'?'Party 3b':'Firma 3b'}</strong></td><td>${_lang==='en'?'Co-Owner':'Neben-Eigentümer'}</td><td><strong>${nb.firma}</strong></td></tr>`:''}
+    <tr><td><strong>${_lang==='en'?'Party 2':'Firma 2'}</strong></td><td>${_lang==='en'?'Principal / Depositor':'Auftraggeber / Hinterleger'}</td><td><strong>${esc(ag.firma)}</strong>${ag.ansprechpartner?'<br><small>z.Hd. '+ag.ansprechpartner+'</small>':''}<br><small>${agAdr}</small></td></tr>
+    <tr><td><strong>${_lang==='en'?'Party 3':'Firma 3'}</strong></td><td>${_lang==='en'?'Main Owner / Beneficiary':'Haupt-Eigentümer / Begünstigter'}</td><td><strong>${esc(eig.firma)}</strong>${eig.ansprechpartner?'<br><small>z.Hd. '+eig.ansprechpartner+'</small>':''}<br><small>${eigAdr}</small></td></tr>
+    ${nb?`<tr><td><strong>${_lang==='en'?'Party 3b':'Firma 3b'}</strong></td><td>${_lang==='en'?'Co-Owner':'Neben-Eigentümer'}</td><td><strong>${esc(nb.firma)}</strong></td></tr>`:''}
   </tbody>
 </table>
 <div class="brief-txt" style="margin-top:16px"><strong>${_lang==='en'?'§ 1 Subject Matter':'§ 1 Vertragsgegenstand'}</strong></div>
-<div class="brief-txt">${_lang==='en'?(TV.escrowPar1_en||`Party 1 (${T.firmenname||'Safe Operator'}) agrees to securely store data carriers on behalf of Party 2 (${ag.firma}). The data carriers are the property of Party 3 (${eig.firma}). Party 2 is authorised by Party 3 to instruct storage. Party 1 shall only release the data carriers upon joint written instruction by Party 2 and Party 3.`):(TV.escrowPar1||`Firma 1 (${T.firmenname||'Tresor-Betreiber'}) verpflichtet sich, im Auftrag von Firma 2 (${ag.firma}) Datenträger sicher einzulagern. Die Datenträger stehen im Eigentum von Firma 3 (${eig.firma}). Firma 2 ist von Firma 3 zur Einlagerungsbeauftragung berechtigt. Firma 1 gibt die Datenträger nur auf gemeinsame schriftliche Weisung von Firma 2 und Firma 3 heraus.`)}</div>
+<div class="brief-txt">${_lang==='en'?(TV.escrowPar1_en||`Party 1 (${T.firmenname||'Safe Operator'}) agrees to securely store data carriers on behalf of Party 2 (${esc(ag.firma)}). The data carriers are the property of Party 3 (${esc(eig.firma)}). Party 2 is authorised by Party 3 to instruct storage. Party 1 shall only release the data carriers upon joint written instruction by Party 2 and Party 3.`):(TV.escrowPar1||`Firma 1 (${T.firmenname||'Tresor-Betreiber'}) verpflichtet sich, im Auftrag von Firma 2 (${esc(ag.firma)}) Datenträger sicher einzulagern. Die Datenträger stehen im Eigentum von Firma 3 (${esc(eig.firma)}). Firma 2 ist von Firma 3 zur Einlagerungsbeauftragung berechtigt. Firma 1 gibt die Datenträger nur auf gemeinsame schriftliche Weisung von Firma 2 und Firma 3 heraus.`)}</div>
 <div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 2 Release Conditions':'§ 2 Freigabebedingungen'}</strong></div>
 <div class="brief-txt">${notiz?notiz.replace(/\n/g,'<br>'):(_lang==='en'?(TV.escrowPar2_en||'Release requires written consent of both Party 2 and Party 3. Unilateral release is excluded.'):(TV.escrowPar2||'Die Herausgabe setzt die schriftliche Zustimmung von Firma 2 und Firma 3 voraus. Eine einseitige Herausgabe ist ausgeschlossen.'))}</div>
 <div class="brief-txt" style="margin-top:8px"><strong>${_lang==='en'?'§ 3 Remuneration':'§ 3 Vergütung'}</strong></div>
@@ -4069,8 +4074,8 @@ function genVertragEscrowHtml(ag,eig,nb,vtnr,notiz){
 <div style="display:flex;gap:20px;padding:28px 20px 8px">
   <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Place, Date':'Ort, Datum'}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
   <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Party 1 – Safe Operator':'Firma 1 – Tresor-Betreiber'}: ${T.firmenname||''}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
-  <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Party 2 – Principal':'Firma 2 – Auftraggeber'}: ${ag.firma}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
-  <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Party 3 – Owner':'Firma 3 – Eigentümer'}: ${eig.firma}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
+  <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Party 2 – Principal':'Firma 2 – Auftraggeber'}: ${esc(ag.firma)}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
+  <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px">${_lang==='en'?'Party 3 – Owner':'Firma 3 – Eigentümer'}: ${esc(eig.firma)}</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999">___________</div></div>
 </div>
 <div class="brief-foot">
   ${fA?`<div class="brief-foot-col">${fA}</div>`:''}
@@ -4121,7 +4126,7 @@ function renderDashboard(){
   document.getElementById('db-vertraege-aktiv-count').textContent=aktiveVertraege.length;
   const avEl=document.getElementById('db-vertraege-aktiv-liste');
   if(!aktiveVertraege.length){avEl.innerHTML='<div class="empty">'+t('empty_db_vertraege')+'</div>';}
-  else{avEl.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_vertragsnr')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_beginn')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_ende')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">DT</th></tr></thead><tbody>'+aktiveVertraege.map(k=>{const dts=datentraeger.filter(d=>d.kunden_id===k.id&&d.status==='eingelagert');return`<tr><td style="padding:5px 6px;font-weight:600">${k.firma}</td><td style="padding:5px 6px;font-family:monospace;font-size:11px">${k.vertragsnr||'-'}</td><td style="padding:5px 6px">${fmtDate2(k.vertragsbeginn)||'-'}</td><td style="padding:5px 6px">${fmtDate2(k.vertragsende)||t('lbl_unbefristet')}</td><td style="padding:5px 6px;text-align:center"><span class="badge bg">${dts.length}</span></td></tr>`;}).join('')+'</tbody></table>';}
+  else{avEl.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_vertragsnr')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_beginn')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_ende')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">DT</th></tr></thead><tbody>'+aktiveVertraege.map(k=>{const dts=datentraeger.filter(d=>d.kunden_id===k.id&&d.status==='eingelagert');return`<tr><td style="padding:5px 6px;font-weight:600">${esc(k.firma)}</td><td style="padding:5px 6px;font-family:monospace;font-size:11px">${k.vertragsnr||'-'}</td><td style="padding:5px 6px">${fmtDate2(k.vertragsbeginn)||'-'}</td><td style="padding:5px 6px">${fmtDate2(k.vertragsende)||t('lbl_unbefristet')}</td><td style="padding:5px 6px;text-align:center"><span class="badge bg">${dts.length}</span></td></tr>`;}).join('')+'</tbody></table>';}
   // Verträge die bald ablaufen
   const heute=new Date();const d60=new Date(heute);d60.setDate(d60.getDate()+60);
   const ablaufend=kunden.filter(k=>{if(!k.vertragsende)return false;const e=new Date(k.vertragsende);return e>=heute&&e<=d60;}).sort((a,b)=>new Date(a.vertragsende)-new Date(b.vertragsende));
@@ -4129,7 +4134,7 @@ function renderDashboard(){
   const smap={aktiv:'bg',gekuendigt:'br',abgelaufen:'ba',pausiert:'ba'};
   const ablEl=document.getElementById('db-ablauf-liste');
   if(!ablaufend.length){ablEl.innerHTML='<div class="empty">'+t('empty_db_ablauf')+'</div>';}
-  else{ablEl.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_ende')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_status')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_tage')+'</th></tr></thead><tbody>'+ablaufend.map(k=>{const tage=Math.ceil((new Date(k.vertragsende)-heute)/(86400000));return`<tr><td style="padding:5px 6px;font-weight:600">${k.firma}</td><td style="padding:5px 6px;text-align:center">${fmtDate2(k.vertragsende)}</td><td style="padding:5px 6px;text-align:center"><span class="badge ${smap[k.vertragsstatus]||'ba'}">${k.vertragsstatus||'-'}</span></td><td style="padding:5px 6px;text-align:center"><span class="badge ${tage<=14?'br':'ba'}">${tage}d</span></td></tr>`;}).join('')+'</tbody></table>';}
+  else{ablEl.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_ende')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_status')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_tage')+'</th></tr></thead><tbody>'+ablaufend.map(k=>{const tage=Math.ceil((new Date(k.vertragsende)-heute)/(86400000));return`<tr><td style="padding:5px 6px;font-weight:600">${esc(k.firma)}</td><td style="padding:5px 6px;text-align:center">${fmtDate2(k.vertragsende)}</td><td style="padding:5px 6px;text-align:center"><span class="badge ${smap[k.vertragsstatus]||'ba'}">${k.vertragsstatus||'-'}</span></td><td style="padding:5px 6px;text-align:center"><span class="badge ${tage<=14?'br':'ba'}">${tage}d</span></td></tr>`;}).join('')+'</tbody></table>';}
   // Umsatz pro Kunde
   const umsatzMap={};eingelagert.forEach(d=>{if(!umsatzMap[d.kunden_id])umsatzMap[d.kunden_id]={id:d.kunden_id,netto:0,anz:0};umsatzMap[d.kunden_id].netto+=d.preis_jahr*(1-d.rabatt/100);umsatzMap[d.kunden_id].anz++;});
   const sorted=Object.values(umsatzMap).sort((a,b)=>b.netto-a.netto).slice(0,8);
@@ -4154,7 +4159,7 @@ function renderDashboard(){
     const el=document.getElementById('db-wartung-liste');
     if(!list.length){el.innerHTML='<div class="empty">'+t('empty_db_wartung')+'</div>';return;}
     el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_bezeichnung')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_standort')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_datum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_status')+'</th></tr></thead><tbody>'+
-      list.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');const cls=t.ueberfaellig?'br':'ba';const lbl=t.ueberfaellig?`⚠ ${ta('überfällig','overdue')} (${Math.abs(t.tage_bis_wartung)}d)`:ta('in ','in ')+`${t.tage_bis_wartung}d`;return`<tr style="${t.ueberfaellig?'background:var(--d-bg)':''}"><td style="padding:5px 6px;font-weight:600${t.ueberfaellig?';color:var(--d-txt)':''}">${t.bezeichnung}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${loc||'-'}</td><td style="padding:5px 6px${t.ueberfaellig?';color:var(--d-txt)':''}">${fmtDate2(t.naechster_wartungstermin)}</td><td style="padding:5px 6px"><span class="badge ${cls}">${lbl}</span></td></tr>`;}).join('')+'</tbody></table>';
+      list.map(t=>{const loc=[t.stadt,t.gebaeude,t.raum].filter(Boolean).join(', ');const cls=t.ueberfaellig?'br':'ba';const lbl=t.ueberfaellig?`⚠ ${ta('überfällig','overdue')} (${Math.abs(t.tage_bis_wartung)}d)`:ta('in ','in ')+`${t.tage_bis_wartung}d`;return`<tr style="${t.ueberfaellig?'background:var(--d-bg)':''}"><td style="padding:5px 6px;font-weight:600${t.ueberfaellig?';color:var(--d-txt)':''}">${esc(t.bezeichnung)}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${loc||'-'}</td><td style="padding:5px 6px${t.ueberfaellig?';color:var(--d-txt)':''}">${fmtDate2(t.naechster_wartungstermin)}</td><td style="padding:5px 6px"><span class="badge ${cls}">${lbl}</span></td></tr>`;}).join('')+'</tbody></table>';
   });
 }
 
@@ -4188,7 +4193,7 @@ function renderTresore(){
       const terminLbl=!_tD?'<span style="color:var(--mut);font-size:11px">—</span>':
         _tD<_tNow?`<span class="badge br" title="Termin überfällig">${fmtDate2(t.termin_wartungsfirma)}</span>`:
         `<span class="badge bi">${fmtDate2(t.termin_wartungsfirma)}</span>`;
-      return`<tr><td><strong style="cursor:pointer;color:var(--i-txt)" onclick="tresorDetail(${t.id})">${t.bezeichnung}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${t.hersteller}${t.modell?' '+t.modell:''}</span>`:''}</td><td style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center">${dtBadge}</td><td>${warnLbl}</td><td>${terminLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
+      return`<tr><td><strong style="cursor:pointer;color:var(--i-txt)" onclick="tresorDetail(${t.id})">${esc(t.bezeichnung)}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${esc(t.hersteller)}${t.modell?' '+t.modell:''}</span>`:''}</td><td style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center">${dtBadge}</td><td>${warnLbl}</td><td>${terminLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
 }
 
@@ -4277,7 +4282,7 @@ async function tresorSpeichern(){
 
 async function tresorLoeschen(id){
   const t=tresore.find(x=>x.id===id);
-  if(!confirm(ta(`Tresor "${t?.bezeichnung}" wirklich löschen? Alle zugeordneten Datenträger werden entsperrt.`,`Really delete safe "${t?.bezeichnung}"? All assigned media will be unlinked.`)))return;
+  if(!confirm(ta(`Tresor "${esc(t?.bezeichnung)}" wirklich löschen? Alle zugeordneten Datenträger werden entsperrt.`,`Really delete safe "${esc(t?.bezeichnung)}"? All assigned media will be unlinked.`)))return;
   await apiJ(`/api/tresore/${id}`,{method:'DELETE',headers:{'X-Token':TOKEN}});
   tresore=await apiJ('/api/tresore')||[];
   datentraeger=await apiJ('/api/datentraeger')||[];
@@ -4322,10 +4327,10 @@ function showKundenSub(sub){
   if(sub==='vertraege'){
     renderVertraegeListe();
     const s=document.getElementById('vt-v-kunden_id');
-    if(s)s.innerHTML='<option value="">'+t('opt_firma_waehlen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.nr} – ${k.firma}</option>`).join('');
+    if(s)s.innerHTML='<option value="">'+t('opt_firma_waehlen')+'</option>'+kunden.map(k=>`<option value="${k.id}">${esc(k.nr)} – ${esc(k.firma)}</option>`).join('');
     ['vt-e-auftraggeber_id','vt-e-eigentuemer_id','vt-e-neben_id'].forEach(sid=>{
       const se=document.getElementById(sid);if(!se)return;
-      se.innerHTML='<option value="">'+t('lbl_opt_keine_firma')+'</option>'+kunden.map(k=>`<option value="${k.id}">${k.firma}</option>`).join('');
+      se.innerHTML='<option value="">'+t('lbl_opt_keine_firma')+'</option>'+kunden.map(k=>`<option value="${k.id}">${esc(k.firma)}</option>`).join('');
     });
   }
 }
@@ -4368,7 +4373,7 @@ function tresorDetail(id){
       ${dl('Kaufpreis',t.kaufpreis?eur(t.kaufpreis):'')}
       ${dl(ta('Wartungskosten/J.','Maint. Cost/Y.'),t.wartungskosten_jaehrlich?eur(t.wartungskosten_jaehrlich):'')}
       ${dl('Eingelagerte DT',String(t.anzahl_dt||0))}
-      ${t.notizen?`<div class="drow"><span class="dlbl">Notizen</span><span style="white-space:pre-wrap">${t.notizen}</span></div>`:''}
+      ${t.notizen?`<div class="drow"><span class="dlbl">Notizen</span><span style="white-space:pre-wrap">${esc(t.notizen)}</span></div>`:''}
     </div>
     <div>
       ${dl(ta('Letzter Wartungstermin','Last Maintenance'),t.letzter_wartungstermin?fmtDate(t.letzter_wartungstermin):'')}
@@ -4564,7 +4569,7 @@ function renderGroupMappingRows(mappingJson) {
   try { mapping = JSON.parse(mappingJson || samlSettings.group_mapping || '{}'); } catch(e) {}
 
   const rollenOpts = samlRollen.map(r =>
-    `<option value="${r.id}">${r.name}</option>`).join('');
+    `<option value="${r.id}">${esc(r.name)}</option>`).join('');
 
   const entries = Object.entries(mapping);
   if (!entries.length) entries.push(['', '3']); // default empty row
@@ -4575,7 +4580,7 @@ function renderGroupMappingRows(mappingJson) {
         style="flex:2" id="gm-group-${i}" onchange="gmRowChanged()">
       <span style="font-size:11px;color:var(--mut);flex-shrink:0">→</span>
       <select style="flex:1" id="gm-rolle-${i}" onchange="gmRowChanged()">
-        ${samlRollen.map(r => `<option value="${r.id}" ${String(r.id)===String(rid)?'selected':''}>${r.name}</option>`).join('')}
+        ${samlRollen.map(r => `<option value="${r.id}" ${String(r.id)===String(rid)?'selected':''}>${esc(r.name)}</option>`).join('')}
       </select>
       <button onclick="removeGroupRow(${i})" class="btn-d" style="padding:5px 8px;font-size:11px">✕</button>
     </div>`).join('');
@@ -4604,7 +4609,7 @@ function addGroupMappingRow() {
   const el = document.getElementById('saml-group-rows');
   if (!el) return;
   const i = el.children.length;
-  const rollenOpts = samlRollen.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+  const rollenOpts = samlRollen.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join('');
   const div = document.createElement('div');
   div.id = 'gmrow-'+i;
   div.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
@@ -4752,7 +4757,7 @@ function samlAddMappingRow(groupName='', rollenId='3'){
   const c = document.getElementById('saml-group-mapping-rows');
   const row = document.createElement('div');
   row.style.cssText = 'display:flex;gap:6px;margin-bottom:6px;align-items:center';
-  const rOptions = _samlRollen.map(r=>`<option value="${r.id}" ${r.id==rollenId?'selected':''}>${r.name}</option>`).join('');
+  const rOptions = _samlRollen.map(r=>`<option value="${r.id}" ${r.id==rollenId?'selected':''}>${esc(r.name)}</option>`).join('');
   row.innerHTML = `
     <input placeholder="IdP-Gruppenname (z.B. DTV-Admins)" value="${groupName}" style="flex:2;font-size:12px" oninput="samlUpdateMappingPreview()">
     <select style="flex:1;font-size:12px" onchange="samlUpdateMappingPreview()">${rOptions}</select>
@@ -5107,17 +5112,17 @@ function globalSuche(q){
   const results=[];
   // Kunden
   kunden.filter(k=>(k.firma||'').toLowerCase().includes(q)||(k.nr||'').toLowerCase().includes(q)||(k.vertragsnr||'').toLowerCase().includes(q)).slice(0,4).forEach(k=>{
-    results.push({label:`👥 ${k.firma}`,sub:`${k.nr}${k.vertragsnr?' · VT '+k.vertragsnr:''}`,action:`showTab('kunden')`});
+    results.push({label:`👥 ${esc(k.firma)}`,sub:`${esc(k.nr)}${k.vertragsnr?' · VT '+k.vertragsnr:''}`,action:`showTab('kunden')`});
   });
   // Datenträger
   datentraeger.filter(d=>(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.interne_nr||'').toLowerCase().includes(q)).slice(0,4).forEach(d=>{
     const k=kunden.find(x=>x.id===d.kunden_id);
-    results.push({label:`💾 ${d.bezeichnung}`,sub:`${d.serial}${d.interne_nr?' · '+d.interne_nr:''} · ${k?.firma||''}`,action:`showTab('datentraeger')`});
+    results.push({label:`💾 ${esc(d.bezeichnung)}`,sub:`${esc(d.serial)}${d.interne_nr?' · '+d.interne_nr:''} · ${k?.firma||''}`,action:`showTab('datentraeger')`});
   });
   // Rechnungen aus _reHist
   if(typeof _reHist!=='undefined'){
     _reHist.filter(r=>(r.nr||'').toLowerCase().includes(q)||(r.firma||'').toLowerCase().includes(q)).slice(0,3).forEach(r=>{
-      results.push({label:`🧾 ${r.nr}`,sub:`${r.firma||''} · ${r.dat||''}`,action:`showTab('rechnung');showRechnungSub('historie')`});
+      results.push({label:`🧾 ${esc(r.nr)}`,sub:`${r.firma||''} · ${r.dat||''}`,action:`showTab('rechnung');showRechnungSub('historie')`});
     });
   }
   if(!results.length){box.innerHTML='<div style="padding:10px 14px;font-size:12px;color:var(--mut)">Keine Treffer</div>';box.style.display='block';return;}
@@ -5172,7 +5177,7 @@ async function renderDTWartungDashboard(){
       list.map(d=>{
         const cls=d.ueberfaellig?'br':(d.tage_bis_check<=14?'br':'ba');
         const lbl=d.ueberfaellig?`Überfällig (${Math.abs(d.tage_bis_check)}d)`:(`In ${d.tage_bis_check}d`);
-        return`<tr><td style="padding:5px 6px;font-weight:600;font-size:11px">${d.bezeichnung}${d.interne_nr?`<br><span style="font-size:10px;color:var(--mut)">${d.interne_nr}</span>`:''}</td><td style="padding:5px 6px;font-size:11px">${d.firma||''}</td><td style="padding:5px 6px;font-size:11px">${d.naechster_check||''}</td><td style="padding:5px 6px"><span class="badge ${cls}" style="font-size:10px">${lbl}</span></td></tr>`;
+        return`<tr><td style="padding:5px 6px;font-weight:600;font-size:11px">${esc(d.bezeichnung)}${d.interne_nr?`<br><span style="font-size:10px;color:var(--mut)">${esc(d.interne_nr)}</span>`:''}</td><td style="padding:5px 6px;font-size:11px">${d.firma||''}</td><td style="padding:5px 6px;font-size:11px">${d.naechster_check||''}</td><td style="padding:5px 6px"><span class="badge ${cls}" style="font-size:10px">${lbl}</span></td></tr>`;
       }).join('')+'</tbody></table>';
   }catch(e){}
 }

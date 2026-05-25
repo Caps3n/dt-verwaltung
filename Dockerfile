@@ -19,7 +19,8 @@ RUN pip install --no-cache-dir \
     "pysaml2>=7.0" \
     "cryptography>=41.0" \
     "pysqlcipher3>=1.2" \
-    "pyotp>=2.9"
+    "pyotp>=2.9" \
+    "flask-limiter>=3.5"
 
 COPY app/ .
 

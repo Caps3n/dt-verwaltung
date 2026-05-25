@@ -4,6 +4,17 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.11] – 2026-05-25
+
+### Security
+- **Rate-Limiting auf Login** – `/api/login` akzeptiert maximal 10 Versuche/Minute und 30/Stunde pro IP (`flask-limiter`). Bei Überschreitung: HTTP 429.
+- **XSS-Schutz: `esc()` Helper** – Neue `esc()`-Funktion im Frontend escaped alle User-kontrollierten Felder (131 Stellen: `firma`, `bezeichnung`, `serial`, `name`, `username`, `nr`, `email`, `tel`, `vertragsnr`, u.a.) in `innerHTML`-Template-Literalen. Verhindert Stored-XSS-Angriffe.
+- **HTTP Security-Headers** – Server sendet jetzt bei jeder Response: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Strict-Transport-Security`, `Referrer-Policy`, `Permissions-Policy` und `Content-Security-Policy`.
+- **Passwort-Mindestlänge** – Von 4 auf 8 Zeichen erhöht.
+- **CORS konfigurierbar** – Erlaubter Origin kann per `ALLOWED_ORIGIN` Umgebungsvariable eingeschränkt werden (Standard: `*` für Rückwärtskompatibilität).
+
+---
+
 ## [v1.7.10] – 2026-05-25
 
 ### Added
