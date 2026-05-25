@@ -4,6 +4,18 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.17] – 2026-05-25
+
+### Added
+- **QR-Code als Deep-Link URL** – Der QR-Code eines Datenträgers kodiert jetzt eine direkte URL (`https://dtv.capelan.de/#dt=<id>`) statt nur des Beschriftungstexts. Wer den Code mit seinem Smartphone scannt, öffnet die App direkt bei dem betreffenden Datenträger. Zusätzlich: „🔗 Link kopieren"-Button im QR-Overlay sowie größeres QR-Bild (200×200).
+- **In-App Kamera-Scanner** – Neuer „📷 Scannen"-Button im Datenträger-Panel. Öffnet ein Scanner-Modal mit Live-Kamerabild (bevorzugt Rückkamera). Nutzt `BarcodeDetector`-API (Chrome/Android) mit automatischem `jsQR`-Fallback für andere Browser. Erkennt sowohl Deep-Link-URLs (`#dt=<id>`) als auch ältere QR-Codes mit reiner Seriennummer/internen Nummer.
+- **Mobile-optimiertes Scan-Ergebnis** – Nach erfolgreichem Scan zeigt ein strukturiertes Ergebnis-Panel: Bezeichnung, Interne Nr., Seriennummer, Kunde, Status-Badge. Über „🔍 In Liste anzeigen" wird direkt zum Datenträger navigiert, der Tab wechselt automatisch und die Zeile wird optisch hervorgehoben (Puls-Animation).
+- **Deep-Link-Handler** – Beim App-Start wird der URL-Hash auf `#dt=<id>` geprüft. Nach dem Login navigiert die App automatisch zum entsprechenden Datenträger (Tab-Wechsel + Scroll + Highlight). Nützlich für per E-Mail oder Chat geteilte QR-Links.
+- **jsQR Bibliothek** – `jsQR 1.4.0` via cdnjs als universeller QR-Decoder in Browser-Umgebungen ohne `BarcodeDetector`-Support.
+- **`data-dtid` Attribut in DT-Tabellenzeilen** – Ermöglicht direktes Anspringen einer Zeile per JavaScript nach Scan oder Deep-Link.
+
+---
+
 ## [v1.7.16] – 2026-05-25
 
 ### Fixed

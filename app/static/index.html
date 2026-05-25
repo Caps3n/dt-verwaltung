@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>DT-Verwaltung</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -172,7 +173,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   td,th{padding:5px 4px}
   button{font-size:11px}
 }
-/* ── Dashboard v1.7.15 ─────────────────────────────────────────────────────── */
+/* ── Dashboard v1.7.17 ─────────────────────────────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -213,6 +214,24 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 #session-warn.show{display:flex}
 #session-warn button{padding:5px 14px;font-size:12px;font-weight:700;border-radius:var(--rad);border:1.5px solid var(--w-brd);background:var(--bg);color:var(--w-txt);cursor:pointer;transition:background .12s}
 #session-warn button:hover{background:var(--w-brd);color:#fff}
+/* ── QR Scanner Modal ───────────────────────────────────────────── */
+#scan-modal{display:none;position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.85);align-items:center;justify-content:center;flex-direction:column}
+#scan-modal.show{display:flex}
+#scan-box{background:var(--bg);border-radius:var(--radl);padding:1.25rem;width:min(98vw,400px);text-align:center}
+#scan-video{width:100%;max-width:360px;border-radius:var(--rad);border:2px solid var(--brd2);background:#000;aspect-ratio:1}
+#scan-canvas-hidden{display:none}
+#scan-result-box{display:none;margin-top:14px;padding:12px;border-radius:var(--rad);background:var(--s-bg);border:1px solid var(--s-brd);text-align:left}
+#scan-result-box .scan-field{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-top:8px}
+#scan-result-box .scan-val{font-size:14px;font-weight:600;color:var(--txt);margin-top:1px}
+#scan-result-box .scan-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;margin-top:6px}
+.scan-badge.eingelagert{background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd)}
+.scan-badge.uebergeben{background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd)}
+.scan-badge.unbekannt{background:var(--surf);color:var(--mut);border:1px solid var(--brd)}
+#scan-aim{position:relative;display:inline-block;width:100%;max-width:360px}
+#scan-aim::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:140px;height:140px;border:3px solid rgba(99,201,99,.85);border-radius:6px;box-shadow:0 0 0 9999px rgba(0,0,0,.35);pointer-events:none}
+/* ── Mobile DT Highlight ────────────────────────────────────────── */
+@keyframes dtHighlight{0%{box-shadow:0 0 0 0 rgba(59,130,246,.6)}70%{box-shadow:0 0 0 10px rgba(59,130,246,0)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}
+.dt-highlight-row{animation:dtHighlight 1.2s ease 3;background:var(--i-bg)!important}
 </style>
 </head>
 <body>
@@ -234,6 +253,37 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <button id="saml-login-btn" onclick="doSamlLogin()" style="display:none;width:100%;padding:9px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--rad);font-size:13px;font-weight:600;cursor:pointer;color:var(--txt)">
       <span id="saml-btn-label">Single Sign-On</span>
     </button>
+  </div>
+</div>
+
+<!-- QR SCANNER MODAL -->
+<div id="scan-modal" role="dialog" aria-modal="true" aria-label="QR-Code Scanner">
+  <div id="scan-box">
+    <div style="font-weight:700;font-size:15px;margin-bottom:12px">📷 QR-Code scannen</div>
+    <div id="scan-aim">
+      <video id="scan-video" autoplay playsinline muted></video>
+    </div>
+    <canvas id="scan-canvas-hidden"></canvas>
+    <div id="scan-status" style="font-size:12px;color:var(--mut);margin-top:8px">Kamera wird gestartet…</div>
+    <div id="scan-result-box">
+      <div class="scan-field">Bezeichnung</div>
+      <div class="scan-val" id="sr-bezeichnung">—</div>
+      <div class="scan-field">Interne Nr.</div>
+      <div class="scan-val" id="sr-interne-nr">—</div>
+      <div class="scan-field">Seriennummer</div>
+      <div class="scan-val" id="sr-serial">—</div>
+      <div class="scan-field">Kunde</div>
+      <div class="scan-val" id="sr-kunde">—</div>
+      <div class="scan-field">Status</div>
+      <div id="sr-status-badge" style="margin-top:4px"></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn-p" onclick="scanGoToDT()" style="flex:1;padding:7px 0;font-size:12px">🔍 In Liste anzeigen</button>
+        <button onclick="scanAgain()" style="flex:1;padding:7px 0;font-size:12px">↩️ Erneut scannen</button>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <button onclick="stopScan()" style="padding:6px 20px;font-size:12px;border:1px solid var(--brd2);border-radius:var(--rad);background:var(--surf);cursor:pointer;color:var(--txt)">✕ Schließen</button>
+    </div>
   </div>
 </div>
 
@@ -678,9 +728,10 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div class="stitle" data-i18n="st_dt_eingelagert">Eingelagerte Datenträger</div>
         <select id="dt-filter" onchange="renderDT()"><option value="">Alle Firmen</option></select>
         <input type="search" id="dt-search" placeholder="Typ, Seriennummer, interne Nr…" oninput="renderDT()" style="margin-top:8px">
-        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center">
           <button id="dt-status-alle" onclick="dtSetStatus('alle')" style="padding:4px 10px;font-size:11px">Alle</button>
           <button id="dt-status-eingelagert" class="btn-p" onclick="dtSetStatus('eingelagert')" style="padding:4px 10px;font-size:11px">✅ Eingelagert</button>
+          <button onclick="startScan()" style="padding:4px 10px;font-size:11px;margin-left:auto;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer;font-weight:600" title="QR-Code mit Kamera scannen">📷 Scannen</button>
         </div>
         <div style="margin-top:10px" id="dt-tabelle"><div class="empty" data-i18n="empty_dt">Keine Datenträger</div></div>
         <div id="dt-pagination" style="display:flex;align-items:center;gap:6px;margin-top:8px;justify-content:center;font-size:12px"></div>
@@ -1480,7 +1531,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.16
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.17
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -2386,6 +2437,8 @@ async function showApp() {
   document.getElementById('r-zeitraum').value=`01.01.${yr} - ${fmtDate(today)}`;
   nextReNr().then(nr=>{ document.getElementById('r-nr').value=nr; });
   _startSessionWatcher();
+  // Handle deep-link after data is loaded (loadAll runs after showApp, so defer)
+  setTimeout(checkDeepLink, 1200);
 }
 
 // ══ LOAD ALL ═════════════════════════════════════════
@@ -2693,7 +2746,7 @@ function renderDT(){
       const tresorInfo=d.tresor_bezeichnung?`<br><span style="font-size:10px;color:var(--mut)">🔒 ${d.tresor_bezeichnung}${d.tresor_raum?', Raum '+d.tresor_raum:''}</span>`:'';
       const statusBadge=d.status==='eingelagert'?`<span class="badge bg" style="font-size:10px">✅</span>`:`<span class="badge ba" style="font-size:10px">📦</span>`;
       const qrBtn=`<button onclick="showQR(${d.id},'${(d.interne_nr||d.serial).replace(/'/g,"\\'")}',this)" style="padding:2px 6px;font-size:10px;border:1px solid var(--brd2);border-radius:3px;background:var(--surf);cursor:pointer" title="QR-Code">QR</button>`;
-      return`<tr><td>${imgC}</td><td style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${esc(d.bezeichnung)}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${esc(d.serial)}${d.interne_nr?`<br><span style="color:var(--mut)">${esc(d.interne_nr)}</span>`:''}</td><td style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${statusBadge}</td><td><div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">${scanBtn}${qrBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">✎</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">✕</button>`:''}</div></td></tr>`;
+      return`<tr data-dtid="${d.id}"><td>${imgC}</td><td style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${esc(d.bezeichnung)}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${esc(d.serial)}${d.interne_nr?`<br><span style="color:var(--mut)">${esc(d.interne_nr)}</span>`:''}</td><td style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${statusBadge}</td><td><div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">${scanBtn}${qrBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">✎</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">✕</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
   // Pagination
   if(pgEl){
@@ -2704,27 +2757,47 @@ function renderDT(){
   }
 }
 
-// QR-Code Overlay
+// QR-Code Overlay (Deep-Link URL)
 let _qrInstance=null;
 function showQR(did, label, btn){
+  const deepLink=`${window.location.origin}/#dt=${did}`;
   let ov=document.getElementById('qr-overlay');
   if(!ov){
     ov=document.createElement('div');
     ov.id='qr-overlay';
     ov.style.cssText='display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:1000;align-items:center;justify-content:center;background:rgba(0,0,0,.6)';
-    ov.innerHTML='<div style="background:var(--bg);border-radius:var(--radl);padding:1.5rem;text-align:center;min-width:240px"><div id="qr-title" style="font-weight:700;margin-bottom:12px"></div><div id="qr-canvas"></div><div id="qr-label" style="font-size:11px;color:var(--mut);margin-top:8px;font-family:monospace"></div><div style="margin-top:14px;display:flex;gap:8px;justify-content:center"><button onclick="printQR()" class="btn-p" style="padding:5px 14px;font-size:12px">🖨️ Drucken</button><button onclick="document.getElementById(\'qr-overlay\').style.display=\'none\'" style="padding:5px 14px;font-size:12px">Schließen</button></div></div>';
+    ov.innerHTML=`<div style="background:var(--bg);border-radius:var(--radl);padding:1.5rem;text-align:center;min-width:260px;max-width:95vw">
+      <div id="qr-title" style="font-weight:700;margin-bottom:12px"></div>
+      <div id="qr-canvas"></div>
+      <div id="qr-label" style="font-size:10px;color:var(--mut);margin-top:8px;font-family:monospace;word-break:break-all;max-width:220px;margin-left:auto;margin-right:auto"></div>
+      <div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button onclick="printQR()" class="btn-p" style="padding:5px 14px;font-size:12px">🖨️ Drucken</button>
+        <button onclick="copyQRLink()" style="padding:5px 14px;font-size:12px;border:1px solid var(--brd2);border-radius:var(--rad);background:var(--surf);cursor:pointer;color:var(--txt)">🔗 Link kopieren</button>
+        <button onclick="document.getElementById('qr-overlay').style.display='none'" style="padding:5px 14px;font-size:12px;border:1px solid var(--brd2);border-radius:var(--rad);background:var(--surf);cursor:pointer;color:var(--txt)">Schließen</button>
+      </div>
+    </div>`;
     document.body.appendChild(ov);
   }
   document.getElementById('qr-title').textContent='QR-Code: '+label;
-  document.getElementById('qr-label').textContent=label;
+  document.getElementById('qr-label').textContent=deepLink;
   const canvas=document.getElementById('qr-canvas');
   canvas.innerHTML='';
   if(window.QRCode){
-    new QRCode(canvas,{text:label,width:180,height:180,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+    new QRCode(canvas,{text:deepLink,width:200,height:200,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
   } else {
     canvas.innerHTML='<div style="color:var(--d-txt);font-size:12px">QR-Lib nicht geladen</div>';
   }
   ov.style.display='flex';
+  // Store deep link for copy
+  ov.dataset.link=deepLink;
+}
+function copyQRLink(){
+  const link=document.getElementById('qr-overlay')?.dataset?.link||'';
+  if(!link)return;
+  navigator.clipboard.writeText(link).then(()=>{
+    const btn=document.querySelector('#qr-overlay button:nth-child(2)');
+    if(btn){const old=btn.textContent;btn.textContent='✅ Kopiert!';setTimeout(()=>btn.textContent=old,1500);}
+  }).catch(()=>alert(link));
 }
 function printQR(){
   const c=document.querySelector('#qr-canvas img')||document.querySelector('#qr-canvas canvas');
@@ -2732,8 +2805,153 @@ function printQR(){
   const w=window.open('','_blank');
   const src=c.tagName==='IMG'?c.src:c.toDataURL();
   const lbl=document.getElementById('qr-label').textContent;
-  w.document.write(`<html><body style="text-align:center;font-family:Arial;padding:20px"><img src="${src}" style="width:180px"><p style="font-size:13px;font-family:monospace;margin-top:8px">${lbl}</p></body></html>`);
+  w.document.write(`<html><body style="text-align:center;font-family:Arial;padding:20px"><img src="${src}" style="width:200px"><p style="font-size:11px;font-family:monospace;margin-top:8px;word-break:break-all">${lbl}</p></body></html>`);
   w.document.close();w.print();
+}
+
+// ── QR-Scanner (Kamera) ───────────────────────────────────────────────────────
+let _scanStream=null;
+let _scanRaf=null;
+let _scanFoundId=null;
+
+async function startScan(){
+  _scanFoundId=null;
+  const modal=document.getElementById('scan-modal');
+  const status=document.getElementById('scan-status');
+  const resBox=document.getElementById('scan-result-box');
+  modal.classList.add('show');
+  resBox.style.display='none';
+  status.textContent='Kamera wird gestartet…';
+  try{
+    _scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+    const vid=document.getElementById('scan-video');
+    vid.srcObject=_scanStream;
+    await vid.play();
+    status.textContent='QR-Code in den Rahmen halten…';
+    _scanTick();
+  }catch(e){
+    status.textContent='❌ Kamera nicht verfügbar: '+e.message;
+  }
+}
+
+function _scanTick(){
+  const vid=document.getElementById('scan-video');
+  const cvs=document.getElementById('scan-canvas-hidden');
+  if(!vid||!cvs||!_scanStream){return;}
+  if(vid.readyState<2){_scanRaf=requestAnimationFrame(_scanTick);return;}
+  const W=vid.videoWidth||320;
+  const H=vid.videoHeight||240;
+  cvs.width=W;cvs.height=H;
+  const ctx=cvs.getContext('2d');
+  ctx.drawImage(vid,0,0,W,H);
+  const img=ctx.getImageData(0,0,W,H);
+  let decoded=null;
+  // Try BarcodeDetector (Chrome/Android)
+  if(window.BarcodeDetector){
+    window.BarcodeDetector.getSupportedFormats?.().then(()=>{});
+    const bd=new BarcodeDetector({formats:['qr_code']});
+    bd.detect(vid).then(codes=>{
+      if(codes.length){_handleScanData(codes[0].rawValue);}
+      else{_scanRaf=requestAnimationFrame(_scanTick);}
+    }).catch(()=>{
+      // Fallback to jsQR
+      if(window.jsQR){const r=jsQR(img.data,W,H);if(r){_handleScanData(r.data);}else{_scanRaf=requestAnimationFrame(_scanTick);}}
+      else{_scanRaf=requestAnimationFrame(_scanTick);}
+    });
+    return;
+  }
+  // jsQR fallback
+  if(window.jsQR){
+    const r=jsQR(img.data,W,H);
+    if(r){_handleScanData(r.data);}
+    else{_scanRaf=requestAnimationFrame(_scanTick);}
+  } else {
+    document.getElementById('scan-status').textContent='❌ QR-Scan-Library nicht geladen';
+  }
+}
+
+function _handleScanData(rawValue){
+  // Try to extract DT id from deep-link URL
+  const m=rawValue.match(/#dt=(\d+)/);
+  const dtId=m?parseInt(m[1]):null;
+  // Also try matching by serial/interne_nr
+  const found=dtId
+    ? datentraeger.find(d=>d.id===dtId)
+    : datentraeger.find(d=>(d.serial||'')===(rawValue||'').trim()||(d.interne_nr||'')===(rawValue||'').trim());
+  if(!found){
+    document.getElementById('scan-status').textContent='⚠️ Kein DT gefunden für: '+rawValue.slice(0,40);
+    setTimeout(()=>{
+      document.getElementById('scan-status').textContent='QR-Code in den Rahmen halten…';
+      _scanRaf=requestAnimationFrame(_scanTick);
+    },2000);
+    return;
+  }
+  _scanFoundId=found.id;
+  // Stop scanning
+  if(_scanRaf){cancelAnimationFrame(_scanRaf);_scanRaf=null;}
+  // Fill result
+  const kunde=kunden.find(k=>k.id===found.kunden_id);
+  document.getElementById('sr-bezeichnung').textContent=found.typ||'—';
+  document.getElementById('sr-interne-nr').textContent=found.interne_nr||'—';
+  document.getElementById('sr-serial').textContent=found.serial||'—';
+  document.getElementById('sr-kunde').textContent=kunde?(kunde.nr+' – '+kunde.firma):'—';
+  const badge=document.getElementById('sr-status-badge');
+  const statusMap={eingelagert:'✅ Eingelagert',uebergeben:'📦 Übergeben'};
+  badge.innerHTML=`<span class="scan-badge ${found.status||'unbekannt'}">${statusMap[found.status]||found.status||'Unbekannt'}</span>`;
+  document.getElementById('scan-result-box').style.display='block';
+  document.getElementById('scan-status').textContent='✅ Gefunden!';
+}
+
+function scanGoToDT(){
+  if(!_scanFoundId)return;
+  stopScan();
+  // Navigate to DT tab, reset filter, highlight row
+  showTab('dt');
+  // Set filter to show all so we can find it
+  _dtStatusFilter='alle';
+  document.querySelectorAll('[id^="dt-status-"]').forEach(b=>b.classList.remove('btn-p'));
+  const ab=document.getElementById('dt-status-alle');if(ab)ab.classList.add('btn-p');
+  renderDT();
+  // Scroll and highlight
+  setTimeout(()=>{
+    const row=document.querySelector(`tr[data-dtid="${_scanFoundId}"]`);
+    if(row){row.classList.add('dt-highlight-row');row.scrollIntoView({behavior:'smooth',block:'center'});}
+  },300);
+}
+
+function scanAgain(){
+  _scanFoundId=null;
+  document.getElementById('scan-result-box').style.display='none';
+  document.getElementById('scan-status').textContent='QR-Code in den Rahmen halten…';
+  _scanTick();
+}
+
+function stopScan(){
+  if(_scanRaf){cancelAnimationFrame(_scanRaf);_scanRaf=null;}
+  if(_scanStream){_scanStream.getTracks().forEach(t=>t.stop());_scanStream=null;}
+  const vid=document.getElementById('scan-video');
+  if(vid)vid.srcObject=null;
+  document.getElementById('scan-modal').classList.remove('show');
+}
+
+// ── Deep-Link Handler (#dt=<id>) ──────────────────────────────────────────────
+function checkDeepLink(){
+  const m=window.location.hash.match(/#dt=(\d+)/);
+  if(!m)return;
+  const dtId=parseInt(m[1]);
+  history.replaceState(null,'',window.location.pathname);
+  if(!TOKEN)return; // not logged in, can't navigate
+  setTimeout(()=>{
+    showTab('dt');
+    _dtStatusFilter='alle';
+    document.querySelectorAll('[id^="dt-status-"]').forEach(b=>b.classList.remove('btn-p'));
+    const ab=document.getElementById('dt-status-alle');if(ab)ab.classList.add('btn-p');
+    renderDT();
+    setTimeout(()=>{
+      const row=document.querySelector(`tr[data-dtid="${dtId}"]`);
+      if(row){row.classList.add('dt-highlight-row');row.scrollIntoView({behavior:'smooth',block:'center'});}
+    },400);
+  },600);
 }
 
 function renderSelects(){
@@ -3547,7 +3765,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.16${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.17${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
