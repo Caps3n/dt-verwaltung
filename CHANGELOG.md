@@ -4,6 +4,18 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.12] – 2026-05-25
+
+### Changed
+- **Dashboard-Redesign (modern & minimalist)** – Komplett überarbeitetes Dashboard-Layout:
+  - **KPI-Strip** – Alle 6 KPIs (Eingelagerte DT, Kunden, Netto/Jahr, Aktive Verträge, Ablauf <60 Tage, Offene Rechnungen) jetzt in einem einzigen horizontalen Band mit vertikalen Trennlinien statt einzelner Karten.
+  - **Quick Actions** – 4 Aktions-Buttons in sauberem 4-Spalten-Grid (Emoji + Text gestapelt), klares Hover-Feedback in Akzentfarbe.
+  - **Logische Inhaltsblöcke** – Zwei 2-Spalten-Zeilen (Termine + Chart | Ablauf + Umsatz), gefolgt von Aktive Verträge (volle Breite), Wartungen (2-spaltig) und DT nach Typ (volle Breite).
+  - **Section-Header** – Einheitliche `.db-sh` Klasse: Titel linksbündig, Badge rechtsbündig, klare Trennung vom Inhalt.
+  - Responsive: KPI-Strip bricht bei <600 px auf 3×2 um, Quick Actions auf 2×2.
+
+---
+
 ## [v1.7.11] – 2026-05-25
 
 ### Security

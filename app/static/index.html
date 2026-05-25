@@ -172,6 +172,24 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   td,th{padding:5px 4px}
   button{font-size:11px}
 }
+/* ── Dashboard ─────────────────────────────────────────────────────────────── */
+.db-kpi{padding:14px 16px;display:flex;flex-direction:column;gap:4px;border-right:1px solid var(--brd)}
+.db-kpi:last-child{border-right:none}
+.db-kpi-val{font-size:26px;font-weight:700;line-height:1;color:var(--txt)}
+.db-kpi-lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.db-action-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:14px 8px;background:var(--bg);border:1px solid var(--brd);border-radius:var(--radl);font-size:12px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s,border-color .15s;text-align:center;width:100%}
+.db-action-btn:hover{background:var(--i-bg);border-color:var(--i-brd);color:var(--i-txt)}
+.db-section{margin-bottom:0}
+.db-sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--txt)}
+@media(max-width:900px){
+  .db-kpi{padding:10px 12px}
+  .db-kpi-val{font-size:20px}
+}
+@media(max-width:600px){
+  [style*="grid-template-columns:repeat(6"]{grid-template-columns:repeat(3,1fr)!important}
+  [style*="grid-template-columns:repeat(4"]{grid-template-columns:repeat(2,1fr)!important}
+  .db-kpi-val{font-size:18px}
+}
 </style>
 </head>
 <body>
@@ -232,74 +250,120 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 
 <!-- DASHBOARD -->
 <div id="page-dashboard" class="page active">
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
-    <div class="card" style="text-align:center;padding:1rem">
-      <div style="font-size:28px;font-weight:700;color:var(--i-txt)" id="db-dt-count">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="lbl_eingelagert_dt">Eingelagerte DT</div>
+
+  <!-- ── KPI Strip ─────────────────────────────────────────────────────────── -->
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);background:var(--bg);border:1px solid var(--brd);border-radius:var(--radl);margin-bottom:16px;overflow:hidden">
+    <div class="db-kpi">
+      <div class="db-kpi-val" id="db-dt-count" style="color:var(--i-txt)">—</div>
+      <div class="db-kpi-lbl" data-i18n="lbl_eingelagert_dt">Eingelagerte DT</div>
     </div>
-    <div class="card" style="text-align:center;padding:1rem">
-      <div style="font-size:28px;font-weight:700;color:var(--s-txt)" id="db-kunden-count">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_aktive_kunden">Aktive Kunden</div>
+    <div class="db-kpi">
+      <div class="db-kpi-val" id="db-kunden-count">—</div>
+      <div class="db-kpi-lbl" data-i18n="db_aktive_kunden">Kunden</div>
     </div>
-    <div class="card" style="text-align:center;padding:1rem">
-      <div style="font-size:28px;font-weight:700;color:var(--txt)" id="db-umsatz-netto">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_netto_jahr">Netto/Jahr (akt.)</div>
+    <div class="db-kpi">
+      <div class="db-kpi-val" id="db-umsatz-netto" style="font-size:20px">—</div>
+      <div class="db-kpi-lbl" data-i18n="db_netto_jahr">Netto / Jahr</div>
     </div>
-    <div class="card" style="text-align:center;padding:1rem">
-      <div style="font-size:28px;font-weight:700;color:var(--s-txt)" id="db-vertraege-aktiv-count">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_aktive_vt_kpi">Aktive Verträge</div>
+    <div class="db-kpi">
+      <div class="db-kpi-val" id="db-vertraege-aktiv-count" style="color:var(--s-txt)">—</div>
+      <div class="db-kpi-lbl" data-i18n="db_aktive_vt_kpi">Verträge aktiv</div>
     </div>
-    <div class="card" style="text-align:center;padding:1rem">
-      <div style="font-size:28px;font-weight:700;color:var(--w-txt)" id="db-ablauf-count">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_ablauf_kpi">Verträge &lt;60 Tage</div>
+    <div class="db-kpi">
+      <div class="db-kpi-val" id="db-ablauf-count" style="color:var(--w-txt)">—</div>
+      <div class="db-kpi-lbl" data-i18n="db_ablauf_kpi">&lt; 60 Tage</div>
     </div>
-    <div class="card" style="text-align:center;padding:1rem;cursor:pointer" onclick="showTab('rechnungen','historie')">
-      <div style="font-size:28px;font-weight:700;color:#dc2626" id="db-re-offen-count">-</div>
-      <div style="font-size:11px;color:var(--mut);margin-top:4px;text-transform:uppercase;letter-spacing:.4px" data-i18n="db_offene_re">Offene Rechnungen</div>
-      <div style="font-size:12px;color:#dc2626;margin-top:2px" id="db-re-offen-summe"></div>
+    <div class="db-kpi" style="cursor:pointer;border-right:none" onclick="showTab('rechnungen','historie')">
+      <div class="db-kpi-val" id="db-re-offen-count" style="color:var(--d-txt)">—</div>
+      <div class="db-kpi-lbl" data-i18n="db_offene_re">Offen <span id="db-re-offen-summe" style="font-weight:400;font-size:10px"></span></div>
     </div>
   </div>
-  <!-- Quick Actions -->
-  <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-    <button class="btn-p" style="flex:1;min-width:140px;padding:10px 14px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="showTab('datentraeger');setTimeout(()=>{document.getElementById('dt-erfassen-btn')?.click()},100)">💾 Neuer Datenträger</button>
-    <button class="btn-p" style="flex:1;min-width:140px;padding:10px 14px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="showTab('rechnungen')">🧾 Rechnung erstellen</button>
-    <button class="btn-p" style="flex:1;min-width:140px;padding:10px 14px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="showTab('uebergabe')">📦 Übergabe starten</button>
-    <button class="btn-p" style="flex:1;min-width:140px;padding:10px 14px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="showTab('kunden')">👥 Neuer Kunde</button>
+
+  <!-- ── Quick Actions ──────────────────────────────────────────────────────── -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+    <button class="db-action-btn" onclick="showTab('datentraeger');setTimeout(()=>{document.getElementById('dt-erfassen-btn')?.click()},100)">
+      <span style="font-size:18px">💾</span><span>Neuer Datenträger</span>
+    </button>
+    <button class="db-action-btn" onclick="showTab('rechnungen')">
+      <span style="font-size:18px">🧾</span><span>Rechnung erstellen</span>
+    </button>
+    <button class="db-action-btn" onclick="showTab('uebergabe')">
+      <span style="font-size:18px">📦</span><span>Übergabe starten</span>
+    </button>
+    <button class="db-action-btn" onclick="showTab('kunden')">
+      <span style="font-size:18px">👥</span><span>Neuer Kunde</span>
+    </button>
   </div>
-  <div class="g2">
-    <div class="card">
-      <div class="stitle" data-i18n="st_ablaufen">Verträge die bald ablaufen</div>
+
+  <!-- ── Main Grid ──────────────────────────────────────────────────────────── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+
+    <!-- Anstehende Termine -->
+    <div class="card db-section">
+      <div class="db-sh">
+        <span>Anstehende Termine</span>
+        <span id="db-termine-count" class="badge ba" style="font-size:10px">0</span>
+      </div>
+      <div id="db-termine-liste"><div class="empty">Laden…</div></div>
+    </div>
+
+    <!-- Umsatz Chart -->
+    <div class="card db-section">
+      <div class="db-sh"><span>📈 Umsatz letzte 12 Monate</span></div>
+      <div id="db-umsatz-chart" style="overflow-x:auto"><div class="empty">Laden…</div></div>
+    </div>
+
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+
+    <!-- Ablaufende Verträge -->
+    <div class="card db-section">
+      <div class="db-sh"><span data-i18n="st_ablaufen">Verträge bald ablaufend</span></div>
       <div id="db-ablauf-liste"><div class="empty">Laden...</div></div>
     </div>
-    <div class="card">
-      <div class="stitle" data-i18n="st_umsatz">Umsatz pro Kunde (Netto/Jahr)</div>
+
+    <!-- Umsatz pro Kunde -->
+    <div class="card db-section">
+      <div class="db-sh"><span data-i18n="st_umsatz">Umsatz pro Kunde</span></div>
       <div id="db-umsatz-liste"><div class="empty">Laden...</div></div>
     </div>
+
   </div>
-  <div class="card">
-    <div class="stitle">📅 Anstehende Termine <span id="db-termine-count" class="badge ba" style="font-size:11px">0</span></div>
-    <div id="db-termine-liste"><div class="empty">Laden…</div></div>
-  </div>
-  <div class="card">
-    <div class="stitle" data-i18n="st_aktive_vt">Aktive Verträge</div>
+
+  <!-- ── Aktive Verträge (full width) ─────────────────────────────────────── -->
+  <div class="card db-section" style="margin-bottom:12px">
+    <div class="db-sh"><span data-i18n="st_aktive_vt">Aktive Verträge</span></div>
     <div id="db-vertraege-aktiv-liste"><div class="empty">Laden...</div></div>
   </div>
-  <div class="card">
-    <div class="stitle" data-i18n="st_dt_typ">Datenträger nach Typ</div>
-    <div id="db-typen-liste" style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0"></div>
+
+  <!-- ── Wartungen + DT-Typen ──────────────────────────────────────────────── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+
+    <div class="card db-section">
+      <div class="db-sh">
+        <span data-i18n="st_db_wartung">🔒 Tresor-Wartung</span>
+        <span id="db-wartung-count" class="badge ba" style="font-size:10px">0</span>
+      </div>
+      <div id="db-wartung-liste"><div class="empty" data-i18n="empty_db_wartung">Keine anstehenden Wartungstermine</div></div>
+    </div>
+
+    <div class="card db-section">
+      <div class="db-sh">
+        <span>🔧 DT-Medienwartung</span>
+        <span id="db-dt-wartung-count" class="badge ba" style="font-size:10px">0</span>
+      </div>
+      <div id="db-dt-wartung-liste"><div class="empty">Keine anstehenden DT-Checks</div></div>
+    </div>
+
   </div>
-  <div class="card">
-    <div class="stitle" data-i18n="st_db_wartung">🔒 Tresor-Wartungstermine <span id="db-wartung-count" class="badge ba" style="font-size:11px">0</span></div>
-    <div id="db-wartung-liste"><div class="empty" data-i18n="empty_db_wartung">Keine anstehenden Wartungstermine</div></div>
+
+  <!-- ── DT nach Typ ───────────────────────────────────────────────────────── -->
+  <div class="card db-section">
+    <div class="db-sh"><span data-i18n="st_dt_typ">Datenträger nach Typ</span></div>
+    <div id="db-typen-liste" style="display:flex;flex-wrap:wrap;gap:6px;padding:2px 0"></div>
   </div>
-  <div class="card">
-    <div class="stitle">🔧 DT-Medienwartung <span id="db-dt-wartung-count" class="badge ba" style="font-size:11px">0</span></div>
-    <div id="db-dt-wartung-liste"><div class="empty">Keine anstehenden DT-Checks</div></div>
-  </div>
-  <div class="card">
-    <div class="stitle">📈 Umsatz letzte 12 Monate (Netto)</div>
-    <div id="db-umsatz-chart" style="overflow-x:auto;padding:4px 0"><div class="empty">Laden…</div></div>
-  </div>
+
 </div>
 
 <!-- TRESORE -->
@@ -1391,7 +1455,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.11
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.12
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -3432,7 +3496,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.11${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.12${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
