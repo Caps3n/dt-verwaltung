@@ -4,6 +4,13 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.19] – 2026-05-25
+
+### Changed
+- **Hamburger-Menü Breakpoint: 640px → 1024px** – Das Hamburger-Menü greift jetzt auch auf Tablets und kleinen Laptops (bis 1024px Breite). Die horizontale Tab-Leiste mit 9 Einträgen war auf diesen Geräten zu eng.
+
+---
+
 ## [v1.7.18] – 2026-05-25
 
 ### Added
