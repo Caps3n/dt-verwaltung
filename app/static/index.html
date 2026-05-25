@@ -172,23 +172,41 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   td,th{padding:5px 4px}
   button{font-size:11px}
 }
-/* ── Dashboard ─────────────────────────────────────────────────────────────── */
-.db-kpi{padding:14px 16px;display:flex;flex-direction:column;gap:4px;border-right:1px solid var(--brd)}
+/* ── Dashboard v1.7.13 ─────────────────────────────────────────────────────── */
+.db-wrap{max-width:1400px}
+/* KPI Strip */
+.db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
+.db-kpi{padding:18px 20px;display:flex;flex-direction:column;gap:6px;border-right:1px solid var(--brd);cursor:default;transition:background .12s}
 .db-kpi:last-child{border-right:none}
-.db-kpi-val{font-size:26px;font-weight:700;line-height:1;color:var(--txt)}
-.db-kpi-lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
-.db-action-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:14px 8px;background:var(--bg);border:1px solid var(--brd);border-radius:var(--radl);font-size:12px;font-weight:600;color:var(--txt);cursor:pointer;transition:background .15s,border-color .15s;text-align:center;width:100%}
-.db-action-btn:hover{background:var(--i-bg);border-color:var(--i-brd);color:var(--i-txt)}
-.db-section{margin-bottom:0}
-.db-sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--txt)}
+.db-kpi:hover{background:var(--surf)}
+.db-kpi-val{font-size:28px;font-weight:700;line-height:1;letter-spacing:-.5px;color:var(--txt)}
+.db-kpi-lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+/* Quick Actions */
+.db-actions{display:flex;gap:8px;margin-bottom:20px}
+.db-action-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:var(--bg);border:1px solid var(--brd);border-radius:var(--rad);font-size:12px;font-weight:600;color:var(--mut);cursor:pointer;transition:all .12s;flex:1;justify-content:center}
+.db-action-btn:hover{background:var(--i-bg);border-color:var(--i-brd);color:var(--i-txt);transform:translateY(-1px)}
+.db-action-btn span:first-child{font-size:15px}
+/* Sections */
+.db-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.db-section{background:var(--bg);border:1px solid var(--brd);border-radius:var(--radl);padding:16px 18px;margin-bottom:0}
+.db-sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.db-sh-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mut)}
+.db-sh .badge{font-size:10px;padding:2px 7px}
+@media(max-width:1100px){.db-kpi{padding:14px 16px}.db-kpi-val{font-size:22px}}
 @media(max-width:900px){
-  .db-kpi{padding:10px 12px}
-  .db-kpi-val{font-size:20px}
+  .db-kpis{grid-template-columns:repeat(3,1fr)}
+  .db-kpi:nth-child(3){border-right:none}
+  .db-kpi:nth-child(4),.db-kpi:nth-child(5),.db-kpi:nth-child(6){border-top:1px solid var(--brd)}
+  .db-grid2{grid-template-columns:1fr}
+  .db-actions{flex-wrap:wrap}
+  .db-action-btn{flex:1 1 calc(50% - 4px)}
 }
 @media(max-width:600px){
-  [style*="grid-template-columns:repeat(6"]{grid-template-columns:repeat(3,1fr)!important}
-  [style*="grid-template-columns:repeat(4"]{grid-template-columns:repeat(2,1fr)!important}
-  .db-kpi-val{font-size:18px}
+  .db-kpis{grid-template-columns:repeat(2,1fr)}
+  .db-kpi:nth-child(2n){border-right:none}
+  .db-kpi:nth-child(3),.db-kpi:nth-child(4),.db-kpi:nth-child(5),.db-kpi:nth-child(6){border-top:1px solid var(--brd)}
+  .db-kpi-val{font-size:20px}
+  .db-action-btn{flex:1 1 100%}
 }
 </style>
 </head>
@@ -252,7 +270,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <div id="page-dashboard" class="page active">
 
   <!-- ── KPI Strip ─────────────────────────────────────────────────────────── -->
-  <div style="display:grid;grid-template-columns:repeat(6,1fr);background:var(--bg);border:1px solid var(--brd);border-radius:var(--radl);margin-bottom:16px;overflow:hidden">
+  <div class="db-kpis">
     <div class="db-kpi">
       <div class="db-kpi-val" id="db-dt-count" style="color:var(--i-txt)">—</div>
       <div class="db-kpi-lbl" data-i18n="lbl_eingelagert_dt">Eingelagerte DT</div>
@@ -262,7 +280,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="db-kpi-lbl" data-i18n="db_aktive_kunden">Kunden</div>
     </div>
     <div class="db-kpi">
-      <div class="db-kpi-val" id="db-umsatz-netto" style="font-size:20px">—</div>
+      <div class="db-kpi-val" id="db-umsatz-netto">—</div>
       <div class="db-kpi-lbl" data-i18n="db_netto_jahr">Netto / Jahr</div>
     </div>
     <div class="db-kpi">
@@ -273,94 +291,82 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div class="db-kpi-val" id="db-ablauf-count" style="color:var(--w-txt)">—</div>
       <div class="db-kpi-lbl" data-i18n="db_ablauf_kpi">&lt; 60 Tage</div>
     </div>
-    <div class="db-kpi" style="cursor:pointer;border-right:none" onclick="showTab('rechnungen','historie')">
+    <div class="db-kpi" style="cursor:pointer" onclick="showTab('rechnungen','historie')">
       <div class="db-kpi-val" id="db-re-offen-count" style="color:var(--d-txt)">—</div>
-      <div class="db-kpi-lbl" data-i18n="db_offene_re">Offen <span id="db-re-offen-summe" style="font-weight:400;font-size:10px"></span></div>
+      <div class="db-kpi-lbl" data-i18n="db_offene_re">Offen <span id="db-re-offen-summe" style="font-weight:400"></span></div>
     </div>
   </div>
 
   <!-- ── Quick Actions ──────────────────────────────────────────────────────── -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+  <div class="db-actions">
     <button class="db-action-btn" onclick="showTab('datentraeger');setTimeout(()=>{document.getElementById('dt-erfassen-btn')?.click()},100)">
-      <span style="font-size:18px">💾</span><span>Neuer Datenträger</span>
+      <span>💾</span><span>Neuer Datenträger</span>
     </button>
-    <button class="db-action-btn" onclick="showTab('rechnungen')">
-      <span style="font-size:18px">🧾</span><span>Rechnung erstellen</span>
+    <button class="db-action-btn" onclick="showTab('rechnung')">
+      <span>🧾</span><span>Rechnung erstellen</span>
     </button>
     <button class="db-action-btn" onclick="showTab('uebergabe')">
-      <span style="font-size:18px">📦</span><span>Übergabe starten</span>
+      <span>📦</span><span>Übergabe starten</span>
     </button>
     <button class="db-action-btn" onclick="showTab('kunden')">
-      <span style="font-size:18px">👥</span><span>Neuer Kunde</span>
+      <span>👥</span><span>Neuer Kunde</span>
     </button>
   </div>
 
-  <!-- ── Main Grid ──────────────────────────────────────────────────────────── -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-
-    <!-- Anstehende Termine -->
-    <div class="card db-section">
+  <!-- ── Row 1: Termine + Chart ─────────────────────────────────────────────── -->
+  <div class="db-grid2">
+    <div class="db-section">
       <div class="db-sh">
-        <span>Anstehende Termine</span>
-        <span id="db-termine-count" class="badge ba" style="font-size:10px">0</span>
+        <span class="db-sh-lbl" data-i18n="st_termine">Anstehende Termine</span>
+        <span id="db-termine-count" class="badge ba">0</span>
       </div>
       <div id="db-termine-liste"><div class="empty">Laden…</div></div>
     </div>
-
-    <!-- Umsatz Chart -->
-    <div class="card db-section">
-      <div class="db-sh"><span>📈 Umsatz letzte 12 Monate</span></div>
+    <div class="db-section">
+      <div class="db-sh"><span class="db-sh-lbl">Umsatz — letzte 12 Monate</span></div>
       <div id="db-umsatz-chart" style="overflow-x:auto"><div class="empty">Laden…</div></div>
     </div>
-
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-
-    <!-- Ablaufende Verträge -->
-    <div class="card db-section">
-      <div class="db-sh"><span data-i18n="st_ablaufen">Verträge bald ablaufend</span></div>
-      <div id="db-ablauf-liste"><div class="empty">Laden...</div></div>
+  <!-- ── Row 2: Ablauf + Umsatz/Kunde ──────────────────────────────────────── -->
+  <div class="db-grid2">
+    <div class="db-section">
+      <div class="db-sh"><span class="db-sh-lbl" data-i18n="st_ablaufen">Verträge bald ablaufend</span></div>
+      <div id="db-ablauf-liste"><div class="empty">Laden…</div></div>
     </div>
-
-    <!-- Umsatz pro Kunde -->
-    <div class="card db-section">
-      <div class="db-sh"><span data-i18n="st_umsatz">Umsatz pro Kunde</span></div>
-      <div id="db-umsatz-liste"><div class="empty">Laden...</div></div>
+    <div class="db-section">
+      <div class="db-sh"><span class="db-sh-lbl" data-i18n="st_umsatz">Umsatz pro Kunde</span></div>
+      <div id="db-umsatz-liste"><div class="empty">Laden…</div></div>
     </div>
-
   </div>
 
-  <!-- ── Aktive Verträge (full width) ─────────────────────────────────────── -->
-  <div class="card db-section" style="margin-bottom:12px">
-    <div class="db-sh"><span data-i18n="st_aktive_vt">Aktive Verträge</span></div>
-    <div id="db-vertraege-aktiv-liste"><div class="empty">Laden...</div></div>
+  <!-- ── Aktive Verträge (full width) ──────────────────────────────────────── -->
+  <div class="db-section" style="margin-bottom:12px">
+    <div class="db-sh"><span class="db-sh-lbl" data-i18n="st_aktive_vt">Aktive Verträge</span></div>
+    <div id="db-vertraege-aktiv-liste"><div class="empty">Laden…</div></div>
   </div>
 
-  <!-- ── Wartungen + DT-Typen ──────────────────────────────────────────────── -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-
-    <div class="card db-section">
+  <!-- ── Row 3: Wartungen ───────────────────────────────────────────────────── -->
+  <div class="db-grid2">
+    <div class="db-section">
       <div class="db-sh">
-        <span data-i18n="st_db_wartung">🔒 Tresor-Wartung</span>
-        <span id="db-wartung-count" class="badge ba" style="font-size:10px">0</span>
+        <span class="db-sh-lbl" data-i18n="st_db_wartung">Tresor-Wartung</span>
+        <span id="db-wartung-count" class="badge ba">0</span>
       </div>
       <div id="db-wartung-liste"><div class="empty" data-i18n="empty_db_wartung">Keine anstehenden Wartungstermine</div></div>
     </div>
-
-    <div class="card db-section">
+    <div class="db-section">
       <div class="db-sh">
-        <span>🔧 DT-Medienwartung</span>
-        <span id="db-dt-wartung-count" class="badge ba" style="font-size:10px">0</span>
+        <span class="db-sh-lbl">DT-Medienwartung</span>
+        <span id="db-dt-wartung-count" class="badge ba">0</span>
       </div>
       <div id="db-dt-wartung-liste"><div class="empty">Keine anstehenden DT-Checks</div></div>
     </div>
-
   </div>
 
-  <!-- ── DT nach Typ ───────────────────────────────────────────────────────── -->
-  <div class="card db-section">
-    <div class="db-sh"><span data-i18n="st_dt_typ">Datenträger nach Typ</span></div>
+  <!-- ── DT nach Typ (full width) ──────────────────────────────────────────── -->
+  <div class="db-section">
+    <div class="db-sh"><span class="db-sh-lbl" data-i18n="st_dt_typ">Datenträger nach Typ</span></div>
     <div id="db-typen-liste" style="display:flex;flex-wrap:wrap;gap:6px;padding:2px 0"></div>
   </div>
 
@@ -1455,7 +1461,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.12
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.13
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -3496,7 +3502,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.12${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.13${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';

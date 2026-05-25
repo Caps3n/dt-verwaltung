@@ -4,6 +4,17 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.13] – 2026-05-25
+
+### Changed
+- **Dashboard-Redesign v2 (Typography-first)** – Zweite Iteration, nochmals minimaler:
+  - **KPI-Strip** – Eigene `.db-kpis`-Klasse, 28 px fette Zahlen mit negativem Letter-Spacing, Hover-State pro KPI-Zelle. Responsive: 3-spaltig bei < 900 px, 2-spaltig bei < 600 px mit automatischen Top-Borders.
+  - **Quick Actions** – Jetzt als kompakte horizontale Flex-Reihe (nicht mehr 4-Spalten-Grid). Icon + Text inline, flacher Look mit subtilen Borders, Lift-Effekt beim Hover (`translateY(-1px)`).
+  - **Section-Header** – Neue `.db-sh-lbl`-Klasse: 10 px, uppercase, letter-spaced, mutedfarbe — cleaner als fette Titel. Emoji aus Überschriften entfernt.
+  - **Kein Inline-Style mehr** im Dashboard-HTML — alles über dedizierte CSS-Klassen (`db-kpis`, `db-actions`, `db-grid2`, `db-section`, `db-sh`, `db-sh-lbl`).
+
+---
+
 ## [v1.7.12] – 2026-05-25
 
 ### Changed
