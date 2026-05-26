@@ -1,4 +1,4 @@
-# DT-Verwaltung v1.7.20
+# DT-Verwaltung v1.7.21
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-caps3n-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/caps3n)
 
@@ -115,11 +115,26 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 
 ### QR Codes
 - Each media record has a **QR code button** that generates a printable QR code overlay
-- QR code encodes the media's internal number for quick identification
+- QR code encodes a **deep-link URL** — scan with smartphone to open directly in the app
+- 📷 **QR scanner in search bar** — scan any QR code via the search field to navigate instantly
 
 ### Maintenance Intervals
 - Each media record can store a **maintenance interval (years)** and a **last-check date**
 - Dashboard shows a warning panel for all media with overdue or upcoming maintenance
+
+### Media Detail Tabs (v1.7.21)
+- **Foto-Tab** — upload and view a high-resolution photo per media record (separate from the list thumbnail)
+- **Notizen-Tab** — timestamped free-text notes per media record, with author tracking
+- **Wartungs-Tab** — maintenance history log with date, description, and technician
+
+### Batch Actions (v1.7.21)
+- **Multi-select checkboxes** in the media list with a "Select All" header checkbox
+- **Batch actions**: mark all selected as stored, or bulk-delete selected records
+
+### Progressive Web App / PWA (v1.7.21)
+- Installable on iOS/Android/Desktop via "Add to Homescreen"
+- Service worker caches static assets for offline access to the UI
+- Browser **push notifications** for upcoming contract expirations (with permission)
 
 ### 2FA / TOTP
 - Users can enable **two-factor authentication** (TOTP, compatible with Google Authenticator, Authy, etc.)

@@ -616,6 +616,33 @@ def init_db():
             erstellt TEXT DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    # Migration: foto columns on datentraeger
+    for col, typ in [('foto_data','BLOB'),('foto_type','TEXT')]:
+        try:
+            db.execute(f"ALTER TABLE datentraeger ADD COLUMN {col} {typ}")
+        except Exception:
+            pass
+    # Migration: dt_notizen table
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS dt_notizen (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            datentraeger_id INTEGER NOT NULL REFERENCES datentraeger(id) ON DELETE CASCADE,
+            text TEXT NOT NULL,
+            benutzer TEXT NOT NULL,
+            ts TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    # Migration: dt_wartungen table (pro-DT Wartungsprotokoll-History)
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS dt_wartungen (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            datentraeger_id INTEGER NOT NULL REFERENCES datentraeger(id) ON DELETE CASCADE,
+            datum TEXT NOT NULL,
+            notizen TEXT,
+            benutzer TEXT NOT NULL,
+            erstellt TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
     # Migration: fix umlaut encoding in uebergaben.grund (pre-i18n data)
     try:
         db.execute("UPDATE uebergaben SET grund='Rückgabe auf Wunsch' WHERE grund='Rueckgabe auf Wunsch'")
@@ -637,7 +664,7 @@ def add_security_headers(resp):
     resp.headers['X-Frame-Options'] = 'DENY'
     resp.headers['X-Content-Type-Options'] = 'nosniff'
     resp.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    resp.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    resp.headers['Permissions-Policy'] = 'geolocation=(), microphone=()'  # camera allowed for QR scanner
     # HSTS only meaningful over HTTPS – gunicorn hinter Reverse-Proxy
     resp.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     # CSP: allow self + inline styles (needed for SPA) + cdnjs for QR-code lib
@@ -2258,6 +2285,223 @@ def dt_wartung_faellig():
 @app.route('/api/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok', 'db': DB_PATH})
+
+# ─── PHASE 1: DB-BACKUP ──────────────────────────────────────────────────────
+@app.route('/api/admin/backup', methods=['GET'])
+@require_auth('manageUsers')
+def admin_backup():
+    import shutil
+    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+    tmp = f'/tmp/dtv_backup_{ts}.db'
+    shutil.copy2(DB_PATH, tmp)
+    return send_file(tmp, as_attachment=True,
+                     download_name=f'dtv_backup_{ts}.db',
+                     mimetype='application/octet-stream')
+
+# ─── PHASE 1: AUDIT-LOG CSV EXPORT ───────────────────────────────────────────
+@app.route('/api/audit_log_csv', methods=['GET'])
+@require_auth('manageUsers')
+def audit_log_csv():
+    import csv, io
+    db = get_db()
+    rows = db.execute(
+        "SELECT ts, benutzer, aktion, tabelle, datensatz_id, details FROM audit_log ORDER BY id DESC LIMIT 10000"
+    ).fetchall()
+    db.close()
+    out = io.StringIO()
+    w = csv.writer(out, delimiter=';')
+    w.writerow(['Zeitstempel','Benutzer','Aktion','Tabelle','ID','Details'])
+    for r in rows:
+        w.writerow(list(r))
+    from flask import Response
+    return Response(
+        '﻿' + out.getvalue(),   # BOM für Excel
+        content_type='text/csv; charset=utf-8',
+        headers={'Content-Disposition': 'attachment; filename=audit_log.csv'}
+    )
+
+# ─── PHASE 2: DT-FOTO ────────────────────────────────────────────────────────
+@app.route('/api/datentraeger/<int:did>/foto', methods=['POST'])
+@require_auth('write')
+def upload_dt_foto(did):
+    f = request.files.get('foto')
+    if not f:
+        return jsonify({'error': 'Kein Foto'}), 400
+    data = f.read()
+    if len(data) > 5 * 1024 * 1024:
+        return jsonify({'error': 'Foto zu groß (max. 5 MB)'}), 413
+    mime = f.content_type or 'image/jpeg'
+    db = get_db()
+    db.execute("UPDATE datentraeger SET foto_data=?, foto_type=? WHERE id=?", (data, mime, did))
+    db.commit()
+    db.close()
+    _cache_del('datentraeger')
+    log_audit(request.user['username'], 'FOTO_UPLOAD', 'datentraeger', did, f'type={mime}, size={len(data)}')
+    return jsonify({'ok': True})
+
+@app.route('/api/datentraeger/<int:did>/foto', methods=['GET'])
+@require_auth('read')
+def get_dt_foto(did):
+    db = get_db()
+    row = db.execute("SELECT foto_data, foto_type FROM datentraeger WHERE id=?", (did,)).fetchone()
+    db.close()
+    if not row or not row['foto_data']:
+        return '', 404
+    from flask import Response
+    return Response(row['foto_data'], content_type=row['foto_type'] or 'image/jpeg')
+
+@app.route('/api/datentraeger/<int:did>/foto', methods=['DELETE'])
+@require_auth('write')
+def delete_dt_foto(did):
+    db = get_db()
+    db.execute("UPDATE datentraeger SET foto_data=NULL, foto_type=NULL WHERE id=?", (did,))
+    db.commit()
+    db.close()
+    _cache_del('datentraeger')
+    return jsonify({'ok': True})
+
+# ─── PHASE 2: DT-NOTIZEN ─────────────────────────────────────────────────────
+@app.route('/api/datentraeger/<int:did>/notizen', methods=['GET'])
+@require_auth('read')
+def get_dt_notizen(did):
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, text, benutzer, ts FROM dt_notizen WHERE datentraeger_id=? ORDER BY ts DESC", (did,)
+    ).fetchall()
+    db.close()
+    return jsonify([dict(r) for r in rows])
+
+@app.route('/api/datentraeger/<int:did>/notizen', methods=['POST'])
+@require_auth('write')
+def add_dt_notiz(did):
+    data = request.json or {}
+    text = (data.get('text') or '').strip()
+    if not text:
+        return jsonify({'error': 'Text fehlt'}), 400
+    benutzer = request.user.get('username', '?')
+    ts = datetime.now().isoformat(timespec='seconds')
+    db = get_db()
+    cur = db.execute(
+        "INSERT INTO dt_notizen(datentraeger_id, text, benutzer, ts) VALUES(?,?,?,?)",
+        (did, text, benutzer, ts)
+    )
+    db.commit()
+    nid = cur.lastrowid
+    db.close()
+    return jsonify({'ok': True, 'id': nid, 'benutzer': benutzer, 'ts': ts})
+
+@app.route('/api/datentraeger/<int:did>/notizen/<int:nid>', methods=['DELETE'])
+@require_auth('write')
+def delete_dt_notiz(did, nid):
+    db = get_db()
+    db.execute("DELETE FROM dt_notizen WHERE id=? AND datentraeger_id=?", (nid, did))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+# ─── PHASE 2: DT-WARTUNGSHISTORIE ────────────────────────────────────────────
+@app.route('/api/datentraeger/<int:did>/wartungen', methods=['GET'])
+@require_auth('read')
+def get_dt_wartungen(did):
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, datum, notizen, benutzer, erstellt FROM dt_wartungen WHERE datentraeger_id=? ORDER BY datum DESC",
+        (did,)
+    ).fetchall()
+    db.close()
+    return jsonify([dict(r) for r in rows])
+
+@app.route('/api/datentraeger/<int:did>/wartungen', methods=['POST'])
+@require_auth('write')
+def add_dt_wartung(did):
+    data = request.json or {}
+    datum = (data.get('datum') or '').strip() or datetime.now().strftime('%Y-%m-%d')
+    notizen = (data.get('notizen') or '').strip()
+    benutzer = request.user.get('username', '?')
+    db = get_db()
+    db.execute("UPDATE datentraeger SET letzter_check_datum=? WHERE id=?", (datum, did))
+    cur = db.execute(
+        "INSERT INTO dt_wartungen(datentraeger_id, datum, notizen, benutzer) VALUES(?,?,?,?)",
+        (did, datum, notizen, benutzer)
+    )
+    db.commit()
+    wid = cur.lastrowid
+    db.close()
+    _cache_del('datentraeger')
+    return jsonify({'ok': True, 'id': wid, 'datum': datum, 'notizen': notizen, 'benutzer': benutzer})
+
+@app.route('/api/datentraeger/<int:did>/wartungen/<int:wid>', methods=['DELETE'])
+@require_auth('write')
+def delete_dt_wartung(did, wid):
+    db = get_db()
+    db.execute("DELETE FROM dt_wartungen WHERE id=? AND datentraeger_id=?", (wid, did))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+# ─── PHASE 4: STATS / CHARTS ─────────────────────────────────────────────────
+@app.route('/api/stats/charts', methods=['GET'])
+@require_auth('read')
+def stats_charts():
+    cached = _cache_get('stats_charts')
+    if cached:
+        return jsonify(cached)
+    db = get_db()
+    # Monthly revenue last 12 months (from netto column)
+    revenue_months, revenue_values = [], []
+    now = datetime.now()
+    for i in range(11, -1, -1):
+        yr = (now.month - i - 1) // 12
+        mo = ((now.month - i - 1) % 12) + 1
+        yr_actual = now.year + yr if (now.month - i - 1) >= 0 else now.year - 1 + yr
+        mo_str = f'{yr_actual}-{mo:02d}'
+        revenue_months.append(mo_str)
+        # netto is stored as string like "1234.56" or "1.234,56" – try float cast
+        rows = db.execute(
+            "SELECT netto FROM rechnungen WHERE erstellt LIKE ?", (mo_str+'%',)
+        ).fetchall()
+        total = 0.0
+        for r in rows:
+            try:
+                val = str(r['netto']).replace('.','').replace(',','.').replace('€','').replace(' ','')
+                total += float(val)
+            except Exception:
+                pass
+        revenue_values.append(round(total, 2))
+    # DT status counts
+    status_rows = db.execute(
+        "SELECT status, COUNT(*) as cnt FROM datentraeger GROUP BY status"
+    ).fetchall()
+    dt_status = {r['status']: r['cnt'] for r in status_rows}
+    # Vault utilization (top 8)
+    vault_rows = db.execute("""
+        SELECT t.bezeichnung, COUNT(d.id) as cnt
+        FROM tresore t
+        LEFT JOIN datentraeger d ON d.tresor_id=t.id AND d.status='eingelagert'
+        GROUP BY t.id ORDER BY cnt DESC LIMIT 8
+    """).fetchall()
+    vault_util = [{'name': r['bezeichnung'], 'cnt': r['cnt']} for r in vault_rows]
+    # Upcoming expirations (next 60 days) for push notifications
+    cutoff = (now + timedelta(days=60)).strftime('%Y-%m-%d')
+    today = now.strftime('%Y-%m-%d')
+    exp_rows = db.execute("""
+        SELECT k.firma, k.nr, k.vertrag_laufzeit
+        FROM kunden k
+        WHERE k.vertrag_laufzeit IS NOT NULL AND k.vertrag_laufzeit != ''
+          AND k.vertrag_laufzeit >= ? AND k.vertrag_laufzeit <= ?
+        ORDER BY k.vertrag_laufzeit ASC LIMIT 20
+    """, (today, cutoff)).fetchall()
+    expirations = [{'firma': r['firma'], 'nr': r['nr'], 'datum': r['vertrag_laufzeit']} for r in exp_rows]
+    db.close()
+    result = {
+        'revenue_months': revenue_months,
+        'revenue_values': revenue_values,
+        'dt_status': dt_status,
+        'vault_utilization': vault_util,
+        'upcoming_expirations': expirations,
+    }
+    _cache_set('stats_charts', result, 120)
+    return jsonify(result)
 
 # ─── STATIC ──────────────────────────────────────────────────────────────────
 @app.route('/')

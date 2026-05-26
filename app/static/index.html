@@ -6,6 +6,12 @@
 <title>DT-Verwaltung</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0065A4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="DT-Verwaltung">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -173,7 +179,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   td,th{padding:5px 4px}
   button{font-size:11px}
 }
-/* ── Dashboard v1.7.20 ─────────────────────────────────────────────────────── */
+/* ── Overlay inner tabs (v1.7.21) ──────────────────────────────────────────── */
+.ov-tab-btn{border:none;border-bottom:2px solid transparent;background:transparent;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--mut);border-radius:0;transition:color .12s}
+.ov-tab-btn:hover{color:var(--txt)}
+.ov-tab-btn.ov-tab-active{color:var(--i-txt);border-bottom-color:var(--i-brd);background:var(--i-bg)}
+/* Batch bar */
+#dt-batch-bar{display:none;align-items:center;gap:8px;background:var(--i-bg);border:1px solid var(--i-brd);border-radius:var(--rad);padding:7px 12px;margin-bottom:8px;font-size:12px;color:var(--i-txt)}
+/* ── Dashboard v1.7.21 ─────────────────────────────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -435,8 +447,20 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       <div id="db-termine-liste"><div class="empty">Laden…</div></div>
     </div>
     <div class="db-section">
-      <div class="db-sh"><span class="db-sh-lbl">Umsatz — letzte 12 Monate</span></div>
-      <div id="db-umsatz-chart" style="overflow-x:auto"><div class="empty">Laden…</div></div>
+      <div class="db-sh"><span class="db-sh-lbl">📈 Umsatz — letzte 12 Monate</span></div>
+      <div style="position:relative;height:200px"><canvas id="chart-revenue"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── Charts Row 2: DT-Status + Tresor-Auslastung ───────────────────────── -->
+  <div class="db-grid2" style="margin-bottom:12px">
+    <div class="db-section">
+      <div class="db-sh"><span class="db-sh-lbl">💾 DT nach Status</span></div>
+      <div style="position:relative;height:180px;display:flex;align-items:center;justify-content:center"><canvas id="chart-dt-status" style="max-height:160px;max-width:160px"></canvas></div>
+    </div>
+    <div class="db-section">
+      <div class="db-sh"><span class="db-sh-lbl">🔒 Tresor-Auslastung</span></div>
+      <div style="position:relative;height:180px"><canvas id="chart-vaults"></canvas></div>
     </div>
   </div>
 
@@ -782,6 +806,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <button id="dt-status-alle" onclick="dtSetStatus('alle')" style="padding:4px 10px;font-size:11px">Alle</button>
           <button id="dt-status-eingelagert" class="btn-p" onclick="dtSetStatus('eingelagert')" style="padding:4px 10px;font-size:11px">✅ Eingelagert</button>
           <button onclick="startScan()" style="padding:4px 10px;font-size:11px;margin-left:auto;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer;font-weight:600" title="QR-Code mit Kamera scannen">📷 Scannen</button>
+        </div>
+        <!-- Batch action bar -->
+        <div id="dt-batch-bar">
+          <span id="dt-batch-count" style="font-weight:700">0 ausgewählt</span>
+          <button onclick="dtBatchStatus('eingelagert')" style="padding:4px 10px;font-size:11px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:var(--rad)">✅ Als eingelagert markieren</button>
+          <button onclick="dtBatchLoeschen()" style="padding:4px 10px;font-size:11px;background:var(--d-bg);color:var(--d-txt);border:1px solid var(--d-brd);border-radius:var(--rad)">🗑 Auswahl löschen</button>
+          <button onclick="dtBatchClear()" style="padding:4px 10px;font-size:11px;margin-left:auto">✕ Abwählen</button>
         </div>
         <div style="margin-top:10px" id="dt-tabelle"><div class="empty" data-i18n="empty_dt">Keine Datenträger</div></div>
         <div id="dt-pagination" style="display:flex;align-items:center;gap:6px;margin-top:8px;justify-content:center;font-size:12px"></div>
@@ -1351,6 +1382,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <button class="btn-s" onclick="api('/api/db/export').then(r=>r.blob()).then(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='dtv.db';a.click()})" style="width:100%;margin-bottom:8px">DB exportieren (.db)</button>
         <button onclick="exportCSV('kunden')" style="width:100%;margin-bottom:8px;font-size:12px" data-i18n="btn_kunden_csv">Kunden als CSV</button>
         <button onclick="exportCSV('datentraeger')" style="width:100%;margin-bottom:8px;font-size:12px" data-i18n="btn_dt_csv">Datenträger als CSV</button>
+        <button onclick="exportAuditCSV()" style="width:100%;margin-bottom:8px;font-size:12px">📋 Audit-Log als CSV</button>
         <button onclick="dbClear()" class="btn-d" style="width:100%;font-size:12px">Factory Reset</button>
       </div>
       <div class="card" id="saml-admin-card" style="display:none">
@@ -1581,7 +1613,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.20
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.21
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1596,27 +1628,67 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <div id="dt-ov" class="overlay">
   <div class="overlay-bg" onclick="document.getElementById('dt-ov').classList.remove('open')"></div>
   <div class="overlay-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:14px;font-weight:700" data-i18n="st_dt_bearb">Datenträger bearbeiten</span><button onclick="document.getElementById('dt-ov').classList.remove('open')" style="padding:5px 10px">X</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:14px;font-weight:700" data-i18n="st_dt_bearb">Datenträger bearbeiten</span><button onclick="document.getElementById('dt-ov').classList.remove('open')" style="padding:5px 10px">✕</button></div>
+    <!-- inner tabs -->
+    <div style="display:flex;border-bottom:1px solid var(--brd2);margin-bottom:12px">
+      <button id="ov-tab-daten" class="ov-tab-btn ov-tab-active" onclick="ovDtTab('daten')">📋 Daten</button>
+      <button id="ov-tab-foto" class="ov-tab-btn" onclick="ovDtTab('foto')">📷 Foto</button>
+      <button id="ov-tab-notizen" class="ov-tab-btn" onclick="ovDtTab('notizen')">📝 Notizen</button>
+      <button id="ov-tab-wartung" class="ov-tab-btn" onclick="ovDtTab('wartung')">🔧 Wartung</button>
+    </div>
     <input type="hidden" id="ov-dt-id">
-    <label data-i18n="lbl_k_firma">Firma</label><select id="ov-dt-kunden_id"></select>
-    <label data-i18n="lbl_bezeichnung_short">Bezeichnung</label><input id="ov-dt-bezeichnung">
-    <label data-i18n="lbl_seriennr_short">Seriennummer</label><input id="ov-dt-serial">
-    <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="ov-dt-interne_nr" placeholder="z.B. INT-001">
-    <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-einfach" value="einfach" checked onchange="ovDtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-escrow" value="escrow" onchange="ovDtModusWechseln()"> Escrow / 3-Firmen</label></div>
-    <div id="ov-dt-escrow-section" style="display:none"><label><span data-i18n="lbl_haupt_eigentuemer">Haupt-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="ov-dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
-    <label><span data-i18n="lbl_neben_eigentuemer">Neben-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="ov-dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
-    <label><span data-i18n="lbl_rechnungsempfaenger">Rechnungsempfänger</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="ov-dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
-    <label data-i18n="lbl_preis">Preis</label>
-    <div class="r2"><input id="ov-dt-preis" type="number" step="0.10" min="0"><select id="ov-dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
-    <label data-i18n="lbl_rabatt">Rabatt (%)</label><input id="ov-dt-rabatt" type="number" min="0" max="100" step="0.1">
-    <label data-i18n="lbl_einl_datum">Einlagerungsdatum</label><input id="ov-dt-datum" type="date">
-    <label data-i18n="lbl_beschreibung_short">Beschreibung</label><input id="ov-dt-beschreibung">
-    <label data-i18n="lbl_tresor_select">Tresor / Schrank (optional)</label><select id="ov-dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
-    <label>🔧 Wartungsintervall (Jahre, 0 = kein)</label><input id="ov-dt-wartungsintervall_jahre" type="number" min="0" step="1" value="0" style="width:80px">
-    <label>📅 Letzter Check</label><input id="ov-dt-letzter_check_datum" type="date">
-    <label data-i18n="lbl_bild_ersetzen">Bild ersetzen</label>
-    <div class="upzone" id="ov-bild-zone" onclick="document.getElementById('ov-bild-file').click()"><input type="file" id="ov-bild-file" accept="image/*" style="display:none" onchange="handleOvBild(event)"><div id="ov-bild-prev" data-i18n="txt_klicken">Klicken</div></div>
-    <div style="margin-top:14px;display:flex;gap:8px"><button onclick="document.getElementById('dt-ov').classList.remove('open')" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button><button class="btn-p" onclick="dtSpeichern()" style="flex:1" data-i18n="lbl_speichern">Speichern</button></div>
+    <!-- STAMMDATEN PANEL -->
+    <div id="ov-panel-daten">
+      <label data-i18n="lbl_k_firma">Firma</label><select id="ov-dt-kunden_id"></select>
+      <label data-i18n="lbl_bezeichnung_short">Bezeichnung</label><input id="ov-dt-bezeichnung">
+      <label data-i18n="lbl_seriennr_short">Seriennummer</label><input id="ov-dt-serial">
+      <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="ov-dt-interne_nr" placeholder="z.B. INT-001">
+      <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-einfach" value="einfach" checked onchange="ovDtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-escrow" value="escrow" onchange="ovDtModusWechseln()"> Escrow / 3-Firmen</label></div>
+      <div id="ov-dt-escrow-section" style="display:none"><label><span data-i18n="lbl_haupt_eigentuemer">Haupt-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="ov-dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
+      <label><span data-i18n="lbl_neben_eigentuemer">Neben-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="ov-dt-neben_eigentuemer_id"><option value="">— keiner —</option></select>
+      <label><span data-i18n="lbl_rechnungsempfaenger">Rechnungsempfänger</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="ov-dt-rechnungsempfaenger_id"><option value="">— gleiche Firma —</option></select></div>
+      <label data-i18n="lbl_preis">Preis</label>
+      <div class="r2"><input id="ov-dt-preis" type="number" step="0.10" min="0"><select id="ov-dt-einheit"><option value="monat">pro Monat</option><option value="jahr">pro Jahr</option></select></div>
+      <label data-i18n="lbl_rabatt">Rabatt (%)</label><input id="ov-dt-rabatt" type="number" min="0" max="100" step="0.1">
+      <label data-i18n="lbl_einl_datum">Einlagerungsdatum</label><input id="ov-dt-datum" type="date">
+      <label data-i18n="lbl_beschreibung_short">Beschreibung</label><input id="ov-dt-beschreibung">
+      <label data-i18n="lbl_tresor_select">Tresor / Schrank (optional)</label><select id="ov-dt-tresor_id"><option value="">— kein Tresor zugeordnet —</option></select>
+      <label>🔧 Wartungsintervall (Jahre, 0 = kein)</label><input id="ov-dt-wartungsintervall_jahre" type="number" min="0" step="1" value="0" style="width:80px">
+      <label>📅 Letzter Check</label><input id="ov-dt-letzter_check_datum" type="date">
+      <label data-i18n="lbl_bild_ersetzen">Listenbild (Thumbnail)</label>
+      <div class="upzone" id="ov-bild-zone" onclick="document.getElementById('ov-bild-file').click()"><input type="file" id="ov-bild-file" accept="image/*" style="display:none" onchange="handleOvBild(event)"><div id="ov-bild-prev" data-i18n="txt_klicken">Klicken</div></div>
+      <div style="margin-top:14px;display:flex;gap:8px"><button onclick="document.getElementById('dt-ov').classList.remove('open')" style="flex:1" data-i18n="lbl_abbrechen">Abbrechen</button><button class="btn-p" onclick="dtSpeichern()" style="flex:1" data-i18n="lbl_speichern">💾 Speichern</button></div>
+    </div>
+    <!-- FOTO PANEL -->
+    <div id="ov-panel-foto" style="display:none">
+      <div id="ov-foto-preview" style="text-align:center;margin-bottom:12px;min-height:120px;display:flex;align-items:center;justify-content:center;background:var(--surf);border-radius:var(--rad);border:1px dashed var(--brd2);overflow:hidden">
+        <span style="color:var(--hint);font-size:12px">Kein Foto vorhanden</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn-p" style="flex:1" onclick="document.getElementById('ov-foto-file').click()">📷 Foto hochladen / ersetzen</button>
+        <button class="btn-d" id="ov-foto-del-btn" style="display:none;padding:8px 12px" onclick="ovFotoLoeschen()" title="Foto löschen">🗑</button>
+      </div>
+      <input type="file" id="ov-foto-file" accept="image/*" style="display:none" onchange="ovFotoHochladen(event)">
+      <div id="ov-foto-status" style="font-size:11px;color:var(--mut);text-align:center;margin-top:4px"></div>
+    </div>
+    <!-- NOTIZEN PANEL -->
+    <div id="ov-panel-notizen" style="display:none">
+      <div id="ov-notizen-liste" style="margin-bottom:12px;max-height:220px;overflow-y:auto"><div class="empty">Lade…</div></div>
+      <div style="border-top:1px solid var(--brd);padding-top:10px">
+        <label>Neue Notiz</label>
+        <textarea id="ov-notiz-text" rows="3" placeholder="Notiz eingeben…" style="width:100%;resize:vertical"></textarea>
+        <button class="btn-p btn-full" style="margin-top:8px" onclick="ovNotizHinzufuegen()">💬 Notiz speichern</button>
+      </div>
+    </div>
+    <!-- WARTUNG PANEL -->
+    <div id="ov-panel-wartung" style="display:none">
+      <div id="ov-wartung-liste" style="margin-bottom:12px;max-height:200px;overflow-y:auto"><div class="empty">Lade…</div></div>
+      <div style="border-top:1px solid var(--brd);padding-top:10px">
+        <label class="req">Datum</label><input id="ov-wartung-datum" type="date">
+        <label>Notizen / Beschreibung</label><input id="ov-wartung-notizen" placeholder="Was wurde gemacht?">
+        <button class="btn-p btn-full" style="margin-top:8px" onclick="ovWartungHinzufuegen()">🔧 Wartung eintragen</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2489,6 +2561,12 @@ async function showApp() {
   _startSessionWatcher();
   // Handle deep-link after data is loaded (loadAll runs after showApp, so defer)
   setTimeout(checkDeepLink, 1200);
+  // Register service worker (PWA)
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
+  // Request notification permission after 3s
+  setTimeout(requestNotifPermission, 3000);
 }
 
 // ══ LOAD ALL ═════════════════════════════════════════
@@ -2733,6 +2811,8 @@ async function dtBearbeiten(id) {
   if(d.hat_bild){const img=await apiJ(`/api/datentraeger/${id}/bild`);if(img)document.getElementById('ov-bild-prev').innerHTML=`<img src="${img.data}" style="max-height:50px;max-width:100%;border-radius:4px;object-fit:contain">`;}
   else document.getElementById('ov-bild-prev').textContent=t('txt_klicken');
   pendingOvBild=null;document.getElementById('ov-bild-file').value='';
+  // Reset to Stammdaten tab
+  ovDtTab('daten');
   document.getElementById('dt-ov').classList.add('open');
 }
 
@@ -2755,6 +2835,7 @@ async function dtLoeschen(id) {
 
 let _dtStatusFilter='eingelagert';
 let _dtPage=0;const _dtPerPage=25;
+let _dtSelected=new Set();
 // Sort state
 let _kSort={col:'firma',dir:1};
 let _dtSort={col:'bezeichnung',dir:1};
@@ -2788,15 +2869,16 @@ function renderDT(){
   const page=list.slice(_dtPage*_dtPerPage,(_dtPage+1)*_dtPerPage);
   if(!page.length){el.innerHTML='<div class="empty">'+t('empty_dt')+'</div>';if(pgEl)pgEl.innerHTML='';return;}
   const th=(lbl,col)=>_thS(lbl,'dtSortBy',_dtSort,col);
-  el.innerHTML=`<table><thead><tr><th style="width:7%">${t('col_bild')}</th>${th(t('col_firma'),'kunden_nr')}${th(t('col_typ'),'bezeichnung')}${th(t('col_serial'),'serial')}${th(t('col_preis'),'preis_jahr')}<th style="width:8%">Status</th><th style="width:20%"></th></tr></thead><tbody>`+
+  el.innerHTML=`<table><thead><tr><th style="width:30px"><input type="checkbox" id="dt-sel-all" onchange="dtBatchToggleAll(this)" style="width:14px;height:14px"></th><th style="width:7%">${t('col_bild')}</th>${th(t('col_firma'),'kunden_nr')}${th(t('col_typ'),'bezeichnung')}${th(t('col_serial'),'serial')}${th(t('col_preis'),'preis_jahr')}<th style="width:8%">Status</th><th style="width:20%"></th></tr></thead><tbody>`+
     page.map(d=>{
+      const chk=_dtSelected.has(d.id)?'checked':'';
       const imgC=d.hat_bild?`<img src="" class="thumb" style="cursor:pointer" onclick="loadAndShowImg('/api/datentraeger/${d.id}/bild',this)">`:'<div style="width:34px;height:34px;background:var(--surf);border-radius:6px;border:1px dashed var(--brd2)"></div>';
       const scanBtn=d.hat_eingang_doc?`<button onclick="loadAndOpenDoc('/api/datentraeger/${d.id}/eingang_doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Eingangsprotokoll anzeigen">📄 ${_lang==='en'?'Incoming':'Eingang'}</button>`:`<span style="font-size:10px;color:var(--mut)">${t('kein_scan')}</span>`;
       const pl=d.einheit==='monat'?`${eur(d.preis)}/M`:`${eur(d.preis)}/J`;
       const tresorInfo=d.tresor_bezeichnung?`<br><span style="font-size:10px;color:var(--mut)">🔒 ${d.tresor_bezeichnung}${d.tresor_raum?', Raum '+d.tresor_raum:''}</span>`:'';
       const statusBadge=d.status==='eingelagert'?`<span class="badge bg" style="font-size:10px">✅</span>`:`<span class="badge ba" style="font-size:10px">📦</span>`;
       const qrBtn=`<button onclick="showQR(${d.id},'${(d.interne_nr||d.serial).replace(/'/g,"\\'")}',this)" style="padding:2px 6px;font-size:10px;border:1px solid var(--brd2);border-radius:3px;background:var(--surf);cursor:pointer" title="QR-Code">QR</button>`;
-      return`<tr data-dtid="${d.id}"><td>${imgC}</td><td style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${esc(d.bezeichnung)}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${esc(d.serial)}${d.interne_nr?`<br><span style="color:var(--mut)">${esc(d.interne_nr)}</span>`:''}</td><td style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${statusBadge}</td><td><div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">${scanBtn}${qrBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">✎</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">✕</button>`:''}</div></td></tr>`;
+      return`<tr data-dtid="${d.id}"><td><input type="checkbox" class="dt-sel-cb" data-id="${d.id}" ${chk} onchange="dtBatchCheck(${d.id},this.checked)" style="width:14px;height:14px"></td><td>${imgC}</td><td style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${esc(d.bezeichnung)}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${esc(d.serial)}${d.interne_nr?`<br><span style="color:var(--mut)">${esc(d.interne_nr)}</span>`:''}</td><td style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${statusBadge}</td><td><div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">${scanBtn}${qrBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">✎</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">✕</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
   // Pagination
   if(pgEl){
@@ -3883,7 +3965,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.20${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.21${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -5581,10 +5663,12 @@ function globalSuche(q){
   kunden.filter(k=>(k.firma||'').toLowerCase().includes(q)||(k.nr||'').toLowerCase().includes(q)||(k.vertragsnr||'').toLowerCase().includes(q)).slice(0,4).forEach(k=>{
     results.push({label:`👥 ${esc(k.firma)}`,sub:`${esc(k.nr)}${k.vertragsnr?' · VT '+k.vertragsnr:''}`,action:`showTab('kunden')`});
   });
-  // Datenträger
-  datentraeger.filter(d=>(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.interne_nr||'').toLowerCase().includes(q)).slice(0,4).forEach(d=>{
+  // Datenträger (alle inkl. archivierte)
+  datentraeger.filter(d=>(d.bezeichnung||'').toLowerCase().includes(q)||(d.serial||'').toLowerCase().includes(q)||(d.interne_nr||'').toLowerCase().includes(q)).slice(0,5).forEach(d=>{
     const k=kunden.find(x=>x.id===d.kunden_id);
-    results.push({label:`💾 ${esc(d.bezeichnung)}`,sub:`${esc(d.serial)}${d.interne_nr?' · '+d.interne_nr:''} · ${k?.firma||''}`,action:`showTab('datentraeger')`});
+    const isArch=d.status==='uebergeben';
+    const statusLbl=isArch?` · <span style="color:var(--w-txt);font-size:10px">Übergeben</span>`:'';
+    results.push({label:`💾 ${esc(d.bezeichnung)}`,sub:`${esc(d.serial)}${d.interne_nr?' · '+d.interne_nr:''} · ${k?.firma||''}${isArch?' (archiviert)':''}`,action:`showTab('datentraeger');${isArch?"dtSetStatus('alle')":''}`});
   });
   // Rechnungen aus _reHist
   if(typeof _reHist!=='undefined'){
@@ -5878,6 +5962,276 @@ function renderTerminWidget(){
   el.innerHTML=html;
 }
 
+// ══ BATCH SELECTION ══════════════════════════════════════════════════════════
+function _dtBatchUpdateBar(){
+  const bar=document.getElementById('dt-batch-bar');
+  const cnt=document.getElementById('dt-batch-count');
+  if(bar){bar.style.display=_dtSelected.size>0?'flex':'none';}
+  if(cnt)cnt.textContent=`${_dtSelected.size} ausgewählt`;
+}
+function dtBatchCheck(id,checked){
+  if(checked)_dtSelected.add(id); else _dtSelected.delete(id);
+  _dtBatchUpdateBar();
+}
+function dtBatchToggleAll(cb){
+  document.querySelectorAll('.dt-sel-cb').forEach(el=>{
+    const id=parseInt(el.dataset.id);
+    el.checked=cb.checked;
+    if(cb.checked)_dtSelected.add(id); else _dtSelected.delete(id);
+  });
+  _dtBatchUpdateBar();
+}
+function dtBatchClear(){_dtSelected.clear();renderDT();}
+async function dtBatchStatus(status){
+  if(!_dtSelected.size)return;
+  if(!confirm(`Status für ${_dtSelected.size} DT auf "${status}" setzen?`))return;
+  const ids=[..._dtSelected];
+  for(const id of ids){
+    await apiPut(`/api/datentraeger/${id}`,{status});
+    const i=datentraeger.findIndex(d=>d.id===id);
+    if(i>=0)datentraeger[i].status=status;
+  }
+  _dtSelected.clear();renderAlles();
+}
+async function dtBatchLoeschen(){
+  if(!_dtSelected.size)return;
+  if(!can('delete')){alert(t('msg_no_perm'));return;}
+  if(!confirm(`${_dtSelected.size} Datenträger wirklich löschen?`))return;
+  const ids=[..._dtSelected];
+  for(const id of ids){await apiDel(`/api/datentraeger/${id}`);}
+  datentraeger=datentraeger.filter(d=>!ids.includes(d.id));
+  _dtSelected.clear();renderAlles();
+}
+
+// ══ OVERLAY INNER TABS ═══════════════════════════════════════════════════════
+function ovDtTab(tab){
+  ['daten','foto','notizen','wartung'].forEach(name=>{
+    const panel=document.getElementById('ov-panel-'+name);
+    const btn=document.getElementById('ov-tab-'+name);
+    if(panel)panel.style.display=name===tab?'block':'none';
+    if(btn){btn.classList.toggle('ov-tab-active',name===tab);}
+  });
+  const id=parseInt(document.getElementById('ov-dt-id').value);
+  if(!id)return;
+  if(tab==='foto')ovFotoLaden(id);
+  if(tab==='notizen')ovNotizenLaden(id);
+  if(tab==='wartung')ovWartungLaden(id);
+}
+
+// ── Foto ─────────────────────────────────────────────────────────────────────
+async function ovFotoLaden(id){
+  const prev=document.getElementById('ov-foto-preview');
+  const del=document.getElementById('ov-foto-del-btn');
+  if(!prev)return;
+  prev.innerHTML='<span style="color:var(--hint);font-size:12px">Lade…</span>';
+  try{
+    const d=await apiJ(`/api/datentraeger/${id}/foto`);
+    if(d&&d.data){
+      prev.innerHTML=`<img src="${d.data}" style="max-width:100%;max-height:240px;border-radius:var(--rad);object-fit:contain">`;
+      if(del)del.style.display='inline-flex';
+    } else {
+      prev.innerHTML='<span style="color:var(--hint);font-size:12px">Kein Foto vorhanden</span>';
+      if(del)del.style.display='none';
+    }
+  }catch(e){prev.innerHTML='<span style="color:var(--d-txt);font-size:12px">Fehler beim Laden</span>';}
+}
+async function ovFotoHochladen(event){
+  const file=event.target.files[0];if(!file)return;
+  if(file.size>5*1024*1024){alert('Foto zu groß (max. 5 MB)');return;}
+  const id=parseInt(document.getElementById('ov-dt-id').value);if(!id)return;
+  const status=document.getElementById('ov-foto-status');
+  if(status)status.textContent='Wird hochgeladen…';
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    const base64=ev.target.result.split(',')[1];
+    const res=await apiPost(`/api/datentraeger/${id}/foto`,{data:base64,mime:file.type});
+    if(status)status.textContent=res?'✅ Foto gespeichert':'❌ Fehler';
+    setTimeout(()=>{if(status)status.textContent='';},2000);
+    if(res)ovFotoLaden(id);
+  };
+  reader.readAsDataURL(file);
+  event.target.value='';
+}
+async function ovFotoLoeschen(){
+  const id=parseInt(document.getElementById('ov-dt-id').value);if(!id)return;
+  if(!confirm('Foto löschen?'))return;
+  await apiDel(`/api/datentraeger/${id}/foto`);
+  ovFotoLaden(id);
+}
+
+// ── Notizen ──────────────────────────────────────────────────────────────────
+async function ovNotizenLaden(id){
+  const el=document.getElementById('ov-notizen-liste');if(!el)return;
+  el.innerHTML='<div class="empty">Lade…</div>';
+  try{
+    const list=await apiJ(`/api/datentraeger/${id}/notizen`)||[];
+    if(!list.length){el.innerHTML='<div class="empty">Keine Notizen vorhanden</div>';return;}
+    el.innerHTML=list.map(n=>`<div style="border:1px solid var(--brd);border-radius:var(--rad);padding:8px 10px;margin-bottom:6px;background:var(--surf)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-size:12px;flex:1;white-space:pre-wrap">${esc(n.text)}</div><button onclick="ovNotizLoeschen(${id},${n.id})" style="padding:2px 6px;font-size:10px;color:var(--d-txt);border:1px solid var(--d-brd);border-radius:3px;background:transparent;margin-left:6px;flex-shrink:0">✕</button></div><div style="font-size:10px;color:var(--mut);margin-top:4px">${esc(n.benutzer)} · ${n.ts?n.ts.slice(0,16):''}</div></div>`).join('');
+  }catch(e){el.innerHTML='<div class="empty">Fehler beim Laden</div>';}
+}
+async function ovNotizHinzufuegen(){
+  const id=parseInt(document.getElementById('ov-dt-id').value);if(!id)return;
+  const txt=document.getElementById('ov-notiz-text').value.trim();
+  if(!txt){alert('Bitte Notiz eingeben');return;}
+  const r=await apiPost(`/api/datentraeger/${id}/notizen`,{text:txt});
+  if(r){document.getElementById('ov-notiz-text').value='';ovNotizenLaden(id);}
+}
+async function ovNotizLoeschen(dtId,nid){
+  if(!confirm('Notiz löschen?'))return;
+  const r=await apiDel(`/api/datentraeger/${dtId}/notizen/${nid}`);
+  if(r)ovNotizenLaden(dtId);
+}
+
+// ── Wartung ──────────────────────────────────────────────────────────────────
+async function ovWartungLaden(id){
+  const el=document.getElementById('ov-wartung-liste');if(!el)return;
+  el.innerHTML='<div class="empty">Lade…</div>';
+  try{
+    const list=await apiJ(`/api/datentraeger/${id}/wartungen`)||[];
+    if(!list.length){el.innerHTML='<div class="empty">Keine Wartungseinträge vorhanden</div>';return;}
+    el.innerHTML=list.map(w=>`<div style="border:1px solid var(--brd);border-radius:var(--rad);padding:8px 10px;margin-bottom:6px;background:var(--surf)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-weight:600;font-size:12px">🔧 ${w.datum||''}</div>${w.notizen?`<div style="font-size:11px;color:var(--mut);margin-top:2px">${esc(w.notizen)}</div>`:''}</div><button onclick="ovWartungLoeschen(${id},${w.id})" style="padding:2px 6px;font-size:10px;color:var(--d-txt);border:1px solid var(--d-brd);border-radius:3px;background:transparent;flex-shrink:0">✕</button></div><div style="font-size:10px;color:var(--mut);margin-top:4px">${esc(w.benutzer||'')} · ${w.erstellt?w.erstellt.slice(0,16):''}</div></div>`).join('');
+  }catch(e){el.innerHTML='<div class="empty">Fehler beim Laden</div>';}
+}
+async function ovWartungHinzufuegen(){
+  const id=parseInt(document.getElementById('ov-dt-id').value);if(!id)return;
+  const datum=document.getElementById('ov-wartung-datum').value;
+  if(!datum){alert('Datum eingeben');return;}
+  const notizen=document.getElementById('ov-wartung-notizen').value.trim();
+  const r=await apiPost(`/api/datentraeger/${id}/wartungen`,{datum,notizen});
+  if(r){document.getElementById('ov-wartung-datum').value='';document.getElementById('ov-wartung-notizen').value='';ovWartungLaden(id);}
+}
+async function ovWartungLoeschen(dtId,wid){
+  if(!confirm('Wartungseintrag löschen?'))return;
+  const r=await apiDel(`/api/datentraeger/${dtId}/wartungen/${wid}`);
+  if(r)ovWartungLaden(dtId);
+}
+
+// ══ AUDIT LOG CSV EXPORT ═════════════════════════════════════════════════════
+async function exportAuditCSV(){
+  try{
+    const r=await api('/api/audit_log_csv');
+    if(!r.ok){alert('Fehler beim Export');return;}
+    const blob=await r.blob();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`audit_log_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();URL.revokeObjectURL(a.href);
+  }catch(e){alert('Export-Fehler: '+e.message);}
+}
+
+// ══ CHART.JS RENDERING ═══════════════════════════════════════════════════════
+let _chartRevenue=null,_chartDTStatus=null,_chartVaults=null;
+async function renderCharts(){
+  try{
+    const data=await apiJ('/api/stats/charts');
+    if(!data)return;
+    // ── Revenue bar chart ──────────────────────────────────────────────────
+    const cvRev=document.getElementById('chart-revenue');
+    if(cvRev&&window.Chart){
+      if(_chartRevenue){_chartRevenue.destroy();_chartRevenue=null;}
+      const labels=data.revenue_months.map(m=>m.slice(5));
+      _chartRevenue=new Chart(cvRev,{
+        type:'bar',
+        data:{labels,datasets:[{label:'Netto €',data:data.revenue_values,
+          backgroundColor:'rgba(0,101,164,.72)',borderColor:'rgba(0,101,164,1)',
+          borderWidth:1,borderRadius:4,borderSkipped:false}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},
+            tooltip:{callbacks:{label:ctx=>`€ ${(ctx.raw||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})}`}}},
+          scales:{y:{beginAtZero:true,ticks:{callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:`${v}`,font:{size:10}},grid:{color:'rgba(128,128,128,.1)'}},
+            x:{grid:{display:false},ticks:{font:{size:10}}}}}
+      });
+    }
+    // ── DT status donut ────────────────────────────────────────────────────
+    const cvDT=document.getElementById('chart-dt-status');
+    if(cvDT&&window.Chart){
+      if(_chartDTStatus){_chartDTStatus.destroy();_chartDTStatus=null;}
+      const statusData=data.dt_status||{};
+      const eingelagert=statusData.eingelagert||0;
+      const uebergeben=statusData.uebergeben||0;
+      if(eingelagert+uebergeben>0){
+        _chartDTStatus=new Chart(cvDT,{
+          type:'doughnut',
+          data:{labels:['Eingelagert','Übergeben'],datasets:[{data:[eingelagert,uebergeben],
+            backgroundColor:['rgba(16,185,129,.85)','rgba(251,191,36,.85)'],
+            borderWidth:2,borderColor:'transparent'}]},
+          options:{responsive:true,maintainAspectRatio:true,cutout:'65%',
+            plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:8}},
+              tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw}`}}}}
+        });
+      } else if(cvDT.parentElement){
+        cvDT.parentElement.innerHTML='<div class="empty" style="font-size:11px;padding:1rem">Keine Datenträger</div>';
+      }
+    }
+    // ── Vault utilization bar (horizontal) ────────────────────────────────
+    const cvVault=document.getElementById('chart-vaults');
+    if(cvVault&&window.Chart){
+      if(_chartVaults){_chartVaults.destroy();_chartVaults=null;}
+      const vaults=data.vault_utilization||[];
+      if(vaults.length){
+        _chartVaults=new Chart(cvVault,{
+          type:'bar',
+          data:{labels:vaults.map(v=>v.name.length>14?v.name.slice(0,14)+'…':v.name),
+            datasets:[{label:'DT',data:vaults.map(v=>v.cnt),
+              backgroundColor:'rgba(0,101,164,.72)',borderRadius:3,borderSkipped:false}]},
+          options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+            plugins:{legend:{display:false},
+              tooltip:{callbacks:{label:ctx=>`${ctx.raw} DT`}}},
+            scales:{x:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}},grid:{color:'rgba(128,128,128,.1)'}},
+              y:{grid:{display:false},ticks:{font:{size:10}}}}}
+        });
+      } else if(cvVault.parentElement){
+        cvVault.parentElement.innerHTML='<div class="empty" style="font-size:11px;padding:1rem">Keine Tresore</div>';
+      }
+    }
+    // ── Browser push notifications for upcoming expirations ───────────────
+    if('Notification' in window&&Notification.permission==='granted'&&data.upcoming_expirations?.length){
+      if(!sessionStorage.getItem('_notif_sent_today')){
+        sessionStorage.setItem('_notif_sent_today','1');
+        data.upcoming_expirations.slice(0,2).forEach((e,i)=>{
+          setTimeout(()=>{
+            try{new Notification('⚠️ Vertragsablauf: '+e.firma,{body:'Läuft ab am: '+e.datum,icon:'/icon-192.png',tag:'expiry-'+e.nr});}
+            catch(err){}
+          },i*1200);
+        });
+      }
+    }
+  }catch(err){console.warn('[renderCharts]',err);}
+}
+
+// ══ SWIPE GESTURES (mobile tab navigation) ════════════════════════════════════
+(function(){
+  let _swX=null,_swY=null;
+  const TABS=['dashboard','datentraeger','rechnung','kunden','uebergabe','tresore','templates'];
+  document.addEventListener('touchstart',e=>{
+    const t=e.touches[0];_swX=t.clientX;_swY=t.clientY;
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(_swX===null)return;
+    const t=e.changedTouches[0];
+    const dx=t.clientX-_swX;const dy=Math.abs(t.clientY-_swY);
+    _swX=null;
+    if(Math.abs(dx)<60||dy>50)return; // not a clean horizontal swipe
+    if(e.target.closest('.overlay'))return; // inside overlay
+    const cur=document.querySelector('.tab.active');
+    if(!cur)return;
+    const curTab=cur.dataset.tab||cur.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+    const idx=TABS.indexOf(curTab);
+    if(idx<0)return;
+    const next=dx<0?TABS[Math.min(idx+1,TABS.length-1)]:TABS[Math.max(idx-1,0)];
+    if(next!==curTab)showTab(next);
+  },{passive:true});
+})();
+
+// ══ NOTIFICATION PERMISSION REQUEST ══════════════════════════════════════════
+function requestNotifPermission(){
+  if('Notification' in window&&Notification.permission==='default'){
+    Notification.requestPermission().then(p=>{
+      if(p==='granted'){renderCharts();}
+    });
+  }
+}
+
 // ══ HOOK: renderDashboard erweitern ══════════════════════════════════════════
 // IIFE-Pattern verhindert Hoisting-Bug (function-Deklaration würde sich selbst referenzieren)
 (function(){
@@ -5887,6 +6241,7 @@ function renderTerminWidget(){
     renderUmsatzChart();
     renderDTWartungDashboard();
     renderTerminWidget();
+    renderCharts();
   };
 })();
 

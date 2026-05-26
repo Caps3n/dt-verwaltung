@@ -4,6 +4,27 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.21] – 2026-05-26
+
+### Added
+- **Chart.js Dashboard-Diagramme** – Das Dashboard zeigt nun drei interaktive Diagramme: Umsatz-Balkendiagramm (letzte 12 Monate via `/api/stats/charts`), DT-Status-Donut-Chart (Eingelagert/Übergeben) und Tresor-Auslastungs-Balkendiagramm (horizontal, Top-8-Tresore).
+- **DT-Overlay: Foto-Tab** – Im „Datenträger bearbeiten"-Dialog gibt es jetzt 4 Tabs: Stammdaten, Foto, Notizen, Wartung. Im Foto-Tab kann ein Hochauflösungsfoto (max. 5 MB) hochgeladen, angezeigt und gelöscht werden (separates DB-Feld `foto_data`/`foto_type`).
+- **DT-Overlay: Notizen-Tab** – Freitext-Notizen pro Datenträger: Liste aller Einträge (Autor, Timestamp) + Eingabefeld zum Hinzufügen und Löschen. Gespeichert in `dt_notizen`-Tabelle.
+- **DT-Overlay: Wartungshistorie-Tab** – Chronologische Wartungseinträge mit Datum, Beschreibung und Techniker. Einträge können hinzugefügt und gelöscht werden (Tabelle `dt_wartungen`).
+- **Batch-Auswahl in der DT-Liste** – Checkboxen in jeder Zeile + „Alle"-Checkbox im Tabellenkopf. Floating-Aktionsleiste beim Auswählen: Sammelaktion „Als eingelagert markieren" und „Auswahl löschen". Auswahl bleibt beim Seitenwechsel (Set-basiert) erhalten.
+- **PWA / Progressive Web App** – `manifest.json` und `sw.js` (Service Worker) aktiviert. Die App kann jetzt auf iOS/Android zum Homescreen hinzugefügt werden. Der Service Worker cached statische Assets und ermöglicht Offline-Zugriff auf die Oberfläche.
+- **Browser-Benachrichtigungen** – Nach dem Login wird einmalig die Notification-Permission angefragt. Bei genehmigter Erlaubnis erscheinen Push-Benachrichtigungen für bevorstehende Vertragsabläufe (max. 2 pro Session).
+- **Swipe-Navigation (Mobile)** – Horizontale Touch-Swipe-Gesten wechseln zwischen den App-Tabs (60px+ Mindesthub, kein versehentliches Auslösen in Overlays oder beim vertikalen Scrollen).
+- **Audit-Log CSV-Export** – Neuer Button „📋 Audit-Log als CSV" im Admin-Bereich → Datenbank-Bereich. Lädt alle Audit-Log-Einträge mit BOM-Zeichen (Excel-kompatibel) herunter.
+- **Globale Suche: Archiv-DTs** – Die globale Suche findet jetzt auch bereits übergebene (archivierte) Datenträger. Archivierte Einträge sind als „(archiviert)" gekennzeichnet und navigieren automatisch in den Alle-Filter.
+
+### Backend (bereits in v1.7.21-pre)
+- **Neue DB-Spalten**: `foto_data BLOB`, `foto_type TEXT` auf `datentraeger` (Auto-Migration)
+- **Neue DB-Tabellen**: `dt_notizen`, `dt_wartungen` (Auto-Migration)
+- **Neue API-Endpunkte**: `GET/POST/DELETE /api/datentraeger/<id>/foto`, `GET/POST /api/datentraeger/<id>/notizen`, `DELETE /api/datentraeger/<id>/notizen/<nid>`, `GET/POST /api/datentraeger/<id>/wartungen`, `DELETE /api/datentraeger/<id>/wartungen/<wid>`, `GET /api/stats/charts` (120s TTL-Cache), `GET /api/admin/backup`, `GET /api/audit_log_csv`
+
+---
+
 ## [v1.7.20] – 2026-05-25
 
 ### Added
