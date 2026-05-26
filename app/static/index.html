@@ -185,7 +185,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 .ov-tab-btn.ov-tab-active{color:var(--i-txt);border-bottom-color:var(--i-brd);background:var(--i-bg)}
 /* Batch bar */
 #dt-batch-bar{display:none;align-items:center;gap:8px;background:var(--i-bg);border:1px solid var(--i-brd);border-radius:var(--rad);padding:7px 12px;margin-bottom:8px;font-size:12px;color:var(--i-txt)}
-/* ── Dashboard (v1.7.21+, Mobile-Fix v1.7.25) ──────────────────────────────── */
+/* ── Dashboard (v1.7.21+, Mobile-Fix v1.7.26) ──────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -1630,7 +1630,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.25
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.26
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -2739,7 +2739,7 @@ async function zeigeDetail(id) {
   document.getElementById('k-detail-title').textContent=k.firma+' ('+k.nr+')';
   const dts=datentraeger.filter(d=>d.kunden_id===id&&d.status==='eingelagert');
   const netto=dts.reduce((a,d)=>a+d.preis_jahr*(1-d.rabatt/100),0);
-  const dl=(l,v)=>v?`<div class="drow"><span class="dlbl">${l}</span><span>${v}</span></div>`:'';
+  const dl=(l,v)=>v?`<div class="drow"><span class="dlbl">${l}</span><span>${esc(String(v))}</span></div>`:'';
   const smap={aktiv:'bg',gekuendigt:'br',abgelaufen:'ba',pausiert:'ba'};
   document.getElementById('k-det-l').innerHTML=
     dl('Nr.',k.nr)+dl('Ansprechp.',(k.anrede?k.anrede+' ':'')+( k.ansprechpartner||''))+dl('E-Mail',k.email)+dl('Telefon',k.tel)+dl('Mobil',k.mobil)+dl('SAP-Nr.',k.sap_nr)+
@@ -3261,7 +3261,7 @@ function genRechnungHtml(k){
 <div class="brief-hr" style="background:${ac}"></div>
 <div class="brief-abs-mini">${T.firmenname||''}${T.firmaAdr?' | '+(T.firmaAdr||'').split('\n')[0]:''}</div>
 <div class="brief-main">
-  <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${adr}</div></div>
+  <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+esc(k.ansprechpartner):''}<br>${adr}</div></div>
   <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${esc(T.tel)}<br>`:''}${T.email?`${esc(T.email)}<br>`:''}${k.nr?`Kd-Nr. ${esc(k.nr)}`:''}</div>
 </div>
 <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
@@ -3563,7 +3563,7 @@ function genUebergabeHtml(k,sel){
 <div class="brief-hr" style="background:${ac}"></div>
 <div class="brief-abs-mini">${T.firmenname||''}${T.firmaAdr?' | '+(T.firmaAdr||'').split('\n')[0]:''}</div>
 <div class="brief-main">
-  <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${adr}</div></div>
+  <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+esc(k.ansprechpartner):''}<br>${adr}</div></div>
   <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${esc(T.tel)}<br>`:''}${T.email?`${esc(T.email)}<br>`:''}${k.nr?`Kd-Nr. ${esc(k.nr)}`:''}</div>
 </div>
 <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
@@ -3982,7 +3982,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.25${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.26${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -4165,7 +4165,28 @@ function downloadTxt(text,fn){const blob=new Blob([text],{type:'text/plain;chars
 function printAsPdf(text,fn){const w=window.open('','_blank');if(!w){alert('Popup blockiert – bitte Popup-Blocker fuer diese Seite deaktivieren.');return;}const safe=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+fn+'</title><style>body{font-family:monospace;font-size:12px;margin:20mm;white-space:pre-wrap;line-height:1.5}@media print{body{margin:15mm}@page{margin:15mm}}</style></head><body>'+safe+'</body></html>');w.document.close();w.focus();setTimeout(function(){w.print();},400);}
 function printHtml(html,fn){const w=window.open('','_blank');if(!w){alert('Popup blockiert – bitte Popup-Blocker fuer diese Seite deaktivieren.');return;}w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+fn+'</title><style>*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1a1a1a;margin:0;padding:0}.brief-header{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 20px 14px;gap:12px}.brief-header-left{flex:1}.brief-firma-name{font-size:16px;font-weight:700;color:#1a1a2e;margin-bottom:2px}.brief-firma-abt{font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase}.brief-firma-adr{font-size:10.5px;color:#444;white-space:pre-line;line-height:1.55}.brief-logo-box{display:flex;align-items:flex-start;justify-content:flex-end;min-width:120px}.brief-logo-box img{max-height:60px;max-width:160px;object-fit:contain}.brief-hr{height:2px;background:#ccc;margin:0}.brief-abs-mini{font-size:9px;color:#999;padding:6px 20px 2px;border-bottom:1px solid #eee;margin:0 20px}.brief-main{display:flex;justify-content:space-between;padding:10px 20px 0}.brief-empf{flex:1.4}.brief-empf-block{font-size:12px;line-height:1.75;min-height:80px}.brief-meta-r{text-align:right;flex:1;padding-left:14px;font-size:11px;line-height:1.7;color:#444}.brief-ort-dat{text-align:right;font-size:11px;color:#444;padding:5px 20px 0}.brief-betreff{font-weight:700;font-size:13px;padding:14px 20px 3px}.brief-sub{font-size:11px;color:#666;padding:0 20px 8px}.brief-txt{padding:6px 20px;font-size:12px;line-height:1.6;white-space:pre-wrap}.brief-tbl{width:calc(100% - 40px);margin:8px 20px;border-collapse:collapse;font-size:11px}.brief-tbl th{background:#f0f0f0;padding:5px 8px;text-align:left;border-bottom:2px solid #ccc}.brief-tbl td{padding:5px 8px;border-bottom:1px solid #eee}.brief-sig-row{display:flex;gap:30px;padding:16px 20px 10px}.brief-sig-box{flex:1}.brief-sig-label{font-size:11px;color:#555;margin-bottom:28px}.brief-sig-line{border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999}.brief-foot{margin-top:16px;border-top:1px solid #ccc;padding:7px 20px;display:flex;justify-content:flex-end;gap:20px;background:#f8f8f8;font-size:9.5px;color:#666;line-height:1.6}.brief-foot-col strong{color:#333;display:block}@media print{@page{margin:10mm}body{margin:0}}</style></head><body>'+html+'</body></html>');w.document.close();w.focus();setTimeout(function(){w.print();},400);}
 async function loadAndShowImg(url, imgEl){const d=await apiJ(url);if(d&&d.data){imgEl.src=d.data;imgEl.onclick=()=>{document.getElementById('ov-img').src=d.data;document.getElementById('img-ov').classList.add('open');}}}
-async function loadAndOpenDoc(url){const d=await apiJ(url);if(d){if(d.type==='application/pdf'){const w=window.open('','_blank');if(w){w.document.write(`<iframe src="${d.data}" style="width:100%;height:100vh;border:none"></iframe>`);w.document.close();}}else{document.getElementById('ov-img').src=d.data;document.getElementById('img-ov').classList.add('open');}}}
+async function loadAndOpenDoc(url){
+  const d=await apiJ(url);
+  if(!d)return;
+  if(d.type==='application/pdf'){
+    // Convert base64 data-URL to a Blob-URL — avoids document.write() and data:-URL iframe security issues
+    try{
+      const b64=d.data.split(',')[1];
+      const bin=atob(b64);
+      const bytes=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+      const blob=new Blob([bytes],{type:'application/pdf'});
+      const blobUrl=URL.createObjectURL(blob);
+      const w=window.open(blobUrl,'_blank');
+      // Revoke after 60 s to free memory
+      setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
+      if(!w)alert('Popup blockiert – bitte Popup-Blocker für diese Seite deaktivieren.');
+    }catch(e){console.error('PDF open error',e);}
+  }else{
+    document.getElementById('ov-img').src=d.data;
+    document.getElementById('img-ov').classList.add('open');
+  }
+}
 
 function handleDtBild(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{pendingDtBild={data:ev.target.result,type:f.type};document.getElementById('dt-bild-zone').classList.add('has-file');document.getElementById('dt-bild-prev').innerHTML=`<img src="${ev.target.result}" style="max-height:50px;max-width:100%;border-radius:4px;object-fit:contain"><span style="font-size:11px;display:block;color:var(--s-txt)">${esc(f.name)}</span>`;};r.readAsDataURL(f);}
 let pendingDtScan=null;
@@ -4205,7 +4226,7 @@ function druckeEingangFromForm(){
     ${absKurz?`<div class="brief-abs-mini">${absKurz}</div>`:''}
     <div class="brief-main">
       <div class="brief-empf">
-        <div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${kAdr}</div>
+        <div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+esc(k.ansprechpartner):''}<br>${kAdr}</div>
       </div>
       <div class="brief-meta-r">${T.bearbeiter?`<strong>${T.bearbeiter}</strong>`:''} ${T.tel?`<div>Tel. ${esc(T.tel)}</div>`:''} ${T.email?`<div>Mail ${esc(T.email)}</div>`:''}</div>
     </div>
@@ -4357,7 +4378,7 @@ function drucke2ParteienVertrag(){
     <div class="brief-hr"></div>
     ${absK2?`<div class="brief-abs-mini">${absK2}</div>`:''}
     <div class="brief-main">
-      <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${kAdr2}</div></div>
+      <div class="brief-empf"><div class="brief-empf-block"><strong>${esc(k.firma)}</strong>${k.ansprechpartner?'<br>z.Hd. '+esc(k.ansprechpartner):''}<br>${kAdr2}</div></div>
       <div class="brief-meta-r">${T.bearbeiter?`<strong>${T.bearbeiter}</strong><br>`:''}${T.tel?`Tel. ${esc(T.tel)}<br>`:''}${T.email?`${esc(T.email)}<br>`:''}${k.nr?`Kd-Nr. ${esc(k.nr)}`:''}</div>
     </div>
     <div class="brief-ort-dat">${T.ort||''}, ${dat}</div>
@@ -4501,7 +4522,7 @@ function genVertragHtml(k){
 <div class="brief-hr" style="background:${ac}"></div>
 <div class="brief-abs-mini">${T.firmenname||''}${T.firmaAdr?' | '+(T.firmaAdr||'').split('\n')[0]:''}</div>
 <div class="brief-main">
-  <div class="brief-empf"><div class="brief-empf-block"><strong>${k?.firma||''}</strong>${k?.ansprechpartner?'<br>z.Hd. '+k.ansprechpartner:''}<br>${adr}</div></div>
+  <div class="brief-empf"><div class="brief-empf-block"><strong>${k?.firma||''}</strong>${k?.ansprechpartner?'<br>z.Hd. '+esc(k.ansprechpartner):''}<br>${adr}</div></div>
   <div class="brief-meta-r">${bline?`<strong>${bline}</strong><br>`:''}${T.tel?`Tel. ${esc(T.tel)}<br>`:''}${T.email?`${esc(T.email)}<br>`:''}${k?.nr?`Kd-Nr. ${esc(k.nr)}`:''}</div>
 </div>
 <div class="brief-ort-dat">${T.ort||''}, ${fmtDate(today)}</div>
@@ -4924,7 +4945,7 @@ function tresorDetail(id){
   const wvBtn=document.getElementById('tr-detail-wv-btn');
   if(t.hat_wartungsvertrag){wvBtn.style.display='';wvBtn.onclick=()=>loadAndOpenDoc('/api/tresore/'+id+'/wartungsvertrag');}
   else{wvBtn.style.display='none';}
-  const dl=(l,v)=>v?`<div class="drow"><span class="dlbl">${l}</span><span>${v}</span></div>`:'';
+  const dl=(l,v)=>v?`<div class="drow"><span class="dlbl">${l}</span><span>${esc(String(v))}</span></div>`:'';
   const loc=[t.land,t.stadt,t.gebaeude,t.etage?'Etage '+t.etage:'',t.raum?'Raum '+t.raum:''].filter(Boolean).join(' / ');
   // Fälligkeitsfarbe
   const _wNow=new Date();
@@ -5473,6 +5494,29 @@ async function checkSamlConfig(){
 function doSamlLogin(){window.location.href='/api/saml/login';}
 
 async function checkSamlTokenInUrl(){
+  const params=new URLSearchParams(window.location.search);
+  const code=params.get('saml_code');
+  if(code){
+    // Remove OTC from URL immediately before doing anything else
+    history.replaceState(null,'',window.location.pathname);
+    // Exchange one-time code for session token
+    const xr=await fetch('/api/saml/exchange',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})}).catch(()=>null);
+    if(xr&&xr.ok){
+      const xd=await xr.json();
+      const token=xd.token;
+      if(token){
+        TOKEN=token;sessionStorage.setItem('dtv_token',token);
+        sessionStorage.setItem('dtv_expires',new Date(Date.now()+8*60*60*1000).toISOString());
+        const r=await fetch('/api/me',{headers:{'X-Token':token}}).catch(()=>null);
+        if(r&&r.ok){currentUser=await r.json();sessionStorage.setItem('dtv_user',JSON.stringify(currentUser));await showApp();return true;}
+      }
+    }
+    TOKEN='';sessionStorage.removeItem('dtv_token');sessionStorage.removeItem('dtv_expires');
+    const errEl=document.getElementById('login-error');
+    if(errEl){errEl.textContent='SSO Fehler: Anmeldung fehlgeschlagen.';errEl.style.display='block';}
+    return false;
+  }
+  // Legacy: fragment-based token (kept for backwards-compatibility with old IdP redirect configs)
   const hash=window.location.hash;
   const match=hash.match(/saml_token=([a-f0-9]+)/);
   if(match){

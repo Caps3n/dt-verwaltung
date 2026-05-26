@@ -21,7 +21,8 @@ try:
     LIMITER_AVAILABLE = True
 except ImportError:
     LIMITER_AVAILABLE = False
-    print("[SEC] flask-limiter not installed – rate limiting disabled")
+    print("[SEC] CRITICAL: flask-limiter not installed – rate limiting DISABLED. "
+          "Install flask-limiter>=3.5 to enable brute-force protection.")
 
 # ─── ENCRYPTION SETUP ────────────────────────────────────────────────────────
 DB_KEY = os.environ.get('DB_KEY', '').strip()
@@ -52,6 +53,9 @@ app = Flask(__name__, static_folder='static')
 
 # ─── CORS: restrict to own domain (or allow all in dev mode) ─────────────────
 _ALLOWED_ORIGIN = os.environ.get('ALLOWED_ORIGIN', '*')
+if _ALLOWED_ORIGIN == '*':
+    print("[SEC] WARNING: CORS is open to all origins (ALLOWED_ORIGIN=*). "
+          "Set ALLOWED_ORIGIN=https://your-domain.com in production.")
 CORS(app, resources={r"/api/*": {"origins": _ALLOWED_ORIGIN}})
 
 # ─── RATE LIMITER ─────────────────────────────────────────────────────────────
@@ -73,6 +77,53 @@ SESSIONS = {}  # token -> {user_id, expires}  (in-memory cache, backed by DB)
 # SAML client cache (keyed by config hash for hot-reload)
 _saml_client_cache = {}
 
+# ─── SMTP PASSWORD ENCRYPTION (Fernet, key auto-generated in /data/smtp.key) ──
+_SMTP_KEY_FILE = os.path.join(os.environ.get('DATA_DIR', '/data'), 'smtp.key')
+
+def _get_smtp_fernet():
+    """Return a Fernet instance for SMTP password encryption, or None if unavailable."""
+    try:
+        from cryptography.fernet import Fernet
+    except ImportError:
+        return None
+    try:
+        if not os.path.exists(_SMTP_KEY_FILE):
+            key = Fernet.generate_key()
+            with open(_SMTP_KEY_FILE, 'wb') as _f:
+                _f.write(key)
+            try:
+                os.chmod(_SMTP_KEY_FILE, 0o600)
+            except Exception:
+                pass
+            print("[SEC] Generated new SMTP encryption key at", _SMTP_KEY_FILE)
+        with open(_SMTP_KEY_FILE, 'rb') as _f:
+            key = _f.read().strip()
+        return Fernet(key)
+    except Exception as e:
+        print(f"[SEC] SMTP key error: {e} – storing password plaintext as fallback")
+        return None
+
+def _encrypt_smtp_pw(pw: str) -> str:
+    if not pw:
+        return pw
+    f = _get_smtp_fernet()
+    if not f:
+        return pw  # fallback: plaintext
+    return 'enc:' + f.encrypt(pw.encode()).decode()
+
+def _decrypt_smtp_pw(stored: str) -> str:
+    if not stored:
+        return stored
+    if not stored.startswith('enc:'):
+        return stored  # legacy plaintext – still works
+    f = _get_smtp_fernet()
+    if not f:
+        return ''
+    try:
+        return f.decrypt(stored[4:].encode()).decode()
+    except Exception:
+        return ''
+
 # ─── SIMPLE TTL CACHE ─────────────────────────────────────────────────────────
 # Lightweight in-memory cache to reduce DB reads for frequently-accessed endpoints.
 # TTL default: 30 s. Invalidated explicitly on every write/update/delete.
@@ -91,6 +142,20 @@ def _cache_set(key, val, ttl: int = 30):
 def _cache_del(*keys):
     for k in keys:
         _cache.pop(k, None)
+
+# ─── SAML ONE-TIME CODES (short-lived, single-use token exchange) ─────────────
+_saml_codes: dict = {}  # {code: {'token': str, 'expires': float}}
+
+def _saml_code_create(token: str) -> str:
+    """Generate a 30-second one-time code that can be exchanged for a session token."""
+    # Prune expired codes
+    now = time.time()
+    expired = [c for c, v in _saml_codes.items() if now > v['expires']]
+    for c in expired:
+        del _saml_codes[c]
+    code = secrets.token_urlsafe(32)
+    _saml_codes[code] = {'token': token, 'expires': now + 30}
+    return code
 
 # ─── SESSION STORE (DB-backed für multi-worker-safe auth) ────────────────────
 def session_create(user_id, expires_iso):
@@ -797,6 +862,7 @@ def auth_refresh():
     return jsonify({'ok': True, 'expires': new_expires})
 
 @app.route('/api/emergency-pw-reset', methods=['POST'])
+@_rate_limit("5 per hour")
 def emergency_pw_reset():
     """Emergency admin password reset — only works if RESET_ADMIN_PASSWORD env var is set."""
     _reset_pw = os.environ.get('RESET_ADMIN_PASSWORD', '').strip()
@@ -808,6 +874,8 @@ def emergency_pw_reset():
     new_pw = data.get('password', '').strip()
     if not new_pw:
         return jsonify({'error': 'password required'}), 400
+    if len(new_pw) < 8:
+        return jsonify({'error': 'Passwort muss mindestens 8 Zeichen lang sein'}), 400
     db = get_db()
     db.execute("UPDATE benutzer SET password_hash=? WHERE username='admin'", (hash_pw(new_pw),))
     db.commit()
@@ -1650,9 +1718,21 @@ def saml_acs():
     expires = (datetime.now() + timedelta(hours=8)).isoformat()
     token = session_create(user['id'], expires)
 
-    # Redirect to frontend with token
+    # Redirect to frontend via one-time code (avoids session token in URL/browser history)
     frontend_url = os.environ.get('SAML_FRONTEND_URL', '/')
-    return redirect(f'{frontend_url}#saml_token={token}')
+    code = _saml_code_create(token)
+    return redirect(f'{frontend_url}?saml_code={code}')
+
+@app.route('/api/saml/exchange', methods=['POST'])
+@_rate_limit("20 per minute")
+def saml_exchange():
+    """Exchange a single-use SAML code (30 s TTL) for a session token."""
+    data = request.json or {}
+    code = data.get('code', '')
+    entry = _saml_codes.pop(code, None)
+    if not entry or time.time() > entry['expires']:
+        return jsonify({'error': 'Invalid or expired code'}), 403
+    return jsonify({'token': entry['token']})
 
 @app.route('/api/saml/metadata', methods=['GET'])
 def saml_metadata():
@@ -2081,12 +2161,12 @@ def update_smtp_settings():
     except (ValueError, TypeError):
         return jsonify({'error': 'Ungültiger SMTP-Port (1–65535)'}), 400
     db = get_db()
-    # Store password only if provided (not empty)
+    # Store password only if provided (not empty) – encrypt before storing
     if data.get('password'):
         db.execute(
             "UPDATE smtp_settings SET host=?,port=?,username=?,password=?,from_email=?,from_name=?,use_tls=?,aktiv=? WHERE id=1",
             (data.get('host',''), port, data.get('username',''),
-             data.get('password',''), data.get('from_email',''), data.get('from_name','DT-Verwaltung'),
+             _encrypt_smtp_pw(data.get('password','')), data.get('from_email',''), data.get('from_name','DT-Verwaltung'),
              1 if data.get('use_tls') else 0, 1 if data.get('aktiv') else 0)
         )
     else:
@@ -2129,7 +2209,7 @@ def _send_email(to_addr, subject, html_body):
         else:
             server = smtplib.SMTP_SSL(cfg['host'], cfg['port'], timeout=10)
         if cfg['username'] and cfg['password']:
-            server.login(cfg['username'], cfg['password'])
+            server.login(cfg['username'], _decrypt_smtp_pw(cfg['password']))
         server.sendmail(cfg['from_email'], [to_addr], msg.as_string())
         server.quit()
         return True, None

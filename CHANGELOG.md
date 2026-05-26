@@ -4,6 +4,17 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.26] – 2026-05-26
+
+### Security
+- **XSS-Fix `k.ansprechpartner`** – Kontaktnamen wurden an ~10 Stellen in Briefvorlagen und Detail-Kacheln ohne `esc()` in innerHTML eingesetzt. Alle Vorkommen jetzt konsequent mit `esc()` escaped. Die generische `dl()`-Hilfsfunktion escapet den Wert nun immer intern.
+- **SAML One-Time-Code (OTC)** – Session-Token wird nicht mehr im URL-Fragment (`#saml_token=`) übergeben. Stattdessen erzeugt der Server einen kurzlebigen (30 s) Single-Use-Code, den das Frontend via `POST /api/saml/exchange` gegen den echten Token tauscht. Token erscheint nie mehr in Browser-History oder Netzwerk-Logs.
+- **`document.write()` entfernt** – `loadAndOpenDoc()` nutzte `document.write()` um PDFs in einem Popup zu öffnen. Ersetzt durch sicheren Blob-URL-Ansatz (`URL.createObjectURL`). Kein DOM-Injection-Risiko mehr.
+- **Emergency-Reset Rate-Limit** – `/api/emergency-pw-reset` hat jetzt `@_rate_limit("5 per hour")` und erzwingt Mindestlänge 8 Zeichen für das neue Passwort.
+- **SMTP-Passwort verschlüsselt** – Passwort wird mit Fernet (AES-128-CBC) verschlüsselt in der DB gespeichert. Schlüssel auto-generiert in `/data/smtp.key` (600-Rechte). Bestehende Plaintext-Passwörter funktionieren weiterhin (automatische Erkennung am fehlenden `enc:`-Prefix). GET-Endpunkt gibt das Passwort weiterhin nicht zurück.
+- **CORS-Warnung** – Startup-Log-Warning wenn `ALLOWED_ORIGIN=*` (Default). Produktiv `ALLOWED_ORIGIN=https://dein-domain.de` setzen.
+- **flask-limiter Warnung verstärkt** – Wenn nicht installiert, erscheint jetzt `CRITICAL` im Log (vorher nur Hinweis).
+
 ## [v1.7.25] – 2026-05-26
 
 ### Fixed
