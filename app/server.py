@@ -2324,19 +2324,24 @@ def audit_log_csv():
 @app.route('/api/datentraeger/<int:did>/foto', methods=['POST'])
 @require_auth('write')
 def upload_dt_foto(did):
-    f = request.files.get('foto')
-    if not f:
+    # Accept JSON with base64 data: {data: "base64...", mime: "image/jpeg"}
+    body = request.get_json(silent=True) or {}
+    b64 = body.get('data', '')
+    mime = body.get('mime', 'image/jpeg')
+    if not b64:
         return jsonify({'error': 'Kein Foto'}), 400
-    data = f.read()
-    if len(data) > 5 * 1024 * 1024:
+    try:
+        raw = base64.b64decode(b64)
+    except Exception:
+        return jsonify({'error': 'Ungültige Bilddaten'}), 400
+    if len(raw) > 5 * 1024 * 1024:
         return jsonify({'error': 'Foto zu groß (max. 5 MB)'}), 413
-    mime = f.content_type or 'image/jpeg'
     db = get_db()
-    db.execute("UPDATE datentraeger SET foto_data=?, foto_type=? WHERE id=?", (data, mime, did))
+    db.execute("UPDATE datentraeger SET foto_data=?, foto_type=? WHERE id=?", (raw, mime, did))
     db.commit()
     db.close()
     _cache_del('datentraeger')
-    log_audit(request.user['username'], 'FOTO_UPLOAD', 'datentraeger', did, f'type={mime}, size={len(data)}')
+    log_audit(request.user['username'], 'FOTO_UPLOAD', 'datentraeger', did, f'type={mime}, size={len(raw)}')
     return jsonify({'ok': True})
 
 @app.route('/api/datentraeger/<int:did>/foto', methods=['GET'])
@@ -2346,9 +2351,10 @@ def get_dt_foto(did):
     row = db.execute("SELECT foto_data, foto_type FROM datentraeger WHERE id=?", (did,)).fetchone()
     db.close()
     if not row or not row['foto_data']:
-        return '', 404
-    from flask import Response
-    return Response(row['foto_data'], content_type=row['foto_type'] or 'image/jpeg')
+        return jsonify({'data': None}), 200
+    b64 = base64.b64encode(row['foto_data']).decode('utf-8')
+    mime = row['foto_type'] or 'image/jpeg'
+    return jsonify({'data': f'data:{mime};base64,{b64}'})
 
 @app.route('/api/datentraeger/<int:did>/foto', methods=['DELETE'])
 @require_auth('write')
@@ -2485,13 +2491,13 @@ def stats_charts():
     cutoff = (now + timedelta(days=60)).strftime('%Y-%m-%d')
     today = now.strftime('%Y-%m-%d')
     exp_rows = db.execute("""
-        SELECT k.firma, k.nr, k.vertrag_laufzeit
+        SELECT k.firma, k.nr, k.vertragsende
         FROM kunden k
-        WHERE k.vertrag_laufzeit IS NOT NULL AND k.vertrag_laufzeit != ''
-          AND k.vertrag_laufzeit >= ? AND k.vertrag_laufzeit <= ?
-        ORDER BY k.vertrag_laufzeit ASC LIMIT 20
+        WHERE k.vertragsende IS NOT NULL AND k.vertragsende != ''
+          AND k.vertragsende >= ? AND k.vertragsende <= ?
+        ORDER BY k.vertragsende ASC LIMIT 20
     """, (today, cutoff)).fetchall()
-    expirations = [{'firma': r['firma'], 'nr': r['nr'], 'datum': r['vertrag_laufzeit']} for r in exp_rows]
+    expirations = [{'firma': r['firma'], 'nr': r['nr'], 'datum': r['vertragsende']} for r in exp_rows]
     db.close()
     result = {
         'revenue_months': revenue_months,
