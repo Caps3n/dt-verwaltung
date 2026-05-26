@@ -1326,6 +1326,9 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div class="r2"><div><label>Tel</label><input id="adm-tel" oninput="syncAdmBrief()"></div><div><label>Fax</label><input id="adm-fax" oninput="syncAdmBrief()"></div></div>
         <label>E-Mail</label><input id="adm-email" oninput="syncAdmBrief()">
         <label data-i18n="lbl_adm_ort">Ort (für Datumszeile)</label><input id="adm-ort" oninput="syncAdmBrief()">
+        <div style="border-top:1px solid var(--brd2);margin:10px 0 8px"></div>
+        <div style="font-size:11px;color:var(--mut);margin-bottom:6px">✍️ Zeichnungsberechtigte Person (erscheint auf Unterschriftszeilen in Übergabe- &amp; Eingangsprotokollen)</div>
+        <label>Zeichnungsberechtigter</label><input id="adm-sig" placeholder="z.B. Max Mustermann, Geschäftsführer" oninput="syncAdmBrief()">
       </div>
       <div class="card">
         <div class="stitle" data-i18n="st_fusszeile_bank">Fußzeile &amp; Bank</div>
@@ -1336,6 +1339,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <label data-i18n="lbl_handelsregister">Handelsregister</label><input id="adm-hrb" oninput="syncAdmBrief()">
       </div>
       <div style="display:flex;gap:8px"><button onclick="loadTemplates()" style="flex:1" data-i18n="lbl_zuruecksetzen">Zurücksetzen</button><button class="btn-p" onclick="admUnternehmenSpeichern()" style="flex:2" data-i18n="lbl_speichern">💾 Speichern</button></div>
+      <div class="card" style="margin-top:12px">
+        <div class="stitle" data-i18n="st_support_kontakt">Support-Kontakt (Hilfe-Seite &amp; Footer)</div>
+        <div style="font-size:11px;color:var(--mut);margin-bottom:10px">⚠️ Nicht dieselbe Person wie der Bearbeiter oben. Der Support-Kontakt erscheint im ❓ Hilfe-Tab und im Copyright-Footer als Ansprechpartner für Endnutzer.</div>
+        <label>Name</label><input id="support-name" placeholder="z.B. Marcel Capelan">
+        <label>E-Mail</label><input id="support-email" type="email" placeholder="z.B. support@firma.de">
+        <button class="btn-p btn-full" onclick="supportSpeichern()" style="margin-top:8px">💾 Support-Kontakt speichern</button>
+      </div>
     </div>
     <div>
       <div class="card" style="border-color:var(--i-brd);background:var(--i-bg)">
@@ -1369,13 +1379,6 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <button class="btn-s" onclick="neueRolleModal()" style="padding:5px 10px;font-size:11px" data-i18n="lbl_neue_rolle">+ Neue Rolle</button>
         </div>
         <div id="rollen-liste"><div class="empty">Lade...</div></div>
-      </div>
-      <div class="card">
-        <div class="stitle" data-i18n="st_support_kontakt">Support-Kontakt (Hilfe-Seite)</div>
-        <div style="font-size:11px;color:var(--mut);margin-bottom:10px" data-i18n="lbl_support_desc">Wird im ❓ Hilfe-Tab und im Copyright-Footer angezeigt.</div>
-        <label>Name</label><input id="support-name" placeholder="z.B. Marcel Capelan">
-        <label>E-Mail</label><input id="support-email" type="email" placeholder="z.B. support@firma.de">
-        <button class="btn-p btn-full" onclick="supportSpeichern()">💾 Speichern</button>
       </div>
       <div class="card">
         <div class="stitle">Datenbank</div>
@@ -1613,7 +1616,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.21
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.22
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -3731,7 +3734,7 @@ async function loadTemplates(){
   Object.entries(TVF).forEach(([fid,key])=>{const el=document.getElementById('tv-'+fid);if(el)el.value=window._TV[key]||'';});
   syncEVorschau();
   // Also sync adm-* fields
-  const admFields={firmenname:'adm-firmenname',abt:'adm-abt',firmaAdr:'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
+  const admFields={firmenname:'adm-firmenname',abt:'adm-abt',firmaAdr:'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',sig:'adm-sig',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
   Object.entries(admFields).forEach(([key,fid])=>{const el=document.getElementById(fid);if(el)el.value=window._T[key]||'';});
   if(d.akzentfarbe){const ac2=document.getElementById('adm-accent-color');if(ac2)ac2.value=d.akzentfarbe;}
   if(d.hat_logo){const logo=await apiJ('/api/templates/logo');if(logo){logoData=logo.data;const imgHtml=`<img src="${logoData}" style="max-height:48px;max-width:160px;object-fit:contain"><div style="font-size:11px;margin-top:3px;color:var(--s-txt)">Klicken zum Ersetzen</div>`;document.getElementById('logo-prev').innerHTML=imgHtml;document.getElementById('logo-zone').classList.add('has-file');const alp=document.getElementById('adm-logo-prev');if(alp){alp.innerHTML=imgHtml;document.getElementById('adm-logo-zone').classList.add('has-file');}}}
@@ -3742,7 +3745,7 @@ async function loadTemplates(){
 
 function readTplFields(){
   // Read from adm-* fields first (primary), then fall back to f-* (hidden, for compat)
-  const admFieldMap={firmenname:'adm-firmenname',abt:'adm-abt',firmaAdr:'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
+  const admFieldMap={firmenname:'adm-firmenname',abt:'adm-abt',firmaAdr:'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',sig:'adm-sig',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
   Object.entries(admFieldMap).forEach(([key,fid])=>{const el=document.getElementById(fid);if(el)window._T[key]=el.value;});
   const TF={anrede:'anrede',intro:'intro',schluss:'schluss',gruss:'gruss',sig:'sig'};
   Object.entries(TF).forEach(([fid,key])=>{const el=document.getElementById('f-'+fid);if(el)window._T[key]=el.value;});
@@ -3908,7 +3911,7 @@ function showAdminSub(sub){
 
 function syncAdmBrief(){
   // Mirror adm-* fields to _T so templates stay in sync
-  const TF={abt:'adm-abt',firmenname:'adm-firmenname','firmaAdr':'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
+  const TF={abt:'adm-abt',firmenname:'adm-firmenname','firmaAdr':'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',sig:'adm-sig',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
   Object.entries(TF).forEach(([key,fid])=>{const el=document.getElementById(fid);if(el)window._T[key]=el.value;});
   const ac=document.getElementById('adm-accent-color');if(ac){accentColor=ac.value;const ac2=document.getElementById('accent-color');if(ac2)ac2.value=accentColor;}
 }
@@ -3939,7 +3942,7 @@ async function loadAdmin(){
     if(se)se.value=tpl.support_email||'';
     // Populate adm-* fields from template
     try{window._T=JSON.parse(tpl.rechnung_json||'{}')}catch(e){window._T={};}
-    const admFields={firmenname:'adm-firmenname',abt:'adm-abt',firmaAdr:'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
+    const admFields={firmenname:'adm-firmenname',abt:'adm-abt',firmaAdr:'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',sig:'adm-sig',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
     Object.entries(admFields).forEach(([key,fid])=>{const el=document.getElementById(fid);if(el)el.value=window._T[key]||'';});
     if(tpl.akzentfarbe){accentColor=tpl.akzentfarbe;const ac=document.getElementById('adm-accent-color');if(ac)ac.value=accentColor;}
     if(tpl.hat_logo){const logo=await apiJ('/api/templates/logo');if(logo&&logo.data){logoData=logo.data;['adm-logo-zone'].forEach(id=>{const z=document.getElementById(id);if(z)z.classList.add('has-file');});const alp=document.getElementById('adm-logo-prev');if(alp)alp.innerHTML=`<img src="${logoData}" style="max-height:48px;max-width:160px;object-fit:contain">`;}}

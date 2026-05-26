@@ -4,6 +4,15 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.22] – 2026-05-26
+
+### Added
+- **Zeichnungsberechtigter (Signatur-Feld)** – Admin → Unternehmen enthält jetzt ein eigenes Feld „Zeichnungsberechtigter" (z.B. „Max Mustermann, Geschäftsführer"), das in allen Unterschriftszeilen der Dokumente (Übergabe, Eingang, Rechnungen) als Signatur der verwaltenden Gesellschaft erscheint. Vorher musste dieses Feld umständlich über den Template-Editor gesetzt werden.
+- **Support-Kontakt in Unternehmen-Panel verschoben** – Der Support-Kontakt (Hilfe-Tab + Footer) ist jetzt direkt im Unternehmen-Panel sichtbar, klar getrennt vom „Bearbeiter" (Briefkopf-Kontakt) mit Hinweis, dass es sich um unterschiedliche Personen handelt.
+
+### Fixed
+- `sig`-Feld wird nun korrekt über alle Admin-Speichervorgänge persistiert (war vorher nur im Template-Editor zugänglich)
+
 ## [v1.7.21] – 2026-05-26
 
 ### Added
