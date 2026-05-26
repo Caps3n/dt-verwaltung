@@ -4,6 +4,15 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.25] – 2026-05-26
+
+### Fixed
+- **Footer-Versionsnummer** – Die dynamisch via JS gerenderte Fußleiste (`updateSupportDisplay()`) zeigte noch `v1.7.21` statt der aktuellen Version. Beide Footer-Stellen (statisches HTML + JS-Render) zeigen nun korrekt `v1.7.25`.
+- **KPI-Raster Mobile – Item 3 fehlender Trennstrich** – Bei 2-Spalten-Layout (≤600px) hatte Item 3 keinen rechten Rand, weil die 900px-Regel `border-right:none` setzte. Bei 2 Spalten ist Item 3 aber links in Zeile 2 und braucht seinen rechten Rand. Expliziter Reset ergänzt.
+- **KPI-Wert Overflow** – `min-width:0` auf `.db-kpi` und `max-width:100%` auf `.db-kpi-val` für sauberes `text-overflow:ellipsis` bei langen Beträgen.
+- **Quick-Action Buttons Mobile** – Text-Overflow für Button-Labels, Padding und Gap leicht komprimiert für bessere Darstellung auf schmalen Screens.
+- **Chart-Höhen Mobile** – Revenue/Vault-Chart 130px statt 140px, Donut 150px/130px für bessere Proportionen auf 375px-Screens.
+
 ## [v1.7.24] – 2026-05-26
 
 ### Fixed

@@ -179,13 +179,13 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   td,th{padding:5px 4px}
   button{font-size:11px}
 }
-/* ── Overlay inner tabs (v1.7.21) ──────────────────────────────────────────── */
+/* ── Overlay inner tabs (v1.7.21+) ─────────────────────────────────────────── */
 .ov-tab-btn{border:none;border-bottom:2px solid transparent;background:transparent;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--mut);border-radius:0;transition:color .12s}
 .ov-tab-btn:hover{color:var(--txt)}
 .ov-tab-btn.ov-tab-active{color:var(--i-txt);border-bottom-color:var(--i-brd);background:var(--i-bg)}
 /* Batch bar */
 #dt-batch-bar{display:none;align-items:center;gap:8px;background:var(--i-bg);border:1px solid var(--i-brd);border-radius:var(--rad);padding:7px 12px;margin-bottom:8px;font-size:12px;color:var(--i-txt)}
-/* ── Dashboard v1.7.21 ─────────────────────────────────────────────────────── */
+/* ── Dashboard (v1.7.21+, Mobile-Fix v1.7.25) ──────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -216,16 +216,24 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 }
 @media(max-width:600px){
   .db-kpis{grid-template-columns:repeat(2,1fr)}
-  .db-kpi{padding:11px 12px}
+  .db-kpi{padding:11px 12px;min-width:0}
+  /* 2-col: rechte Spalte = 2,4,6 → kein rechter Rand */
   .db-kpi:nth-child(2n){border-right:none}
+  /* Item 3 war bei 900px auf border-right:none – bei 2-col ist es LINKS in Reihe 2 → Rand zurück */
+  .db-kpi:nth-child(3){border-right:1px solid var(--brd)}
+  /* Trennlinien zwischen Reihen */
   .db-kpi:nth-child(3),.db-kpi:nth-child(4),.db-kpi:nth-child(5),.db-kpi:nth-child(6){border-top:1px solid var(--brd)}
-  .db-kpi-val{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .db-kpi-lbl{font-size:9px}
-  .db-section{padding:12px 13px}
-  .db-action-btn{flex:1 1 calc(50% - 4px);font-size:11px;padding:8px 10px}
-  .db-chart-h{height:140px!important}
-  .db-donut-wrap{height:140px!important}
-  .db-donut-wrap canvas{max-height:120px!important;max-width:120px!important}
+  .db-kpi-val{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%}
+  .db-kpi-lbl{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .db-section{padding:11px 12px}
+  /* Quick-Actions: 2×2 auch auf Mobile */
+  .db-actions{gap:6px}
+  .db-action-btn{flex:1 1 calc(50% - 3px);font-size:11px;padding:8px 8px;min-width:0;overflow:hidden}
+  .db-action-btn span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Charts kleiner auf Mobile */
+  .db-chart-h{height:130px!important}
+  .db-donut-wrap{height:150px!important}
+  .db-donut-wrap canvas{max-height:130px!important;max-width:130px!important}
 }
 /* ── Session-Timeout Banner ─────────────────────────────────────── */
 #session-warn{display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--w-bg);border-bottom:2px solid var(--w-brd);color:var(--w-txt);padding:10px 16px;font-size:13px;font-weight:600;display:none;align-items:center;gap:10px;justify-content:center}
@@ -1622,7 +1630,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.24
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.25
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -3974,7 +3982,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.21${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.25${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
