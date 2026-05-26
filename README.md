@@ -1,4 +1,4 @@
-# DT-Verwaltung v1.7.21
+# DT-Verwaltung v1.7.25
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-caps3n-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/caps3n)
 
@@ -12,13 +12,11 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 ## Features
 
 ### Dashboard
-- KPIs: active contracts, stored media, monthly and annual revenue
-- **Monthly revenue bar chart** (last 12 months, SVG)
+- **6 KPI tiles** — stored media, active customers, annual revenue (net), active contracts, expiring contracts (< 60 days), open invoices
+- **Chart.js interactive charts** — monthly revenue bar chart (12 months), DT-status donut chart, vault utilisation horizontal bar chart
 - **Quick-action buttons** — one click to create a new media record, invoice, handover, or customer
-- **Upcoming appointments widget** — shows safe maintenance dates, contract expirations, and overdue invoices in the next 60 days, colour-coded by urgency (red = overdue, yellow = soon)
-- Contract expiry warnings (60-day preview, colour-coded)
-- Safe and cabinet maintenance warnings
-- **Media maintenance warnings** — overdue or upcoming checks
+- **Upcoming appointments widget** — safe maintenance dates, contract expirations, and overdue invoices in the next 60 days, colour-coded by urgency
+- **Optimised mobile layout** — responsive KPI grid, compact chart heights, 2×2 quick-action grid on small screens
 
 ### Customers & Contracts
 - Full customer CRUD with contact person, address, and salutation
@@ -34,11 +32,14 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
   - **Haupt-Eigentümer** (main owner, optional) — the party whose IP is on the media (e.g. software developer)
   - **Neben-Eigentümer** (co-owner, optional) — usually the commissioning party in escrow scenarios
   - **Rechnungsempfänger** (billing recipient, optional) — whoever pays; defaults to Auftraggeber
-- Photo upload per media record
+- **High-resolution photo** per media record (separate from list thumbnail)
+- **Notes tab** — timestamped free-text notes with author tracking
+- **Maintenance history tab** — log entries with date, description, and technician
 - Print-ready incoming inspection report with letterhead
 - Status tracking: `stored` / `handed over`
 - Safe / cabinet assignment with location display
 - CSV export with all columns including safe location and internal number
+- **Batch actions** — multi-select with "Select All" checkbox; batch-set status or bulk-delete
 
 ### Handover Workflow
 - Step 1: select company, pick media, generate and print the handover protocol
@@ -56,14 +57,16 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 - Final reminder is automatically labelled "Final Notice / Letzte Mahnung"
 - **Send reminders by email** directly from the reminder history (📧 button per reminder)
 - **Payment status tracking** per invoice (paid / unpaid / overdue)
-- **Pagination** for large media lists
+- **Pagination** for large invoice lists
 
 ### UI & UX
 - **Dark / light mode toggle** (🌙/☀️ button in the top bar) — preference saved in `localStorage`; respects system preference (`prefers-color-scheme`) by default
-- **Active tab highlight** — the current tab is visually emphasised with a border and background
-- **Required field markers** — mandatory form fields are labelled with `*`
-- **Sortable columns** — click any column header in the customer, media, and invoice lists to sort ascending / descending (▲/▼)
-- **Safe media drill-down** — click the media count in the safe list to see all media assigned to that safe
+- **Mobile hamburger menu** — slide-in navigation drawer at ≤ 1024 px
+- **Swipe gestures** (mobile) — horizontal swipe to navigate between tabs
+- **Active tab highlight** — current tab visually emphasised with border and background
+- **Required field markers** — mandatory form fields labelled with `*`
+- **Sortable columns** — click any column header to sort ascending / descending (▲/▼)
+- **Safe media drill-down** — click the media count in the safe list to see all assigned media
 
 ### Safe Management (🔒)
 - CRUD for physical safes and cabinets: name, manufacturer, model, serial number
@@ -75,6 +78,7 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 
 ### Templates & Letter Layouts
 - Logo upload and accent colour for all documents
+- **Zeichnungsberechtigter** — authorised signatory field (appears on signature lines of all documents)
 - Templates for: invoice, handover, incoming report, contract
 - Live preview while editing
 - Placeholder system (company, date, amounts, media list, etc.)
@@ -86,8 +90,8 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 - Eingangsprotokoll and invoices display the relevant party names in Szenario B
 
 ### Contract Printing
-- **2-party storage contract** — generated from Step 2 of the handover workflow; covers parties, stored media list, return terms, remuneration, special conditions, and liability
-- **3-party escrow contract** — covers all three parties with escrow-specific clauses: release conditions, IP protection, remuneration, and final provisions
+- **2-party storage contract** — generated from Step 2 of the handover workflow
+- **3-party escrow contract** — covers all three parties with escrow-specific clauses
 - **Freigabebedingungen / Besondere Bedingungen** — optional free-text field printed verbatim in the contract
 - Button visibility is context-aware: the 2-party button appears in Szenario A, the 3-party button in Szenario B
 
@@ -98,20 +102,22 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 - Preference is persisted in `localStorage`
 
 ### Admin Panel
-- Company data: name, address, bank details, tax number, footer text
+- **Unternehmen tab** — company name, address, contact person (Bearbeiter), authorised signatory (Zeichnungsberechtigter), bank details, logo, accent colour
+- **Support contact** — separate name and email for the ❓ Help tab and footer (distinct from the Bearbeiter)
 - User management: create users, reset passwords, assign roles
 - Roles & permissions: fine-grained tab visibility per role
 - SAML 2.0 / SSO: Azure AD, Okta, Keycloak, and other IdPs
 - **SMTP configuration** (host, port, user, password, TLS/SSL) with test-email function
-- **Audit log** — who changed what and when, searchable with pagination
+- **Audit log** — who changed what and when, searchable with pagination; CSV export with BOM for Excel
+- **Database backup** — WAL-safe SQLite online backup download (`.db` file)
 
 ### Email / SMTP
-- Send Mahnungen (payment reminders) directly by email from the reminder history
+- Send payment reminders directly by email from the reminder history
 - SMTP settings stored in the database, configurable per installation
 - Supports STARTTLS and SSL/TLS
 
 ### Search
-- **Global search bar** in the top navigation — searches across media, customers, safes, and invoices simultaneously
+- **Global search bar** in the top navigation — searches across media, customers, safes, and invoices simultaneously, including archived media
 
 ### QR Codes
 - Each media record has a **QR code button** that generates a printable QR code overlay
@@ -122,17 +128,8 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 - Each media record can store a **maintenance interval (years)** and a **last-check date**
 - Dashboard shows a warning panel for all media with overdue or upcoming maintenance
 
-### Media Detail Tabs (v1.7.21)
-- **Foto-Tab** — upload and view a high-resolution photo per media record (separate from the list thumbnail)
-- **Notizen-Tab** — timestamped free-text notes per media record, with author tracking
-- **Wartungs-Tab** — maintenance history log with date, description, and technician
-
-### Batch Actions (v1.7.21)
-- **Multi-select checkboxes** in the media list with a "Select All" header checkbox
-- **Batch actions**: mark all selected as stored, or bulk-delete selected records
-
-### Progressive Web App / PWA (v1.7.21)
-- Installable on iOS/Android/Desktop via "Add to Homescreen"
+### Progressive Web App (PWA)
+- Installable on iOS / Android / Desktop via "Add to Homescreen"
 - Service worker caches static assets for offline access to the UI
 - Browser **push notifications** for upcoming contract expirations (with permission)
 
@@ -146,6 +143,7 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 - Optional SQLite encryption via SQLCipher AES-256 (`DB_KEY` env var)
 - Runs as a non-root container (UID 1000)
 - Optional TOTP second factor per user account
+- Rate limiting and security headers (XSS, CSRF, content-type sniffing protection)
 
 ---
 
@@ -208,6 +206,8 @@ Default login: `admin` / value of `ADMIN_PASSWORD` (default: `admin`)
 SQLite database at `/data/dtv.db` (persistent Docker volume).
 Migrations are applied automatically on start — no manual schema management required.
 
+**Backup:** Admin → Datenbank → "DB exportieren (.db)" downloads a WAL-safe online backup.
+
 Optional encryption: set `DB_KEY` in the environment **before** the first start.
 ⚠️ Enabling encryption on an existing unencrypted database is not supported.
 
@@ -220,6 +220,7 @@ Optional encryption: set `DB_KEY` in the environment **before** the first start.
 | Backend | Python 3.12, Flask 3.x, Gunicorn, pyotp |
 | Database | SQLite (WAL mode), optional SQLCipher |
 | Frontend | Vanilla JS SPA (no framework), HTML5, CSS3 |
+| Charts | Chart.js 4.4.1 |
 | Auth | Token-based (`X-Token` header), optional SAML 2.0 |
 | Container | Docker, non-root (UID 1000), health check |
 | CI/CD | GitHub Actions → ghcr.io |
