@@ -1397,10 +1397,28 @@ def export_datentraeger_csv():
     )
 
 # ─── DB BACKUP ───────────────────────────────────────────────────────────────
+def _sqlite_backup(dst_path):
+    """Create a consistent SQLite online backup (WAL-safe) using the backup API."""
+    import sqlite3 as _sqlite3
+    src = _sqlite3.connect(DB_PATH)
+    dst = _sqlite3.connect(dst_path)
+    with dst:
+        src.backup(dst)
+    dst.close()
+    src.close()
+
 @app.route('/api/db/export', methods=['GET'])
 @require_auth('manageUsers')
 def export_db():
-    return send_file(DB_PATH, as_attachment=True, download_name='dtv_backup.db')
+    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+    tmp = f'/tmp/dtv_export_{ts}.db'
+    try:
+        _sqlite_backup(tmp)
+        return send_file(tmp, as_attachment=True,
+                         download_name=f'dtv_backup_{ts}.db',
+                         mimetype='application/octet-stream')
+    except Exception as e:
+        return jsonify({'error': f'Backup fehlgeschlagen: {e}'}), 500
 
 # ─── SAML ────────────────────────────────────────────────────────────────────
 
@@ -2290,13 +2308,15 @@ def health():
 @app.route('/api/admin/backup', methods=['GET'])
 @require_auth('manageUsers')
 def admin_backup():
-    import shutil
     ts = datetime.now().strftime('%Y%m%d_%H%M%S')
     tmp = f'/tmp/dtv_backup_{ts}.db'
-    shutil.copy2(DB_PATH, tmp)
-    return send_file(tmp, as_attachment=True,
-                     download_name=f'dtv_backup_{ts}.db',
-                     mimetype='application/octet-stream')
+    try:
+        _sqlite_backup(tmp)
+        return send_file(tmp, as_attachment=True,
+                         download_name=f'dtv_backup_{ts}.db',
+                         mimetype='application/octet-stream')
+    except Exception as e:
+        return jsonify({'error': f'Backup fehlgeschlagen: {e}'}), 500
 
 # ─── PHASE 1: AUDIT-LOG CSV EXPORT ───────────────────────────────────────────
 @app.route('/api/audit_log_csv', methods=['GET'])

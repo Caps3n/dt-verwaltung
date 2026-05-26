@@ -1382,7 +1382,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
       </div>
       <div class="card">
         <div class="stitle">Datenbank</div>
-        <button class="btn-s" onclick="api('/api/db/export').then(r=>r.blob()).then(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='dtv.db';a.click()})" style="width:100%;margin-bottom:8px">DB exportieren (.db)</button>
+        <button class="btn-s" onclick="downloadDB()" style="width:100%;margin-bottom:8px">💾 DB exportieren (.db)</button>
         <button onclick="exportCSV('kunden')" style="width:100%;margin-bottom:8px;font-size:12px" data-i18n="btn_kunden_csv">Kunden als CSV</button>
         <button onclick="exportCSV('datentraeger')" style="width:100%;margin-bottom:8px;font-size:12px" data-i18n="btn_dt_csv">Datenträger als CSV</button>
         <button onclick="exportAuditCSV()" style="width:100%;margin-bottom:8px;font-size:12px">📋 Audit-Log als CSV</button>
@@ -6110,6 +6110,26 @@ async function ovWartungLoeschen(dtId,wid){
 }
 
 // ══ AUDIT LOG CSV EXPORT ═════════════════════════════════════════════════════
+async function downloadDB(){
+  try{
+    const r=await api('/api/db/export');
+    if(!r){return;}
+    if(!r.ok){
+      const e=await r.json().catch(()=>({error:'Serverfehler'}));
+      alert('DB-Export fehlgeschlagen: '+(e.error||r.status));return;
+    }
+    const blob=await r.blob();
+    const ts=new Date().toISOString().slice(0,10);
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`dtv_backup_${ts}.db`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }catch(e){alert('DB-Export Fehler: '+e.message);}
+}
+
 async function exportAuditCSV(){
   try{
     const r=await api('/api/audit_log_csv');
