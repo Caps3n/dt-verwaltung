@@ -4,6 +4,17 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.24] – 2026-05-26
+
+### Fixed
+- **Dashboard Mobile-Layout** – KPI-Strip, Quick-Actions, Charts und Section-Cards optimiert für Bildschirme ≤ 600px:
+  - KPI-Werte auf `font-size:17px` + `text-overflow:ellipsis` (kein Überlauf bei langen Beträgen)
+  - KPI-Label auf `9px`, KPI-Padding kompakter (`11px 12px`)
+  - `.db-section` Innen-Padding auf Mobile auf `12px 13px` reduziert
+  - Quick-Action Buttons bleiben auch auf Mobile 2×2 (nicht 4×1) für bessere Nutzung des Platzes
+  - Revenue- und Vault-Chart-Container: Höhe auf Mobile `140px` statt `180–200px`
+  - Donut-Chart-Canvas auf Mobile auf `max 120×120px` begrenzt (war 160×160px, sah auf Vollbreite winzig und einsam aus)
+
 ## [v1.7.22] – 2026-05-26
 
 ### Added
