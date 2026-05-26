@@ -2954,7 +2954,8 @@ function printQR(){
   const w=window.open('','_blank');
   const src=c.tagName==='IMG'?c.src:c.toDataURL();
   const lbl=document.getElementById('qr-label').textContent;
-  w.document.write(`<html><body style="text-align:center;font-family:Arial;padding:20px"><img src="${src}" style="width:200px"><p style="font-size:11px;font-family:monospace;margin-top:8px;word-break:break-all">${lbl}</p></body></html>`);
+  const lblSafe=lbl.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  w.document.write(`<html><body style="text-align:center;font-family:Arial;padding:20px"><img src="${src}" style="width:200px"><p style="font-size:11px;font-family:monospace;margin-top:8px;word-break:break-all">${lblSafe}</p></body></html>`);
   w.document.close();w.print();
 }
 
