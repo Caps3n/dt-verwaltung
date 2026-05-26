@@ -1,4 +1,4 @@
-# DT-Verwaltung v1.7.25
+# DT-Verwaltung v1.7.26
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-caps3n-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/caps3n)
 
@@ -144,6 +144,10 @@ Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via 
 - Runs as a non-root container (UID 1000)
 - Optional TOTP second factor per user account
 - Rate limiting and security headers (XSS, CSRF, content-type sniffing protection)
+- **SMTP password encrypted at rest** with Fernet AES (key auto-generated in `/data/smtp.key`)
+- **SAML login uses one-time-code exchange** — session token never appears in browser history or URL
+- **XSS-hardened** — all user-supplied data in document templates escaped via `esc()`; `dl()` helpers escape internally
+- Set `ALLOWED_ORIGIN=https://your-domain.com` in production to restrict CORS
 
 ---
 
