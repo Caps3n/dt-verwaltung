@@ -85,6 +85,8 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 .upzone:hover{background:var(--bg);border-color:var(--i-brd)}
 .upzone.has-file{border-color:var(--s-brd);background:var(--s-bg)}.upzone.logo-zone.has-file{border-color:var(--i-brd);background:var(--surf)}
 .thumb{width:34px;height:34px;object-fit:cover;border-radius:6px;border:1px solid var(--brd2);cursor:pointer;vertical-align:middle}
+.lazy-thumb:not([data-loaded]){background:linear-gradient(90deg,var(--surf) 25%,var(--brd) 50%,var(--surf) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;align-items:flex-start;justify-content:center;padding-top:40px;background:rgba(0,0,0,.6)}
 .overlay.open{display:flex}
 .overlay-box{background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd2);padding:1.25rem;width:94%;max-width:520px;max-height:85vh;overflow-y:auto}
@@ -185,7 +187,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 .ov-tab-btn.ov-tab-active{color:var(--i-txt);border-bottom-color:var(--i-brd);background:var(--i-bg)}
 /* Batch bar */
 #dt-batch-bar{display:none;align-items:center;gap:8px;background:var(--i-bg);border:1px solid var(--i-brd);border-radius:var(--rad);padding:7px 12px;margin-bottom:8px;font-size:12px;color:var(--i-txt)}
-/* ── Dashboard (v1.7.21+, Mobile-Fix v1.7.26) ──────────────────────────────── */
+/* ── Dashboard (v1.7.21+, Mobile-Fix v1.7.27) ──────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -1630,7 +1632,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.26
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.27
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -2889,7 +2891,7 @@ function renderDT(){
   el.innerHTML=`<table><thead><tr><th style="width:30px"><input type="checkbox" id="dt-sel-all" onchange="dtBatchToggleAll(this)" style="width:14px;height:14px"></th><th style="width:7%">${t('col_bild')}</th>${th(t('col_firma'),'kunden_nr')}${th(t('col_typ'),'bezeichnung')}${th(t('col_serial'),'serial')}${th(t('col_preis'),'preis_jahr')}<th style="width:8%">Status</th><th style="width:20%"></th></tr></thead><tbody>`+
     page.map(d=>{
       const chk=_dtSelected.has(d.id)?'checked':'';
-      const imgC=d.hat_bild?`<img src="" class="thumb" style="cursor:pointer" onclick="loadAndShowImg('/api/datentraeger/${d.id}/bild',this)">`:'<div style="width:34px;height:34px;background:var(--surf);border-radius:6px;border:1px dashed var(--brd2)"></div>';
+      const imgC=d.hat_bild?`<img src="" data-src="/api/datentraeger/${d.id}/bild" class="thumb lazy-thumb" style="cursor:pointer" onclick="loadAndShowImg('/api/datentraeger/${d.id}/bild',this)">`:'<div style="width:34px;height:34px;background:var(--surf);border-radius:6px;border:1px dashed var(--brd2)"></div>';
       const scanBtn=d.hat_eingang_doc?`<button onclick="loadAndOpenDoc('/api/datentraeger/${d.id}/eingang_doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Eingangsprotokoll anzeigen">📄 ${_lang==='en'?'Incoming':'Eingang'}</button>`:`<span style="font-size:10px;color:var(--mut)">${t('kein_scan')}</span>`;
       const pl=d.einheit==='monat'?`${eur(d.preis)}/M`:`${eur(d.preis)}/J`;
       const tresorInfo=d.tresor_bezeichnung?`<br><span style="font-size:10px;color:var(--mut)">🔒 ${d.tresor_bezeichnung}${d.tresor_raum?', Raum '+d.tresor_raum:''}</span>`:'';
@@ -2904,6 +2906,25 @@ function renderDT(){
       Array.from({length:pages},(_, i)=>`<button onclick="_dtPage=${i};renderDT()" style="padding:3px 8px;${i===_dtPage?'background:var(--i-bg);color:var(--i-txt);border-color:var(--i-brd)':''}">${i+1}</button>`).join('')+
       (_dtPage<pages-1?`<button onclick="_dtPage++;renderDT()" style="padding:3px 8px">▶</button>`:'');
   }
+  // Lazy-load thumbnails via IntersectionObserver — load image when row scrolls into view
+  _dtAttachLazyObs();
+}
+
+function _dtAttachLazyObs(){
+  const imgs=document.querySelectorAll('.lazy-thumb:not([data-loaded])');
+  if(!imgs.length)return;
+  if(!window._dtLazyObs){
+    window._dtLazyObs=new IntersectionObserver(entries=>{
+      entries.forEach(img=>{
+        if(img.isIntersecting&&!img.target.dataset.loaded){
+          img.target.dataset.loaded='1';
+          loadAndShowImg(img.target.dataset.src,img.target);
+          window._dtLazyObs.unobserve(img.target);
+        }
+      });
+    },{rootMargin:'120px'});
+  }
+  imgs.forEach(img=>window._dtLazyObs.observe(img));
 }
 
 // QR-Code Overlay (Deep-Link URL)
@@ -3983,7 +4004,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.26${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.27${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
