@@ -187,7 +187,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 .ov-tab-btn.ov-tab-active{color:var(--i-txt);border-bottom-color:var(--i-brd);background:var(--i-bg)}
 /* Batch bar */
 #dt-batch-bar{display:none;align-items:center;gap:8px;background:var(--i-bg);border:1px solid var(--i-brd);border-radius:var(--rad);padding:7px 12px;margin-bottom:8px;font-size:12px;color:var(--i-txt)}
-/* ── Dashboard (v1.7.21+, Mobile-Fix v1.7.27) ──────────────────────────────── */
+/* ── Dashboard (v1.7.21+, Mobile-Fix v1.7.28) ──────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -280,6 +280,27 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   #topbar-user,#topbar-role{display:none}
   .g2,.g3,.g4{grid-template-columns:1fr!important}
   .db-wrap{max-width:100%}
+  /* Template Brief-Vorschau horizontal scrollbar auf Tablet */
+  .brief-outer{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .brief{min-width:540px}
+}
+/* ── Mobile column hiding + UI fixes (v1.7.28) ───────────────────────────── */
+@media(max-width:600px){
+  /* DT-Tabelle: Kunden-Nr + Preis ausblenden */
+  .dt-col-kd,.dt-col-pr{display:none}
+  /* DT-Tabelle: QR-Button + Eingang-Button ausblenden */
+  .dt-btn-qr-mob,.dt-btn-scan-mob{display:none!important}
+  /* Rechnungen: Zeitraum + Datum ausblenden */
+  .re-col-zr,.re-col-dat{display:none}
+  /* Tresore: Standort + Termin ausblenden */
+  .tr-col-loc,.tr-col-termin{display:none}
+  /* DT Batch-Bar umbrechen */
+  #dt-batch-bar{flex-wrap:wrap;gap:4px}
+  #dt-batch-bar button,#dt-batch-bar select{font-size:10px;padding:3px 7px}
+  /* Template-Tabs scrollbar auf Mobile */
+  .tpl-tabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .tpl-tabs::-webkit-scrollbar{display:none}
+  .tpl-tab{flex-shrink:0}
 }
 </style>
 </head>
@@ -1040,7 +1061,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1" data-i18n="lbl_zurueck">Zurück</button><button class="btn-p" onclick="tplSpeichern()" id="save-tpl-btn" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
       </div>
       <div><div class="stitle" style="margin-bottom:8px" data-i18n="lbl_vorschau">Vorschau</div>
-        <div class="brief" id="brief-preview">
+        <div class="brief-outer"><div class="brief" id="brief-preview">
           <div class="brief-header">
             <div class="brief-header-left">
               <div class="brief-firma-name" id="b-firma-name"></div>
@@ -1064,7 +1085,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <div class="brief-txt" id="b-schluss"></div>
           <div class="brief-gruss"><div id="b-gruss"></div><div><div class="brief-sig" id="b-sig"></div></div></div>
           <div class="brief-foot"><div class="brief-foot-col" id="b-foot-adr"></div><div class="brief-foot-col" id="b-foot-bank"></div><div class="brief-foot-col" id="b-foot-steuer"></div></div>
-        </div>
+        </div></div>
       </div>
     </div>
   </div>
@@ -1091,7 +1112,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1" data-i18n="lbl_zurueck">Zurück</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
       </div>
       <div><div class="stitle" style="margin-bottom:8px" data-i18n="lbl_vorschau">Vorschau</div>
-        <div class="brief" id="u-brief-preview">
+        <div class="brief-outer"><div class="brief" id="u-brief-preview">
           <div class="brief-header">
             <div class="brief-header-left">
               <div class="brief-firma-name" id="ub-firma-name"></div>
@@ -1108,7 +1129,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
           <table class="brief-tbl"><thead><tr><th>Nr.</th><th>Bezeichnung</th><th>Seriennummer</th><th>Eingelagert</th></tr></thead><tbody><tr><td>1</td><td><span class="phc">BEZ</span></td><td><span class="phc">SN</span></td><td><span class="phc">DAT</span></td></tr></tbody></table>
           <div class="brief-txt" id="ub-nach"></div>
           <div class="brief-foot"><div class="brief-foot-col" id="ub-foot-text"></div></div>
-        </div>
+        </div></div>
       </div>
     </div>
   </div>
@@ -1135,7 +1156,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1" data-i18n="lbl_zurueck">Zurück</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
       </div>
       <div><div class="stitle" style="margin-bottom:8px" data-i18n="lbl_vorschau">Vorschau</div>
-        <div class="brief" id="e-brief-preview">
+        <div class="brief-outer"><div class="brief" id="e-brief-preview">
           <div class="brief-header">
             <div class="brief-header-left">
               <div class="brief-firma-name" id="eb-firma-name"></div>
@@ -1170,7 +1191,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
             </div>
           </div>
           <div class="brief-foot"><div class="brief-foot-col" id="eb-foot-text"></div><div class="brief-foot-col" id="eb-foot-bank"></div><div class="brief-foot-col" id="eb-foot-steuer"></div></div>
-        </div>
+        </div></div>
       </div>
     </div>
   </div>
@@ -1277,7 +1298,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div style="display:flex;gap:8px"><button onclick="tplReset()" style="flex:1" data-i18n="lbl_zuruecksetzen">Zurücksetzen</button><button class="btn-p" onclick="tplSpeichern()" style="flex:2" data-i18n="lbl_speichern">Speichern</button></div>
       </div>
       <div><div class="stitle" style="margin-bottom:8px" data-i18n="lbl_vorschau">Vorschau</div>
-        <div class="brief" id="v-brief-preview">
+        <div class="brief-outer"><div class="brief" id="v-brief-preview">
           <div class="brief-header">
             <div class="brief-header-left">
               <div class="brief-firma-name" id="vb-firma-name"></div>
@@ -1308,7 +1329,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
             <div style="flex:1"><div style="font-size:10px;color:#666;margin-bottom:22px" data-i18n="lbl_sig_ag">Unterschrift Auftraggeber</div><div style="border-top:1px solid #999;padding-top:3px;font-size:10px;color:#999"><span class="phc">Auftraggeber</span></div></div>
           </div>
           <div class="brief-foot"><div class="brief-foot-col" id="vb-foot-adr"></div><div class="brief-foot-col" id="vb-foot-bank"></div><div class="brief-foot-col" id="vb-foot-steuer"></div></div>
-        </div>
+        </div></div>
       </div>
     </div>
   </div>
@@ -1632,7 +1653,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.27
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.28
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -2861,7 +2882,7 @@ let _dtSort={col:'bezeichnung',dir:1};
 let _reSort={col:'datum',dir:-1};
 function _sortList(list,col,dir){return [...list].sort((a,b)=>{const va=a[col]??'',vb=b[col]??'';return typeof va==='number'?((va-vb)*dir):(String(va).localeCompare(String(vb),'de'))*dir;});}
 function _sortHdr(id,col,current){const arrow=current.col===col?(current.dir===1?' ▲':' ▼'):'';return`<th style="cursor:pointer;user-select:none" onclick="${id}Sort('${col}')">${col}${arrow}</th>`;}
-function _thS(label,sortId,sortState,col){const arrow=sortState.col===col?(sortState.dir===1?' ▲':' ▼'):'';return`<th style="cursor:pointer;user-select:none;white-space:nowrap" onclick="${sortId}('${col}')">${label}${arrow}</th>`;}
+function _thS(label,sortId,sortState,col,cls){const arrow=sortState.col===col?(sortState.dir===1?' ▲':' ▼'):'';const ca=cls?` class="${cls}"`:'';return`<th${ca} style="cursor:pointer;user-select:none;white-space:nowrap" onclick="${sortId}('${col}')">${label}${arrow}</th>`;}
 function dtSetStatus(s){
   _dtStatusFilter=s;_dtPage=0;
   ['alle','eingelagert'].forEach(x=>{
@@ -2887,17 +2908,17 @@ function renderDT(){
   if(_dtPage>=pages)_dtPage=Math.max(0,pages-1);
   const page=list.slice(_dtPage*_dtPerPage,(_dtPage+1)*_dtPerPage);
   if(!page.length){el.innerHTML='<div class="empty">'+t('empty_dt')+'</div>';if(pgEl)pgEl.innerHTML='';return;}
-  const th=(lbl,col)=>_thS(lbl,'dtSortBy',_dtSort,col);
-  el.innerHTML=`<table><thead><tr><th style="width:30px"><input type="checkbox" id="dt-sel-all" onchange="dtBatchToggleAll(this)" style="width:14px;height:14px"></th><th style="width:7%">${t('col_bild')}</th>${th(t('col_firma'),'kunden_nr')}${th(t('col_typ'),'bezeichnung')}${th(t('col_serial'),'serial')}${th(t('col_preis'),'preis_jahr')}<th style="width:8%">Status</th><th style="width:20%"></th></tr></thead><tbody>`+
+  const th=(lbl,col,cls)=>_thS(lbl,'dtSortBy',_dtSort,col,cls);
+  el.innerHTML=`<table><thead><tr><th style="width:30px"><input type="checkbox" id="dt-sel-all" onchange="dtBatchToggleAll(this)" style="width:14px;height:14px"></th><th style="width:7%">${t('col_bild')}</th>${th(t('col_firma'),'kunden_nr','dt-col-kd')}${th(t('col_typ'),'bezeichnung')}${th(t('col_serial'),'serial')}${th(t('col_preis'),'preis_jahr','dt-col-pr')}<th style="width:8%">Status</th><th style="width:20%"></th></tr></thead><tbody>`+
     page.map(d=>{
       const chk=_dtSelected.has(d.id)?'checked':'';
       const imgC=d.hat_bild?`<img src="" data-src="/api/datentraeger/${d.id}/bild" class="thumb lazy-thumb" style="cursor:pointer" onclick="loadAndShowImg('/api/datentraeger/${d.id}/bild',this)">`:'<div style="width:34px;height:34px;background:var(--surf);border-radius:6px;border:1px dashed var(--brd2)"></div>';
-      const scanBtn=d.hat_eingang_doc?`<button onclick="loadAndOpenDoc('/api/datentraeger/${d.id}/eingang_doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Eingangsprotokoll anzeigen">📄 ${_lang==='en'?'Incoming':'Eingang'}</button>`:`<span style="font-size:10px;color:var(--mut)">${t('kein_scan')}</span>`;
+      const scanBtn=d.hat_eingang_doc?`<button class="dt-btn-scan-mob" onclick="loadAndOpenDoc('/api/datentraeger/${d.id}/eingang_doc')" style="padding:2px 6px;font-size:10px;background:var(--s-bg);color:var(--s-txt);border:1px solid var(--s-brd);border-radius:3px;cursor:pointer" title="Eingangsprotokoll anzeigen">📄 ${_lang==='en'?'Incoming':'Eingang'}</button>`:`<span class="dt-btn-scan-mob" style="font-size:10px;color:var(--mut)">${t('kein_scan')}</span>`;
       const pl=d.einheit==='monat'?`${eur(d.preis)}/M`:`${eur(d.preis)}/J`;
       const tresorInfo=d.tresor_bezeichnung?`<br><span style="font-size:10px;color:var(--mut)">🔒 ${d.tresor_bezeichnung}${d.tresor_raum?', Raum '+d.tresor_raum:''}</span>`:'';
       const statusBadge=d.status==='eingelagert'?`<span class="badge bg" style="font-size:10px">✅</span>`:`<span class="badge ba" style="font-size:10px">📦</span>`;
-      const qrBtn=`<button onclick="showQR(${d.id},'${(d.interne_nr||d.serial).replace(/'/g,"\\'")}',this)" style="padding:2px 6px;font-size:10px;border:1px solid var(--brd2);border-radius:3px;background:var(--surf);cursor:pointer" title="QR-Code">QR</button>`;
-      return`<tr data-dtid="${d.id}"><td><input type="checkbox" class="dt-sel-cb" data-id="${d.id}" ${chk} onchange="dtBatchCheck(${d.id},this.checked)" style="width:14px;height:14px"></td><td>${imgC}</td><td style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${esc(d.bezeichnung)}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${esc(d.serial)}${d.interne_nr?`<br><span style="color:var(--mut)">${esc(d.interne_nr)}</span>`:''}</td><td style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${statusBadge}</td><td><div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">${scanBtn}${qrBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">✎</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">✕</button>`:''}</div></td></tr>`;
+      const qrBtn=`<button class="dt-btn-qr-mob" onclick="showQR(${d.id},'${(d.interne_nr||d.serial).replace(/'/g,"\\'")}',this)" style="padding:2px 6px;font-size:10px;border:1px solid var(--brd2);border-radius:3px;background:var(--surf);cursor:pointer" title="QR-Code">QR</button>`;
+      return`<tr data-dtid="${d.id}"><td><input type="checkbox" class="dt-sel-cb" data-id="${d.id}" ${chk} onchange="dtBatchCheck(${d.id},this.checked)" style="width:14px;height:14px"></td><td>${imgC}</td><td class="dt-col-kd" style="font-size:11px;color:var(--mut)">${d.kunden_nr||''}</td><td>${esc(d.bezeichnung)}${tresorInfo}</td><td style="font-family:monospace;font-size:11px">${esc(d.serial)}${d.interne_nr?`<br><span style="color:var(--mut)">${esc(d.interne_nr)}</span>`:''}</td><td class="dt-col-pr" style="font-size:11px"><span style="font-weight:700">${pl}</span><br><span style="color:var(--mut)">${eur(d.preis_jahr)}/J</span></td><td>${statusBadge}</td><td><div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">${scanBtn}${qrBtn}${can('write')?`<button class="btn-w" onclick="dtBearbeiten(${d.id})" style="padding:3px 6px;font-size:11px">✎</button>`:''}${can('delete')?`<button class="btn-d" onclick="dtLoeschen(${d.id})" style="padding:3px 5px;font-size:11px">✕</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
   // Pagination
   if(pgEl){
@@ -3333,8 +3354,8 @@ async function rechnungSpeichern(k,nr,html){
 function renderRechnungHistorie(list){
   const el=document.getElementById('r-historie');if(!el)return;
   if(!list||!list.length){el.innerHTML='<div class="empty">'+t('empty_rechnungen')+'</div>';return;}
-  el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_nr')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_zeitraum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_netto')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_datum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)"></th></tr></thead><tbody>'+
-    list.map((r)=>{const rK=kunden.find(x=>x.id===r.kunden_id)||{};return`<tr><td style="padding:5px 6px;font-weight:600;font-family:monospace;font-size:11px">${esc(r.nr)}</td><td style="padding:5px 6px">${esc(r.firma)}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${esc(r.zr)}</td><td style="padding:5px 6px;font-size:11px">${r.netto?'EUR '+r.netto:'-'}</td><td style="padding:5px 6px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td><td style="padding:5px 6px"><div style="display:flex;gap:4px"><button onclick="rechnungWiederdrucken(${r.id})" style="padding:2px 8px;font-size:11px">${t('btn_drucken')}</button><button onclick="openRechnungEmailModal(${r.id},${JSON.stringify(r.nr)},${JSON.stringify(r.firma)},${JSON.stringify(rK.email||'')})" style="padding:2px 8px;font-size:11px" title="Per E-Mail senden">📧</button><button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:2px 8px;font-size:11px">${t('btn_mahnung')}</button></div></td></tr>`}).join('')+
+  el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_nr')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_firma_header')+'</th><th class="re-col-zr" style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_zeitraum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_netto')+'</th><th class="re-col-dat" style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)">'+t('col_datum')+'</th><th style="font-size:10px;color:var(--mut);padding:4px 6px;border-bottom:1px solid var(--brd)"></th></tr></thead><tbody>'+
+    list.map((r)=>{const rK=kunden.find(x=>x.id===r.kunden_id)||{};return`<tr><td style="padding:5px 6px;font-weight:600;font-family:monospace;font-size:11px">${esc(r.nr)}</td><td style="padding:5px 6px">${esc(r.firma)}</td><td class="re-col-zr" style="padding:5px 6px;font-size:11px;color:var(--mut)">${esc(r.zr)}</td><td style="padding:5px 6px;font-size:11px">${r.netto?'EUR '+r.netto:'-'}</td><td class="re-col-dat" style="padding:5px 6px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td><td style="padding:5px 6px"><div style="display:flex;gap:4px"><button onclick="rechnungWiederdrucken(${r.id})" style="padding:2px 8px;font-size:11px">${t('btn_drucken')}</button><button onclick="openRechnungEmailModal(${r.id},${JSON.stringify(r.nr)},${JSON.stringify(r.firma)},${JSON.stringify(rK.email||'')})" style="padding:2px 8px;font-size:11px" title="Per E-Mail senden">📧</button><button onclick="rechnungMahnung(${r.id})" class="btn-w" style="padding:2px 8px;font-size:11px">${t('btn_mahnung')}</button></div></td></tr>`}).join('')+
     '</tbody></table>';
 }
 async function rechnungHistorieLadenAlle(){
@@ -3358,8 +3379,8 @@ async function renderRechnungHistoriePage(){
   const th2=(lbl,col)=>_thS(lbl,'reSortBy',_reSort,col);
   el.innerHTML='<table style="width:100%;border-collapse:collapse"><thead><tr>'+
     th2(t('col_nr'),'nr')+th2(t('col_firma_header'),'firma')+
-    `<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">${t('col_zeitraum')}</th>`+
-    th2(t('col_netto'),'netto')+th2(t('col_datum'),'dat')+
+    `<th class="re-col-zr" style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">${t('col_zeitraum')}</th>`+
+    th2(t('col_netto'),'netto')+_thS(t('col_datum'),'reSortBy',_reSort,'dat','re-col-dat')+
     `<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)">${ta('Status','Status')}</th>`+
     `<th style="font-size:10px;color:var(--mut);padding:6px 8px;border-bottom:1.5px solid var(--brd2)"></th>`+
     '</tr></thead><tbody>'+
@@ -3385,9 +3406,9 @@ async function renderRechnungHistoriePage(){
       return`<tr style="border-bottom:1px solid var(--brd)">
       <td style="padding:7px 8px;font-weight:600;font-family:monospace;font-size:12px">${esc(r.nr)}</td>
       <td style="padding:7px 8px;font-weight:600">${esc(r.firma)}</td>
-      <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${esc(r.zr)}</td>
+      <td class="re-col-zr" style="padding:7px 8px;font-size:11px;color:var(--mut)">${esc(r.zr)}</td>
       <td style="padding:7px 8px;font-size:12px">${r.netto?'EUR '+r.netto:'-'}</td>
-      <td style="padding:7px 8px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td>
+      <td class="re-col-dat" style="padding:7px 8px;font-size:11px;color:var(--mut)">${fmtDate(r.dat)}</td>
       <td style="padding:7px 8px">${statusBadge}</td>
       <td style="padding:7px 8px"><div style="display:flex;gap:4px;flex-wrap:wrap">
         ${bezahltBtn}
@@ -4004,7 +4025,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.27${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.28${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';
@@ -4781,7 +4802,7 @@ function renderTresore(){
   const list=q?tresore.filter(t=>(t.bezeichnung||'').toLowerCase().includes(q)||(t.stadt||'').toLowerCase().includes(q)):tresore;
   const el=document.getElementById('tr-liste');
   if(!list.length){el.innerHTML='<div class="empty">'+t('empty_tresore')+'</div>';return;}
-  el.innerHTML='<table><thead><tr><th>'+t('col_bezeichnung')+'</th><th>'+t('col_standort')+'</th><th>DT</th><th>🔧 Wartung fällig</th><th>📅 Termin</th><th></th></tr></thead><tbody>'+
+  el.innerHTML='<table><thead><tr><th>'+t('col_bezeichnung')+'</th><th class="tr-col-loc">'+t('col_standort')+'</th><th>DT</th><th>🔧 Wartung fällig</th><th class="tr-col-termin">📅 Termin</th><th></th></tr></thead><tbody>'+
     list.map(t=>{
       const loc=[t.land!='Deutschland'?t.land:'',t.stadt,t.gebaeude,t.etage?t.etage+'.':'' ,t.raum].filter(Boolean).join(', ');
       const _wNow=new Date();const _wD=t.naechster_wartungstermin?new Date(t.naechster_wartungstermin):null;
@@ -4796,7 +4817,7 @@ function renderTresore(){
       const terminLbl=!_tD?'<span style="color:var(--mut);font-size:11px">—</span>':
         _tD<_tNow?`<span class="badge br" title="Termin überfällig">${fmtDate2(t.termin_wartungsfirma)}</span>`:
         `<span class="badge bi">${fmtDate2(t.termin_wartungsfirma)}</span>`;
-      return`<tr><td><strong style="cursor:pointer;color:var(--i-txt)" onclick="tresorDetail(${t.id})">${esc(t.bezeichnung)}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${esc(t.hersteller)}${t.modell?' '+t.modell:''}</span>`:''}</td><td style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center">${dtBadge}</td><td>${warnLbl}</td><td>${terminLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
+      return`<tr><td><strong style="cursor:pointer;color:var(--i-txt)" onclick="tresorDetail(${t.id})">${esc(t.bezeichnung)}</strong>${t.hersteller?`<br><span style="font-size:10px;color:var(--mut)">${esc(t.hersteller)}${t.modell?' '+t.modell:''}</span>`:''}</td><td class="tr-col-loc" style="font-size:11px;color:var(--mut)">${loc||'—'}</td><td style="text-align:center">${dtBadge}</td><td>${warnLbl}</td><td class="tr-col-termin">${terminLbl}</td><td><div style="display:flex;gap:4px;align-items:center">${wvBtn}${can('write')?`<button class="btn-w" onclick="tresorBearbeiten(${t.id})" style="padding:3px 6px;font-size:11px">Bearb.</button>`:''}${can('delete')?`<button class="btn-d" onclick="tresorLoeschen(${t.id})" style="padding:3px 5px;font-size:11px">X</button>`:''}</div></td></tr>`;
     }).join('')+'</tbody></table>';
 }
 

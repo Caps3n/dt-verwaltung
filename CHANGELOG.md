@@ -4,6 +4,22 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.28] – 2026-05-27
+
+### Changed (Mobile UX)
+- **DT-Tabelle ≤600px** – Spalten „Kunden-Nr" (`dt-col-kd`) und „Preis" (`dt-col-pr`) ausgeblendet; QR-Button und Eingangs-Button per `dt-btn-qr-mob` / `dt-btn-scan-mob` ausgeblendet → 5-Spalten-Ansicht ohne horizontales Scrollen.
+- **Rechnungen-Tabelle ≤600px** – Spalten „Zeitraum" (`re-col-zr`) und „Datum" (`re-col-dat`) ausgeblendet → kompaktere 5-Spalten-Ansicht.
+- **Tresore-Tabelle ≤600px** – Spalten „Standort" (`tr-col-loc`) und „Termin" (`tr-col-termin`) ausgeblendet → 4-Spalten-Ansicht.
+- **DT Batch-Bar** – `flex-wrap:wrap` + kleinere Buttons auf ≤600px; passt sich umbrechen statt zu überfließen.
+- **Template-Tabs** – `overflow-x:auto; flex-wrap:nowrap` auf ≤600px; Tabs scrollen horizontal statt umzubrechen.
+- **Template Brief-Vorschau** – `<div class="brief-outer">` Wrapper um alle 4 Previews (Rechnung, Übergabe, Eingang, Vertrag); `.brief{min-width:540px}` bei ≤1024px → Vorschau scrollt horizontal statt zu quetschen.
+- **`_thS()`** – Optionaler 5. Parameter `cls` für CSS-Klassen auf sortierbaren `<th>`-Elementen.
+
+## [v1.7.27] – 2026-05-27
+
+### Changed
+- **DT-Thumbnail Lazy-Loading** – Vorschaubilder in der Datenträger-Liste werden nicht mehr beim Klick, sondern automatisch per `IntersectionObserver` geladen sobald die Zeile ins Viewport scrollt (rootMargin: 120px). Shimmer-Placeholder während des Ladens.
+
 ## [v1.7.26] – 2026-05-26
 
 ### Security
