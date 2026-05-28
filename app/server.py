@@ -787,6 +787,23 @@ def verify_pw(pw, stored):
 
 _BLOB_MAX = 10 * 1024 * 1024  # 10 MB hard limit for all uploaded blobs
 
+# Field length limits (characters) applied server-side on create/update
+_FIELD_LIMITS = {
+    'firma': 200, 'nr': 50, 'ansprechpartner': 200, 'email': 254,
+    'tel': 50, 'mobil': 50, 'strasse': 200, 'plz': 20, 'ort': 200,
+    'land': 100, 'sap_nr': 100, 'vertragsnr': 100,
+    'bezeichnung': 200, 'serial': 200, 'interne_nr': 100,
+    'beschreibung': 2000, 'notizen': 4000,
+}
+
+def _validate_lengths(data, limits=None):
+    """Return an error string if any field in data exceeds its limit, else None."""
+    for field, maxlen in (limits or _FIELD_LIMITS).items():
+        val = data.get(field)
+        if val and isinstance(val, str) and len(val) > maxlen:
+            return f'Feld „{field}" zu lang (max. {maxlen} Zeichen)'
+    return None
+
 def _check_blob_size(b64_or_bytes, field_name='Datei', max_bytes=_BLOB_MAX):
     """Return an error string if the blob exceeds max_bytes, else None.
 
@@ -1097,6 +1114,9 @@ def create_kunde():
     data = request.json or {}
     if not data.get('firma') or not data.get('nr'):
         return jsonify({'error': 'Firma und Kundennummer erforderlich'}), 400
+    err = _validate_lengths(data)
+    if err:
+        return jsonify({'error': err}), 400
     db = get_db()
     try:
         db.execute(
@@ -1123,6 +1143,9 @@ def create_kunde():
 @require_auth('write')
 def update_kunde(kid):
     data = request.json or {}
+    err = _validate_lengths(data)
+    if err:
+        return jsonify({'error': err}), 400
     db = get_db()
     old = db.execute("SELECT * FROM kunden WHERE id=?", (kid,)).fetchone()
     if old and old['vertragsnr'] and old['vertragsnr'] != data.get('vertragsnr') and data.get('vertragsnr'):
@@ -1252,6 +1275,9 @@ def get_dt_bild(did):
 @require_auth('write')
 def create_dt():
     data = request.json or {}
+    err = _validate_lengths(data)
+    if err:
+        return jsonify({'error': err}), 400
     for field in ('bild', 'eingang_doc'):
         err = _check_blob_size(data.get(field), field)
         if err:
@@ -1286,6 +1312,9 @@ def create_dt():
 @require_auth('write')
 def update_dt(did):
     data = request.json or {}
+    err = _validate_lengths(data)
+    if err:
+        return jsonify({'error': err}), 400
     for field in ('bild', 'eingang_doc'):
         err = _check_blob_size(data.get(field), field)
         if err:
@@ -2283,6 +2312,10 @@ def _send_email(to_addr, subject, html_body):
         msg['Subject'] = subject
         msg['From'] = f"{cfg['from_name']} <{cfg['from_email']}>"
         msg['To'] = to_addr
+        # Plain-text fallback for mail clients that don't render HTML
+        import re as _re
+        plain_body = _re.sub(r'<[^>]+>', '', html_body).strip()
+        msg.attach(MIMEText(plain_body, 'plain', 'utf-8'))
         msg.attach(MIMEText(html_body, 'html', 'utf-8'))
         if cfg['use_tls']:
             server = smtplib.SMTP(cfg['host'], cfg['port'], timeout=10)
@@ -2645,7 +2678,19 @@ def stats_charts():
     if cached:
         return jsonify(cached)
     db = get_db()
-    # Monthly revenue last 12 months (from netto column)
+    # Monthly revenue last 12 months — use invoice date (dat: DD.MM.YYYY), not erstellt
+    from collections import defaultdict
+    _rev_rows = db.execute("SELECT dat, netto FROM rechnungen WHERE dat IS NOT NULL").fetchall()
+    _buckets = defaultdict(float)
+    for r in _rev_rows:
+        try:
+            parts = str(r['dat']).split('.')
+            if len(parts) == 3:
+                key = f"{parts[2]}-{parts[1]}"
+                val = str(r['netto']).replace('.','').replace(',','.').replace('€','').replace(' ','')
+                _buckets[key] += float(val)
+        except Exception:
+            pass
     revenue_months, revenue_values = [], []
     now = datetime.now()
     for i in range(11, -1, -1):
@@ -2654,18 +2699,7 @@ def stats_charts():
         yr_actual = now.year + yr if (now.month - i - 1) >= 0 else now.year - 1 + yr
         mo_str = f'{yr_actual}-{mo:02d}'
         revenue_months.append(mo_str)
-        # netto is stored as string like "1234.56" or "1.234,56" – try float cast
-        rows = db.execute(
-            "SELECT netto FROM rechnungen WHERE erstellt LIKE ?", (mo_str+'%',)
-        ).fetchall()
-        total = 0.0
-        for r in rows:
-            try:
-                val = str(r['netto']).replace('.','').replace(',','.').replace('€','').replace(' ','')
-                total += float(val)
-            except Exception:
-                pass
-        revenue_values.append(round(total, 2))
+        revenue_values.append(round(_buckets.get(mo_str, 0.0), 2))
     # DT status counts
     status_rows = db.execute(
         "SELECT status, COUNT(*) as cnt FROM datentraeger GROUP BY status"

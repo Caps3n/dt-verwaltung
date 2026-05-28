@@ -4,6 +4,16 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.31] – 2026-05-28
+
+### Fixed
+- **Revenue chart** (`/api/stats/charts`) – Was grouping by `erstellt` (DB insert timestamp) instead of `dat` (invoice date `DD.MM.YYYY`). Now uses `dat` for correct monthly bucketing.
+- **Email plain-text fallback** – `send_mail()` now attaches a `text/plain` part (HTML tags stripped) before the `text/html` part so mail clients that don't render HTML show readable content.
+
+### Changed
+- **Input length validation** – `_validate_lengths()` helper added; applied to `create_kunde`, `update_kunde`, `create_dt`, `update_dt`. Returns HTTP 400 if any text field exceeds its limit (e.g. firma: 200, serial: 200, beschreibung: 2000 chars).
+- **Session token already in `sessionStorage`** – Confirmed: token storage was already migrated to `sessionStorage` in a prior release. `localStorage` is only used for non-sensitive preferences (language, theme).
+
 ## [v1.7.30] – 2026-05-28
 
 ### Changed
