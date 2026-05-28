@@ -74,8 +74,10 @@ DATA_DIR = os.environ.get('DATA_DIR', '/data')
 os.makedirs(DATA_DIR, exist_ok=True)
 DB_PATH = os.path.join(DATA_DIR, 'dtv.db')
 SESSIONS = {}  # token -> {user_id, expires}  (in-memory cache, backed by DB)
+_last_clean = 0.0   # Unix timestamp of last clean_sessions() run
 # SAML client cache (keyed by config hash for hot-reload)
 _saml_client_cache = {}
+_saml_tmp_registry = {}  # cfg_key -> list of temp file paths created for that client
 
 # ─── SMTP PASSWORD ENCRYPTION (Fernet, key auto-generated in /data/smtp.key) ──
 _SMTP_KEY_FILE = os.path.join(os.environ.get('DATA_DIR', '/data'), 'smtp.key')
@@ -197,7 +199,13 @@ def session_delete(token):
     db.close()
 
 def clean_sessions():
-    """Remove expired sessions from DB and cache."""
+    """Remove expired sessions from DB and cache. Runs at most once per minute."""
+    import time
+    global _last_clean
+    now_ts = time.monotonic()
+    if now_ts - _last_clean < 60:
+        return  # skip — cleaned recently enough
+    _last_clean = now_ts
     now = datetime.now().isoformat()
     db = get_db()
     db.execute("DELETE FROM sessions WHERE expires < ?", (now,))
@@ -208,8 +216,14 @@ def clean_sessions():
         del SESSIONS[t]
 
 def build_saml_client_from_db(s):
-    """Build a pysaml2 client from DB-stored SAML settings, with caching."""
-    import hashlib as _hashlib
+    """Build a pysaml2 client from DB-stored SAML settings, with caching.
+
+    Temp files are tracked alongside their cache entry. On exception during
+    build, all temp files created so far are cleaned up immediately.
+    When a new config replaces an old cached entry, the old temp files are
+    deleted to prevent accumulation.
+    """
+    import hashlib as _hashlib, tempfile
     cfg_key = _hashlib.md5(json.dumps(s, sort_keys=True).encode()).hexdigest()
     if cfg_key in _saml_client_cache:
         return _saml_client_cache[cfg_key]
@@ -217,52 +231,68 @@ def build_saml_client_from_db(s):
     from saml2 import config as saml2_config
     from saml2.client import Saml2Client
 
-    metadata = {}
-    if s.get('idp_metadata_url'):
-        metadata['remote'] = [{'url': s['idp_metadata_url']}]
-    if s.get('idp_metadata_xml'):
-        # Write to temp file
-        import tempfile
-        tmp = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
-        tmp.write(s['idp_metadata_xml'])
-        tmp.close()
-        metadata['local'] = [tmp.name]
+    tmp_files = []  # track all temp files so we can clean up on failure
 
-    cfg_dict = {
-        'entityid': s.get('sp_entity_id', ''),
-        'service': {
-            'sp': {
-                'name': 'DT-Verwaltung',
-                'endpoints': {
-                    'assertion_consumer_service': [
-                        (s.get('sp_acs_url', ''),
-                         'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
-                    ],
+    def _tmp_write(suffix, content):
+        f = tempfile.NamedTemporaryFile(suffix=suffix, delete=False, mode='w')
+        f.write(content)
+        f.close()
+        tmp_files.append(f.name)
+        return f.name
+
+    try:
+        metadata = {}
+        if s.get('idp_metadata_url'):
+            metadata['remote'] = [{'url': s['idp_metadata_url']}]
+        if s.get('idp_metadata_xml'):
+            metadata['local'] = [_tmp_write('.xml', s['idp_metadata_xml'])]
+
+        cfg_dict = {
+            'entityid': s.get('sp_entity_id', ''),
+            'service': {
+                'sp': {
+                    'name': 'DT-Verwaltung',
+                    'endpoints': {
+                        'assertion_consumer_service': [
+                            (s.get('sp_acs_url', ''),
+                             'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
+                        ],
+                    },
+                    'authn_requests_signed': bool(s.get('want_signed')),
+                    'want_assertions_signed': True,
+                    'allow_unsolicited': True,
                 },
-                'authn_requests_signed': bool(s.get('want_signed')),
-                'want_assertions_signed': True,
-                'allow_unsolicited': True,
             },
-        },
-        'metadata': metadata,
-        'debug': False,
-    }
+            'metadata': metadata,
+            'debug': False,
+        }
 
-    # Add cert/key if present
-    if s.get('sp_cert') and s.get('sp_key'):
-        import tempfile
-        kf = tempfile.NamedTemporaryFile(suffix='.key', delete=False, mode='w')
-        kf.write(s['sp_key']); kf.close()
-        cf = tempfile.NamedTemporaryFile(suffix='.crt', delete=False, mode='w')
-        cf.write(s['sp_cert']); cf.close()
-        cfg_dict['key_file']  = kf.name
-        cfg_dict['cert_file'] = cf.name
+        if s.get('sp_cert') and s.get('sp_key'):
+            cfg_dict['key_file']  = _tmp_write('.key', s['sp_key'])
+            cfg_dict['cert_file'] = _tmp_write('.crt', s['sp_cert'])
 
-    cfg = saml2_config.Config()
-    cfg.load(cfg_dict)
-    client = Saml2Client(config=cfg)
-    _saml_client_cache[cfg_key] = client
-    return client
+        cfg = saml2_config.Config()
+        cfg.load(cfg_dict)
+        client = Saml2Client(config=cfg)
+
+        # Evict old cache entry and clean up its temp files
+        if '_saml_tmp_files' not in globals():
+            pass  # module-level dict tracks tmp files per cfg_key
+        old_files = _saml_tmp_registry.pop(cfg_key, [])
+        for f in old_files:
+            try: os.unlink(f)
+            except OSError: pass
+
+        _saml_client_cache[cfg_key] = client
+        _saml_tmp_registry[cfg_key] = tmp_files
+        return client
+
+    except Exception:
+        # Clean up any temp files created before the failure
+        for f in tmp_files:
+            try: os.unlink(f)
+            except OSError: pass
+        raise
 
 
 def process_saml_response_with_client(client, saml_response_b64):
@@ -428,19 +458,6 @@ def init_db():
         logo BLOB,
         logo_type TEXT,
         akzentfarbe TEXT DEFAULT '#0065A4'
-    );
-    CREATE TABLE IF NOT EXISTS saml_config (
-        id INTEGER PRIMARY KEY DEFAULT 1,
-        enabled INTEGER DEFAULT 0,
-        idp_name TEXT DEFAULT 'Single Sign-On',
-        sp_entity_id TEXT DEFAULT '',
-        sp_acs_url TEXT DEFAULT '',
-        idp_metadata_url TEXT DEFAULT '',
-        idp_metadata_xml TEXT DEFAULT '',
-        group_mapping TEXT DEFAULT '{}',
-        sp_cert TEXT DEFAULT '',
-        sp_key TEXT DEFAULT '',
-        geaendert TEXT DEFAULT CURRENT_TIMESTAMP
     );
     CREATE TABLE IF NOT EXISTS saml_settings (
         id INTEGER PRIMARY KEY DEFAULT 1,
@@ -721,7 +738,6 @@ def init_db():
         pass
     db.execute("INSERT OR IGNORE INTO smtp_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO template_settings(id) VALUES(1)")
-    db.execute("INSERT OR IGNORE INTO saml_config(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_settings(id) VALUES(1)")
     db.commit()
     db.close()
@@ -1277,42 +1293,30 @@ def update_dt(did):
     db = get_db()
     _wj = data.get('wartungsintervall_jahre') or 0
     _lcd = data.get('letzter_check_datum') or None
-    if data.get('bild') and data.get('eingang_doc'):
-        db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=?,wartungsintervall_jahre=?,letzter_check_datum=? WHERE id=?",
-            (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
-             data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
-             data.get('beschreibung',''), data.get('bild'), data.get('bild_type'),
-             data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
-             data.get('tresor_id') or None, data.get('interne_nr',''),
-             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, _wj, _lcd, did)
-        )
-    elif data.get('bild'):
-        db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,bild=?,bild_type=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=?,wartungsintervall_jahre=?,letzter_check_datum=? WHERE id=?",
-            (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
-             data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
-             data.get('beschreibung',''), data.get('bild'), data.get('bild_type'),
-             data.get('tresor_id') or None, data.get('interne_nr',''),
-             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, _wj, _lcd, did)
-        )
-    elif data.get('eingang_doc'):
-        db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,eingang_doc=?,eingang_doc_type=?,eingang_doc_name=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=?,wartungsintervall_jahre=?,letzter_check_datum=? WHERE id=?",
-            (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
-             data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
-             data.get('beschreibung',''), data.get('eingang_doc'), data.get('eingang_doc_type'), data.get('eingang_doc_name'),
-             data.get('tresor_id') or None, data.get('interne_nr',''),
-             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, _wj, _lcd, did)
-        )
-    else:
-        db.execute(
-            "UPDATE datentraeger SET kunden_id=?,bezeichnung=?,serial=?,preis=?,einheit=?,preis_jahr=?,rabatt=?,einlagerungs_datum=?,beschreibung=?,tresor_id=?,interne_nr=?,eigentuemer_id=?,neben_eigentuemer_id=?,rechnungsempfaenger_id=?,wartungsintervall_jahre=?,letzter_check_datum=? WHERE id=?",
-            (data['kunden_id'], data['bezeichnung'], data['serial'], data.get('preis',0), data.get('einheit','monat'),
-             data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
-             data.get('beschreibung',''), data.get('tresor_id') or None, data.get('interne_nr',''),
-             data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None, data.get('rechnungsempfaenger_id') or None, _wj, _lcd, did)
-        )
+    # Dynamic SQL: always update scalar fields; conditionally include blob columns
+    cols = [
+        "kunden_id=?","bezeichnung=?","serial=?","preis=?","einheit=?",
+        "preis_jahr=?","rabatt=?","einlagerungs_datum=?","beschreibung=?",
+        "tresor_id=?","interne_nr=?","eigentuemer_id=?","neben_eigentuemer_id=?",
+        "rechnungsempfaenger_id=?","wartungsintervall_jahre=?","letzter_check_datum=?"
+    ]
+    vals = [
+        data['kunden_id'], data['bezeichnung'], data['serial'],
+        data.get('preis',0), data.get('einheit','monat'),
+        data.get('preis_jahr',0), data.get('rabatt',0), data['einlagerungs_datum'],
+        data.get('beschreibung',''),
+        data.get('tresor_id') or None, data.get('interne_nr',''),
+        data.get('eigentuemer_id') or None, data.get('neben_eigentuemer_id') or None,
+        data.get('rechnungsempfaenger_id') or None, _wj, _lcd
+    ]
+    if data.get('bild'):
+        cols += ["bild=?","bild_type=?"]
+        vals += [data['bild'], data.get('bild_type')]
+    if data.get('eingang_doc'):
+        cols += ["eingang_doc=?","eingang_doc_type=?","eingang_doc_name=?"]
+        vals += [data['eingang_doc'], data.get('eingang_doc_type'), data.get('eingang_doc_name')]
+    vals.append(did)
+    db.execute(f"UPDATE datentraeger SET {','.join(cols)} WHERE id=?", vals)
     db.commit()
     row = db.execute(
         "SELECT d.*,k.firma,k.nr as kunden_nr,e.firma as eigentuemer_firma,ne.firma as neben_eigentuemer_firma,re.firma as rechnungsempfaenger_firma,t.bezeichnung as tresor_bezeichnung,t.land as tresor_land,t.stadt as tresor_stadt,t.gebaeude as tresor_gebaeude,t.etage as tresor_etage,t.raum as tresor_raum FROM datentraeger d JOIN kunden k ON d.kunden_id=k.id LEFT JOIN kunden e ON d.eigentuemer_id=e.id LEFT JOIN kunden ne ON d.neben_eigentuemer_id=ne.id LEFT JOIN kunden re ON d.rechnungsempfaenger_id=re.id LEFT JOIN tresore t ON d.tresor_id=t.id WHERE d.id=?", (did,)
@@ -1592,8 +1596,13 @@ def update_saml_settings():
              1 if data.get('want_signed') else 0))
     db.commit()
     db.close()
-    # Reload SAML client cache
+    # Reload SAML client cache and clean up temp files
     _saml_client_cache.clear()
+    for files in _saml_tmp_registry.values():
+        for f in files:
+            try: os.unlink(f)
+            except OSError: pass
+    _saml_tmp_registry.clear()
     return jsonify({'ok': True})
 
 @app.route('/api/saml_settings/test', methods=['POST'])
@@ -1639,6 +1648,11 @@ def generate_cert():
         db.commit()
         db.close()
         _saml_client_cache.clear()
+        for files in _saml_tmp_registry.values():
+            for f in files:
+                try: os.unlink(f)
+                except OSError: pass
+        _saml_tmp_registry.clear()
         return jsonify({'ok': True, 'cert': cert})
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500

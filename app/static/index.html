@@ -187,7 +187,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 .ov-tab-btn.ov-tab-active{color:var(--i-txt);border-bottom-color:var(--i-brd);background:var(--i-bg)}
 /* Batch bar */
 #dt-batch-bar{display:none;align-items:center;gap:8px;background:var(--i-bg);border:1px solid var(--i-brd);border-radius:var(--rad);padding:7px 12px;margin-bottom:8px;font-size:12px;color:var(--i-txt)}
-/* ── Dashboard (v1.7.21+, Mobile-Fix v1.7.29) ──────────────────────────────── */
+/* ── Dashboard (v1.7.21+, Mobile-Fix v1.7.30) ──────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -284,7 +284,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   .brief-outer{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .brief{min-width:540px}
 }
-/* ── Mobile column hiding + UI fixes (v1.7.29) ───────────────────────────── */
+/* ── Mobile column hiding + UI fixes (v1.7.30) ───────────────────────────── */
 @media(max-width:600px){
   /* DT-Tabelle: Kunden-Nr + Preis ausblenden */
   .dt-col-kd,.dt-col-pr{display:none}
@@ -1653,7 +1653,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.29
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.30
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -4025,7 +4025,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.29${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.30${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';

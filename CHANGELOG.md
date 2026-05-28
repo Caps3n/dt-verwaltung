@@ -4,6 +4,14 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.30] – 2026-05-28
+
+### Changed
+- **`update_dt` refactored** – Replaced 4 near-identical SQL branches with a single dynamic SQL builder. Blob columns (`bild`, `eingang_doc`) are appended only when present in the payload.
+- **`clean_sessions()` rate-limited** – Added `_last_clean` monotonic timestamp; cleanup runs at most once per minute instead of on every login call.
+- **SAML temp file leak fixed** – `build_saml_client_from_db()` now tracks all temp files in `_saml_tmp_registry`. On exception during build, created files are cleaned up immediately. On cache clear (settings save, cert regeneration), all tracked files are deleted.
+- **Dead `saml_config` table removed** – `CREATE TABLE IF NOT EXISTS saml_config` and its initial insert were removed from `init_db()`; only `saml_settings` is queried.
+
 ## [v1.7.29] – 2026-05-28
 
 ### Security
