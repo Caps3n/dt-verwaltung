@@ -4,6 +4,21 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.8.0] – 2026-05-28
+
+### Added
+- **`/api/ping` endpoint** – Unauthenticated liveness probe (`GET /api/ping` → `{"ok":true}`). Dockerfile, docker-compose, and portainer-stack healthchecks migrated to `/api/ping`; the old `/api/health` (which requires auth) no longer causes container restart loops.
+- **Automatik-Tab in Admin panel** – New 🤖 sub-tab with toggle switches for: auto invoice reminders (configurable overdue threshold in days), maintenance warnings (configurable lead time in days), and a weekly status digest (configurable recipient, weekday, and hour).
+- **Background scheduler** – Daemon thread that wakes hourly: sends overdue-invoice reminders, maintenance warnings (via customer email), and the weekly digest; deduplication via `auto_notif_log` prevents double-sends within the same day/week.
+- **Barcode scan → serial number** – 📷 button added next to the serial number field in both the DT create form and the edit overlay. Triggers the camera scanner in barcode mode; BarcodeDetector now includes `code_128`, `code_39`, `ean_13`, `ean_8` in addition to `qr_code`. Scan result is written directly into the field without opening a result panel.
+- **`.dockerignore`** – Excludes `.git`, `*.md`, `docker-compose.yml`, `portainer-stack.yml`, `.github/`, and Python build artefacts from the image layer.
+- **GitHub Actions build cache + version tags** – Workflow now uses `docker/setup-buildx-action`, `docker/metadata-action` (semver tags `v*.*.*` + `latest`), and `cache-from/to: type=gha` for faster CI rebuilds.
+- **`portainer-stack.yml` fixed** – Now pulls from `ghcr.io/caps3n/dt-verwaltung:latest` instead of slow source-build from GitHub URL.
+- **DB tables** – `notif_settings` (notification config) and `auto_notif_log` (deduplication log) added via zero-downtime migration in `init_db()`.
+
+### Fixed
+- **Docker HEALTHCHECK crash loop** – `HEALTHCHECK CMD` now calls `/api/ping` instead of `/api/health` (which was protected by `@require_auth` since v1.7.29).
+
 ## [v1.7.31] – 2026-05-28
 
 ### Fixed

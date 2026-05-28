@@ -1,0 +1,19 @@
+# Exclude dev/doc files to keep image lean
+.git
+.gitignore
+*.md
+CHANGELOG.md
+README.md
+docker-compose.yml
+portainer-stack.yml
+.env*
+*.example
+.github/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
+dist/
+build/

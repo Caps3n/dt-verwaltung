@@ -155,6 +155,12 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 .sub-tab{padding:7px 16px;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);border-bottom:2px solid transparent;background:transparent;border-top:none;border-left:none;border-right:none}
 .sub-tab.active{color:var(--txt);border-bottom-color:var(--txt)}
 .sub-panel{display:none}.sub-panel.active{display:block}
+.toggle-switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--brd2);border-radius:24px;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle-switch input:checked+.toggle-slider{background:var(--acc)}
+.toggle-switch input:checked+.toggle-slider:before{transform:translateX(20px)}
 @media(max-width:900px){
   .app{padding:8px 10px}
   .g2{grid-template-columns:1fr}
@@ -187,7 +193,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 .ov-tab-btn.ov-tab-active{color:var(--i-txt);border-bottom-color:var(--i-brd);background:var(--i-bg)}
 /* Batch bar */
 #dt-batch-bar{display:none;align-items:center;gap:8px;background:var(--i-bg);border:1px solid var(--i-brd);border-radius:var(--rad);padding:7px 12px;margin-bottom:8px;font-size:12px;color:var(--i-txt)}
-/* ── Dashboard (v1.7.21+, Mobile-Fix v1.7.31) ──────────────────────────────── */
+/* ── Dashboard (v1.7.21+, Mobile-Fix v1.8.0) ──────────────────────────────── */
 .db-wrap{max-width:1400px}
 /* KPI Strip */
 .db-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:20px;background:var(--bg);border-radius:var(--radl);border:1px solid var(--brd);overflow:hidden}
@@ -284,7 +290,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   .brief-outer{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .brief{min-width:540px}
 }
-/* ── Mobile column hiding + UI fixes (v1.7.31) ───────────────────────────── */
+/* ── Mobile column hiding + UI fixes (v1.8.0) ───────────────────────────── */
 @media(max-width:600px){
   /* DT-Tabelle: Kunden-Nr + Preis ausblenden */
   .dt-col-kd,.dt-col-pr{display:none}
@@ -811,7 +817,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
         <div class="stitle" data-i18n="st_dt_erfassen">Datenträger erfassen</div>
         <label class="req" data-i18n="lbl_k_firma">Firma</label><select id="dt-kunden_id" onchange="dtKundeGewaehlt()"><option value="">Firma wählen</option></select>
         <label class="req" data-i18n="lbl_bezeichnung">Bezeichnung / Typ</label><input id="dt-bezeichnung" placeholder="z.B. Festplatte, LTO-Tape">
-        <label class="req" data-i18n="lbl_seriennr">Seriennummer</label><input id="dt-serial" placeholder="HDD-2024-001">
+        <label class="req" data-i18n="lbl_seriennr">Seriennummer</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input id="dt-serial" placeholder="HDD-2024-001" style="flex:1">
+          <button type="button" onclick="startSerialScan('new')" title="Barcode / QR-Code scannen" style="padding:6px 10px;font-size:14px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer;flex-shrink:0">📷</button>
+        </div>
         <label><span data-i18n="lbl_interne_nr">Interne Nr.</span> <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="dt-interne_nr" placeholder="z.B. INT-001">
         <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="dt-modus" id="dt-modus-einfach" value="einfach" checked onchange="dtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="dt-modus" id="dt-modus-escrow" value="escrow" onchange="dtModusWechseln()"> Escrow / 3-Firmen</label></div>
         <div id="dt-escrow-section" style="display:none"><label><span data-i18n="lbl_haupt_eigentuemer">Haupt-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_haupt_hint_dt">(optional, wenn abweichend von Firma)</span></label><select id="dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
@@ -1343,6 +1353,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <button class="sub-tab" id="adm-sub-smtp" onclick="showAdminSub('smtp')">📧 E-Mail (SMTP)</button>
     <button class="sub-tab" id="adm-sub-auditlog" onclick="showAdminSub('auditlog');loadAuditLog()">📋 Audit-Log</button>
     <button class="sub-tab" id="adm-sub-saml" onclick="showAdminSub('saml')">🔐 SAML/SSO</button>
+    <button class="sub-tab" id="adm-sub-automatik" onclick="showAdminSub('automatik');loadNotifSettings()">🤖 Automatik</button>
   </div>
 
   <!-- UNTERNEHMEN PANEL -->
@@ -1619,6 +1630,107 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
   </div>
   </div><!-- end adm-panel-auditlog -->
 
+  <!-- AUTOMATIK PANEL -->
+  <div class="sub-panel" id="adm-panel-automatik">
+  <div style="max-width:680px">
+    <div class="card">
+      <div class="stitle">🤖 Automatische Benachrichtigungen</div>
+      <div style="font-size:12px;color:var(--mut);margin-bottom:14px">Aktivierte Automatiken laufen stündlich im Hintergrund. Voraussetzung: SMTP muss konfiguriert und aktiv sein.</div>
+
+      <!-- Auto-Mahnungen -->
+      <div style="border:1px solid var(--brd2);border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-weight:600;font-size:14px">📬 Automatische Zahlungserinnerungen</div>
+            <div style="font-size:12px;color:var(--mut);margin-top:2px">Sendet automatisch Erinnerungen an Kunden mit offenen Rechnungen</div>
+          </div>
+          <label class="toggle-switch" style="flex-shrink:0">
+            <input type="checkbox" id="notif-mahnung-aktiv" onchange="notifSettingsChanged()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div id="notif-mahnung-config" style="display:none">
+          <label style="font-size:12px">Erinnerung nach (Tage überfällig)</label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="number" id="notif-mahnung-tage" value="14" min="1" max="365" style="width:80px" onchange="notifSettingsChanged()">
+            <span style="font-size:12px;color:var(--mut)">Tagen ohne Zahlung</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wartungswarnung -->
+      <div style="border:1px solid var(--brd2);border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-weight:600;font-size:14px">🔧 Wartungserinnerungen</div>
+            <div style="font-size:12px;color:var(--mut);margin-top:2px">Benachrichtigt Kunden wenn ein Datenträger-Service fällig oder überfällig ist</div>
+          </div>
+          <label class="toggle-switch" style="flex-shrink:0">
+            <input type="checkbox" id="notif-wartung-aktiv" onchange="notifSettingsChanged()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div id="notif-wartung-config" style="display:none">
+          <label style="font-size:12px">Warnen wenn Wartung fällig in weniger als (Tage)</label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="number" id="notif-wartung-tage" value="30" min="1" max="365" style="width:80px" onchange="notifSettingsChanged()">
+            <span style="font-size:12px;color:var(--mut)">Tagen</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Digest -->
+      <div style="border:1px solid var(--brd2);border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-weight:600;font-size:14px">📊 Wöchentlicher Statusbericht</div>
+            <div style="font-size:12px;color:var(--mut);margin-top:2px">Sendet eine Zusammenfassung mit offenen Rechnungen, eingelagerten DTs und ablaufenden Verträgen</div>
+          </div>
+          <label class="toggle-switch" style="flex-shrink:0">
+            <input type="checkbox" id="notif-digest-aktiv" onchange="notifSettingsChanged()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div id="notif-digest-config" style="display:none">
+          <label style="font-size:12px">Empfänger-E-Mail</label>
+          <input type="email" id="notif-digest-email" placeholder="admin@firma.de" onchange="notifSettingsChanged()">
+          <div class="r2" style="margin-top:8px">
+            <div>
+              <label style="font-size:12px">Wochentag</label>
+              <select id="notif-digest-wochentag" onchange="notifSettingsChanged()">
+                <option value="0">Montag</option>
+                <option value="1">Dienstag</option>
+                <option value="2">Mittwoch</option>
+                <option value="3">Donnerstag</option>
+                <option value="4">Freitag</option>
+                <option value="5">Samstag</option>
+                <option value="6">Sonntag</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px">Uhrzeit</label>
+              <select id="notif-digest-stunde" onchange="notifSettingsChanged()">
+                <option value="6">06:00 Uhr</option>
+                <option value="7">07:00 Uhr</option>
+                <option value="8" selected>08:00 Uhr</option>
+                <option value="9">09:00 Uhr</option>
+                <option value="10">10:00 Uhr</option>
+                <option value="12">12:00 Uhr</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <button onclick="loadNotifSettings()" style="flex:1">Zurücksetzen</button>
+        <button class="btn-p" onclick="saveNotifSettings()" style="flex:2">💾 Einstellungen speichern</button>
+      </div>
+      <div id="notif-save-msg" style="display:none;font-size:12px;color:var(--ok);margin-top:8px;text-align:center">✅ Gespeichert</div>
+    </div>
+  </div>
+  </div><!-- end adm-panel-automatik -->
+
 </div>
 
 <!-- HILFE -->
@@ -1653,7 +1765,7 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
 <!-- COPYRIGHT FOOTER -->
 <div id="site-footer" style="text-align:center;padding:14px 12px 10px;margin-top:10px;border-top:1px solid var(--brd);font-size:11px;color:var(--hint)">
   © <span id="footer-year"></span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a>
-  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.7.31
+  &nbsp;·&nbsp; <span data-i18n="app_name_footer">Datenträger-Verwaltung</span> v1.8.0
   &nbsp;·&nbsp; <a href="mailto:info@capelan.de" style="color:var(--i-txt);text-decoration:none">info@capelan.de</a>
 </div>
 
@@ -1681,7 +1793,11 @@ input[type=checkbox]{width:15px;height:15px;flex-shrink:0;margin-top:2px;accent-
     <div id="ov-panel-daten">
       <label data-i18n="lbl_k_firma">Firma</label><select id="ov-dt-kunden_id"></select>
       <label data-i18n="lbl_bezeichnung_short">Bezeichnung</label><input id="ov-dt-bezeichnung">
-      <label data-i18n="lbl_seriennr_short">Seriennummer</label><input id="ov-dt-serial">
+      <label data-i18n="lbl_seriennr_short">Seriennummer</label>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input id="ov-dt-serial" style="flex:1">
+        <button type="button" onclick="startSerialScan('edit')" title="Barcode / QR-Code scannen" style="padding:6px 10px;font-size:14px;background:var(--i-bg);color:var(--i-txt);border:1px solid var(--i-brd);border-radius:var(--rad);cursor:pointer;flex-shrink:0">📷</button>
+      </div>
       <label>Interne Nr. <span style="font-weight:400;color:var(--mut)">(optional)</span></label><input id="ov-dt-interne_nr" placeholder="z.B. INT-001">
       <div style="margin:8px 0 4px;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--mut)"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-einfach" value="einfach" checked onchange="ovDtModusWechseln()"> Eigene Einlagerung</label><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="radio" name="ov-dt-modus" id="ov-dt-modus-escrow" value="escrow" onchange="ovDtModusWechseln()"> Escrow / 3-Firmen</label></div>
       <div id="ov-dt-escrow-section" style="display:none"><label><span data-i18n="lbl_haupt_eigentuemer">Haupt-Eigentümer</span> <span style="font-weight:400;color:var(--mut)" data-i18n="lbl_neben_hint_dt">(optional)</span></label><select id="ov-dt-eigentuemer_id"><option value="">— gleiche Firma —</option></select>
@@ -3038,10 +3154,15 @@ function _scanTick(){
   ctx.drawImage(vid,0,0,W,H);
   const img=ctx.getImageData(0,0,W,H);
   let decoded=null;
-  // Try BarcodeDetector (Chrome/Android)
+  // Try BarcodeDetector (Chrome/Android) – QR + common 1D barcodes for serial numbers
   if(window.BarcodeDetector){
-    window.BarcodeDetector.getSupportedFormats?.().then(()=>{});
-    const bd=new BarcodeDetector({formats:['qr_code']});
+    // Build format list based on what the browser supports
+    const _allFormats=['qr_code','code_128','code_39','ean_13','ean_8','itf','codabar','data_matrix'];
+    BarcodeDetector.getSupportedFormats?.().then(supported=>{
+      const _bdFormats=supported?_allFormats.filter(f=>supported.includes(f)):['qr_code'];
+      window._bdDetector=new BarcodeDetector({formats:_bdFormats});
+    }).catch(()=>{window._bdDetector=new BarcodeDetector({formats:['qr_code']});});
+    const bd=window._bdDetector||new BarcodeDetector({formats:['qr_code','code_128','code_39']});
     bd.detect(cvs).then(codes=>{
       if(codes.length){_handleScanData(codes[0].rawValue);}
       else{_scanRaf=requestAnimationFrame(_scanTick);}
@@ -3063,6 +3184,16 @@ function _scanTick(){
 }
 
 function _handleScanData(rawValue){
+  // ── Serial-Scan-Modus: Scan-Ergebnis direkt in Seriennummer-Feld eintragen ──
+  if(_serialScanMode){
+    const fieldId=_serialScanMode==='edit'?'ov-dt-serial':'dt-serial';
+    const field=document.getElementById(fieldId);
+    if(field){field.value=rawValue.trim();}
+    if(_scanRaf){cancelAnimationFrame(_scanRaf);_scanRaf=null;}
+    stopScan();
+    _serialScanMode=false;
+    return;
+  }
   // Try to extract DT id from deep-link URL
   const m=rawValue.match(/#dt=(\d+)/);
   const dtId=m?parseInt(m[1]):null;
@@ -3144,6 +3275,26 @@ function startSearchScan(){
   _searchScanMode=true;
   startScan();
   // Override: nach Scan Suchfeld befüllen statt Ergebnis-Panel zeigen
+}
+
+// Barcode-Scan → Seriennummer-Feld (DT-Formular + Übersicht/Edit)
+let _serialScanMode=false;      // which field to fill: 'new' | 'edit' | false
+function startSerialScan(target){
+  // target: 'new' = dt-serial (Neu-Formular), 'edit' = ov-dt-serial (Edit-Formular)
+  _serialScanMode=target||'new';
+  _searchScanMode=false;
+  const modal=document.getElementById('scan-modal');
+  const status=document.getElementById('scan-status');
+  const resBox=document.getElementById('scan-result-box');
+  modal.classList.add('show');
+  resBox.style.display='none';
+  status.textContent='Barcode / QR-Code scannen…';
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false}).then(stream=>{
+    _scanStream=stream;
+    const vid=document.getElementById('scan-video');
+    vid.srcObject=stream;
+    vid.play().then(()=>_scanTick());
+  }).catch(e=>{ status.textContent='❌ Kamera nicht verfügbar: '+e.message; });
 }
 
 function stopScan(){
@@ -3966,6 +4117,55 @@ function showAdminSub(sub){
   document.getElementById('adm-panel-'+sub).classList.add('active');
 }
 
+// ── Automatik-Tab: Notification Settings ─────────────────────────────────────
+async function loadNotifSettings(){
+  try{
+    const r=await apiFetch('/api/admin/notif_settings');
+    if(!r.ok)return;
+    const d=await r.json();
+    const el=id=>document.getElementById(id);
+    el('notif-mahnung-aktiv').checked=!!d.auto_mahnung_aktiv;
+    el('notif-mahnung-tage').value=d.auto_mahnung_tage||14;
+    el('notif-wartung-aktiv').checked=!!d.wartung_warnung_aktiv;
+    el('notif-wartung-tage').value=d.wartung_warnung_tage||30;
+    el('notif-digest-aktiv').checked=!!d.weekly_digest_aktiv;
+    el('notif-digest-email').value=d.weekly_digest_email||'';
+    el('notif-digest-wochentag').value=d.weekly_digest_wochentag||0;
+    el('notif-digest-stunde').value=d.weekly_digest_stunde||8;
+    notifSettingsChanged();
+  }catch(e){console.error('[notif]',e);}
+}
+function notifSettingsChanged(){
+  const showIf=(chkId,cfgId)=>{
+    const chk=document.getElementById(chkId);
+    const cfg=document.getElementById(cfgId);
+    if(chk&&cfg)cfg.style.display=chk.checked?'block':'none';
+  };
+  showIf('notif-mahnung-aktiv','notif-mahnung-config');
+  showIf('notif-wartung-aktiv','notif-wartung-config');
+  showIf('notif-digest-aktiv','notif-digest-config');
+}
+async function saveNotifSettings(){
+  const el=id=>document.getElementById(id);
+  const body={
+    auto_mahnung_aktiv:el('notif-mahnung-aktiv').checked,
+    auto_mahnung_tage:parseInt(el('notif-mahnung-tage').value)||14,
+    wartung_warnung_aktiv:el('notif-wartung-aktiv').checked,
+    wartung_warnung_tage:parseInt(el('notif-wartung-tage').value)||30,
+    weekly_digest_aktiv:el('notif-digest-aktiv').checked,
+    weekly_digest_email:el('notif-digest-email').value.trim(),
+    weekly_digest_wochentag:parseInt(el('notif-digest-wochentag').value)||0,
+    weekly_digest_stunde:parseInt(el('notif-digest-stunde').value)||8,
+  };
+  try{
+    const r=await apiFetch('/api/admin/notif_settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(r.ok){
+      const msg=document.getElementById('notif-save-msg');
+      if(msg){msg.style.display='block';setTimeout(()=>msg.style.display='none',3000);}
+    }else{const d=await r.json();showToast(d.error||'Fehler beim Speichern','e');}
+  }catch(e){showToast('Netzwerkfehler','e');}
+}
+
 function syncAdmBrief(){
   // Mirror adm-* fields to _T so templates stay in sync
   const TF={abt:'adm-abt',firmenname:'adm-firmenname','firmaAdr':'adm-firma-adr',bearbeiter:'adm-bearbeiter',kuerzel:'adm-kuerzel',tel:'adm-tel',fax:'adm-fax',email:'adm-email',ort:'adm-ort',sig:'adm-sig',iban:'adm-iban',bic:'adm-bic',bank:'adm-bank',steuernr:'adm-steuernr',gf:'adm-gf',hrb:'adm-hrb',footerAdr:'adm-footer-adr'};
@@ -4025,7 +4225,7 @@ function updateSupportDisplay(name,email){
   if(footer&&email){
     // rebuild contact part
     const contactPart=email?`&nbsp;·&nbsp; <a href="mailto:${email}" style="color:var(--i-txt);text-decoration:none">${email}</a>`:'';
-    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.7.31${contactPart}`;
+    footer.innerHTML=`© <span id="footer-year">${new Date().getFullYear()}</span> <a href="https://capelan.de" target="_blank" style="color:var(--i-txt);text-decoration:none;font-weight:600">Capelan.de</a> &nbsp;·&nbsp; ${ta('Datenträger-Verwaltung','Media Management')} v1.8.0${contactPart}`;
   }
   // Update hilfe contact card if visible
   const hc=document.getElementById('hilfe-contact-name');if(hc)hc.textContent=name||'Support';

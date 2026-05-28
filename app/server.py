@@ -736,6 +736,32 @@ def init_db():
         db.execute("UPDATE uebergaben SET grund='Vernichtung beauftragt' WHERE grund='Vernichtung beauftragt'")
     except Exception:
         pass
+    # Migration: notif_settings – Automatik-Tab configuration
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS notif_settings (
+            id INTEGER PRIMARY KEY DEFAULT 1,
+            auto_mahnung_aktiv INTEGER DEFAULT 0,
+            auto_mahnung_tage INTEGER DEFAULT 14,
+            wartung_warnung_aktiv INTEGER DEFAULT 0,
+            wartung_warnung_tage INTEGER DEFAULT 30,
+            weekly_digest_aktiv INTEGER DEFAULT 0,
+            weekly_digest_wochentag INTEGER DEFAULT 1,
+            weekly_digest_stunde INTEGER DEFAULT 8,
+            weekly_digest_email TEXT DEFAULT ''
+        )
+    """)
+    db.execute("INSERT OR IGNORE INTO notif_settings(id) VALUES(1)")
+    # Migration: auto_notif_log – tracks what was already sent (prevents duplicate sends)
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS auto_notif_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            typ TEXT NOT NULL,
+            referenz_id INTEGER,
+            referenz_key TEXT,
+            gesendet_an TEXT,
+            ts TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
     db.execute("INSERT OR IGNORE INTO smtp_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO template_settings(id) VALUES(1)")
     db.execute("INSERT OR IGNORE INTO saml_settings(id) VALUES(1)")
@@ -2504,6 +2530,11 @@ def dt_wartung_faellig():
     result.sort(key=lambda x: x['tage_bis_check'])
     return jsonify(result)
 
+@app.route('/api/ping', methods=['GET'])
+def ping():
+    """Unauthenticated liveness check – used by Docker HEALTHCHECK."""
+    return jsonify({'ok': True})
+
 @app.route('/api/health', methods=['GET'])
 @require_auth('read')
 def health():
@@ -2735,6 +2766,42 @@ def stats_charts():
     _cache_set('stats_charts', result, 120)
     return jsonify(result)
 
+# ─── AUTOMATIK / NOTIFICATION SETTINGS ──────────────────────────────────────
+@app.route('/api/admin/notif_settings', methods=['GET'])
+@require_auth('manageUsers')
+def get_notif_settings():
+    db = get_db()
+    row = db.execute("SELECT * FROM notif_settings WHERE id=1").fetchone()
+    db.close()
+    return jsonify(dict(row) if row else {})
+
+@app.route('/api/admin/notif_settings', methods=['POST'])
+@require_auth('manageUsers')
+def save_notif_settings():
+    data = request.json or {}
+    db = get_db()
+    db.execute("""
+        UPDATE notif_settings SET
+            auto_mahnung_aktiv=?, auto_mahnung_tage=?,
+            wartung_warnung_aktiv=?, wartung_warnung_tage=?,
+            weekly_digest_aktiv=?, weekly_digest_wochentag=?,
+            weekly_digest_stunde=?, weekly_digest_email=?
+        WHERE id=1
+    """, (
+        1 if data.get('auto_mahnung_aktiv') else 0,
+        max(1, int(data.get('auto_mahnung_tage', 14))),
+        1 if data.get('wartung_warnung_aktiv') else 0,
+        max(1, int(data.get('wartung_warnung_tage', 30))),
+        1 if data.get('weekly_digest_aktiv') else 0,
+        int(data.get('weekly_digest_wochentag', 1)) % 7,
+        int(data.get('weekly_digest_stunde', 8)) % 24,
+        str(data.get('weekly_digest_email', ''))[:254],
+    ))
+    db.commit()
+    db.close()
+    log_audit(request.user['username'], 'NOTIF_SETTINGS_UPDATE', 'notif_settings', 1, str(data))
+    return jsonify({'ok': True})
+
 # ─── STATIC ──────────────────────────────────────────────────────────────────
 @app.route('/')
 def index():
@@ -2744,9 +2811,196 @@ def index():
 def static_files(path):
     return send_from_directory('static', path)
 
+# ─── BACKGROUND SCHEDULER ────────────────────────────────────────────────────
+import threading as _threading
+
+def _scheduler_get_notif_settings(db):
+    row = db.execute("SELECT * FROM notif_settings WHERE id=1").fetchone()
+    return dict(row) if row else {}
+
+def _scheduler_already_sent(db, typ, referenz_key):
+    """Check if a notification of this type+key was sent today already."""
+    today = datetime.now().strftime('%Y-%m-%d')
+    row = db.execute(
+        "SELECT id FROM auto_notif_log WHERE typ=? AND referenz_key=? AND ts>=?",
+        (typ, referenz_key, today)
+    ).fetchone()
+    return row is not None
+
+def _scheduler_log_sent(db, typ, referenz_id, referenz_key, gesendet_an):
+    db.execute(
+        "INSERT INTO auto_notif_log(typ, referenz_id, referenz_key, gesendet_an, ts) VALUES(?,?,?,?,?)",
+        (typ, referenz_id, referenz_key, gesendet_an, datetime.now().isoformat(timespec='seconds'))
+    )
+
+def _scheduler_run_auto_mahnungen(db, cfg):
+    """Send automatic Mahnung emails for overdue invoices."""
+    if not cfg.get('auto_mahnung_aktiv'):
+        return
+    tage = int(cfg.get('auto_mahnung_tage', 14))
+    cutoff = (datetime.now() - timedelta(days=tage)).strftime('%Y-%m-%d')
+    # Find invoices without bezahlt_am, with a valid kunden_id and email
+    rows = db.execute("""
+        SELECT r.id, r.nr, r.dat, r.netto, r.firma, k.email, k.ansprechpartner
+        FROM rechnungen r
+        LEFT JOIN kunden k ON k.id = r.kunden_id
+        WHERE r.bezahlt_am IS NULL OR r.bezahlt_am = ''
+          AND r.dat IS NOT NULL AND r.dat != ''
+          AND k.email IS NOT NULL AND k.email != ''
+    """).fetchall()
+    sent_count = 0
+    for r in rows:
+        try:
+            # Parse DD.MM.YYYY
+            parts = str(r['dat']).split('.')
+            if len(parts) != 3:
+                continue
+            inv_date = datetime(int(parts[2]), int(parts[1]), int(parts[0]))
+            if inv_date > datetime.now() - timedelta(days=tage):
+                continue
+            referenz_key = f"mahnung_{r['nr']}"
+            if _scheduler_already_sent(db, 'auto_mahnung', referenz_key):
+                continue
+            subject = f"Zahlungserinnerung: Rechnung {r['nr']}"
+            body = f"""<p>Sehr geehrte Damen und Herren,</p>
+<p>wir möchten Sie freundlich daran erinnern, dass folgende Rechnung noch offen ist:</p>
+<table><tr><td><b>Rechnungsnummer:</b></td><td>{r['nr']}</td></tr>
+<tr><td><b>Rechnungsdatum:</b></td><td>{r['dat']}</td></tr>
+<tr><td><b>Betrag (netto):</b></td><td>{r['netto']}</td></tr></table>
+<p>Bitte überweisen Sie den ausstehenden Betrag zeitnah.</p>
+<p>Mit freundlichen Grüßen,<br>Ihr DT-Verwaltung Team</p>"""
+            send_mail(r['email'], subject, body)
+            _scheduler_log_sent(db, 'auto_mahnung', r['id'], referenz_key, r['email'])
+            sent_count += 1
+        except Exception as e:
+            print(f"[SCHEDULER] Mahnung error for {r.get('nr')}: {e}")
+    if sent_count:
+        db.commit()
+        print(f"[SCHEDULER] Auto-Mahnungen: {sent_count} gesendet")
+
+def _scheduler_run_wartungswarnung(db, cfg):
+    """Send maintenance warning emails for overdue/upcoming DT checks."""
+    if not cfg.get('wartung_warnung_aktiv'):
+        return
+    tage = int(cfg.get('wartung_warnung_tage', 30))
+    today = datetime.now()
+    cutoff_future = (today + timedelta(days=tage)).strftime('%Y-%m-%d')
+    today_str = today.strftime('%Y-%m-%d')
+    # Find DTs with wartungsintervall and letzter_check_datum
+    rows = db.execute("""
+        SELECT d.id, d.bezeichnung, d.serial, d.letzter_check_datum, d.wartungsintervall_jahre,
+               k.firma, k.email
+        FROM datentraeger d
+        LEFT JOIN kunden k ON k.id = d.kunden_id
+        WHERE d.wartungsintervall_jahre > 0
+          AND d.letzter_check_datum IS NOT NULL AND d.letzter_check_datum != ''
+          AND k.email IS NOT NULL AND k.email != ''
+    """).fetchall()
+    sent_count = 0
+    for r in rows:
+        try:
+            letzter = datetime.fromisoformat(r['letzter_check_datum'])
+            naechster = letzter.replace(year=letzter.year + int(r['wartungsintervall_jahre']))
+            naechster_str = naechster.strftime('%Y-%m-%d')
+            if naechster_str > cutoff_future:
+                continue  # Still plenty of time
+            referenz_key = f"wartung_{r['id']}_{naechster_str}"
+            if _scheduler_already_sent(db, 'wartungswarnung', referenz_key):
+                continue
+            overdue = naechster_str < today_str
+            subject = (f"Wartung überfällig: {r['bezeichnung']}" if overdue
+                       else f"Wartung fällig in {(naechster - today).days} Tagen: {r['bezeichnung']}")
+            body = f"""<p>Sehr geehrte Damen und Herren,</p>
+<p>für folgenden Datenträger {'ist die Wartung überfällig' if overdue else 'steht eine Wartung an'}:</p>
+<table><tr><td><b>Bezeichnung:</b></td><td>{r['bezeichnung']}</td></tr>
+<tr><td><b>Seriennummer:</b></td><td>{r['serial']}</td></tr>
+<tr><td><b>Nächste Wartung:</b></td><td>{naechster.strftime('%d.%m.%Y')}</td></tr></table>
+<p>Bitte planen Sie die Wartung entsprechend.</p>
+<p>Mit freundlichen Grüßen,<br>Ihr DT-Verwaltung Team</p>"""
+            send_mail(r['email'], subject, body)
+            _scheduler_log_sent(db, 'wartungswarnung', r['id'], referenz_key, r['email'])
+            sent_count += 1
+        except Exception as e:
+            print(f"[SCHEDULER] Wartungswarnung error for DT {r.get('id')}: {e}")
+    if sent_count:
+        db.commit()
+        print(f"[SCHEDULER] Wartungswarnungen: {sent_count} gesendet")
+
+def _scheduler_run_weekly_digest(db, cfg):
+    """Send weekly digest email on configured weekday + hour."""
+    if not cfg.get('weekly_digest_aktiv'):
+        return
+    email = str(cfg.get('weekly_digest_email', '')).strip()
+    if not email:
+        return
+    wochentag = int(cfg.get('weekly_digest_wochentag', 1))  # 0=Mo ... 6=So
+    stunde = int(cfg.get('weekly_digest_stunde', 8))
+    now = datetime.now()
+    if now.weekday() != wochentag or now.hour != stunde:
+        return
+    referenz_key = f"digest_{now.strftime('%Y-%W')}"
+    if _scheduler_already_sent(db, 'weekly_digest', referenz_key):
+        return
+    # Collect stats
+    open_invoices = db.execute(
+        "SELECT COUNT(*) as cnt FROM rechnungen WHERE bezahlt_am IS NULL OR bezahlt_am=''"
+    ).fetchone()['cnt']
+    dt_count = db.execute("SELECT COUNT(*) as cnt FROM datentraeger WHERE status='eingelagert'").fetchone()['cnt']
+    expiring = db.execute("""
+        SELECT firma, vertragsende FROM kunden
+        WHERE vertragsende IS NOT NULL AND vertragsende != ''
+          AND vertragsende >= date('now') AND vertragsende <= date('now', '+30 days')
+        ORDER BY vertragsende LIMIT 10
+    """).fetchall()
+    body = f"""<h2>DT-Verwaltung – Wöchentlicher Statusbericht</h2>
+<p><b>KW {now.strftime('%W')}/{now.year}</b></p>
+<h3>Übersicht</h3>
+<table>
+<tr><td><b>Eingelagerte Datenträger:</b></td><td>{dt_count}</td></tr>
+<tr><td><b>Offene Rechnungen:</b></td><td>{open_invoices}</td></tr>
+</table>"""
+    if expiring:
+        body += "<h3>Verträge – ablaufend in 30 Tagen</h3><ul>"
+        for e in expiring:
+            body += f"<li>{e['firma']} – {e['vertragsende']}</li>"
+        body += "</ul>"
+    body += "<p><i>Automatisch generiert von DT-Verwaltung</i></p>"
+    try:
+        send_mail(email, f"DT-Verwaltung Statusbericht KW {now.strftime('%W')}", body)
+        _scheduler_log_sent(db, 'weekly_digest', None, referenz_key, email)
+        db.commit()
+        print(f"[SCHEDULER] Weekly digest gesendet an {email}")
+    except Exception as e:
+        print(f"[SCHEDULER] Weekly digest error: {e}")
+
+def _scheduler_tick():
+    """Called every hour by the background thread."""
+    try:
+        db = get_db()
+        cfg = _scheduler_get_notif_settings(db)
+        _scheduler_run_auto_mahnungen(db, cfg)
+        _scheduler_run_wartungswarnung(db, cfg)
+        _scheduler_run_weekly_digest(db, cfg)
+        db.close()
+    except Exception as e:
+        print(f"[SCHEDULER] Tick error: {e}")
+
+def _start_scheduler():
+    """Start the background scheduler thread that runs every 60 minutes."""
+    def _loop():
+        # Wait 60s after startup before first run (DB must be initialized)
+        _threading.Event().wait(60)
+        while True:
+            _scheduler_tick()
+            _threading.Event().wait(3600)  # run hourly
+    t = _threading.Thread(target=_loop, daemon=True, name='dtv-scheduler')
+    t.start()
+    print("[SCHEDULER] Background scheduler started (hourly)")
+
 # ─── MAIN ────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
     init_db()
+    _start_scheduler()
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('DEBUG', 'false').lower() == 'true'
     print(f"[APP] Starting on port {port}, debug={debug}")
@@ -2754,3 +3008,4 @@ if __name__ == '__main__':
 else:
     # Called by gunicorn
     init_db()
+    _start_scheduler()
