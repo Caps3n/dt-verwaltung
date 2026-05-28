@@ -4,6 +4,20 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.7.29] – 2026-05-28
+
+### Security
+- **`session_get()` multi-worker fix** – Session token is now always verified against the database, not only the in-memory dict. Logout on one Gunicorn worker now correctly invalidates the session on all workers.
+- **`/api/health` hardened** – Endpoint now requires authentication (`read` permission) and no longer exposes the DB file path.
+- **TOTP setup/disable require current password** – `POST /api/me/totp/setup` and `DELETE /api/me/totp` now demand `current_password` in the request body; both return HTTP 403 if the password is wrong.
+- **Upload size limit (10 MB)** – New `_check_blob_size()` helper applied to all blob upload paths (DT bild, eingang_doc, Kunden vertrag_doc, Tresor wartungsvertrag_doc). Returns HTTP 413 if payload exceeds 10 MB.
+
+### Fixed
+- **DB connection leak in `get_mahnungen`** – Missing `db.close()` added to `GET /api/mahnungen/<rechnung_nr>`.
+
+### Changed
+- **Audit logging** – `log_audit()` calls added to all CRUD operations: Kunden (create/update/delete), Datenträger (create/update/delete), Tresore (create/update/delete), Übergaben (create/abschließen/delete), Rechnungen (create/delete). Every write now leaves an audit trail.
+
 ## [v1.7.28] – 2026-05-27
 
 ### Changed (Mobile UX)

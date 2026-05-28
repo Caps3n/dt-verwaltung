@@ -172,16 +172,20 @@ def session_create(user_id, expires_iso):
     return token
 
 def session_get(token):
-    """Get session from in-memory cache or fall back to DB."""
-    if token in SESSIONS:
-        return SESSIONS[token]
+    """Get session from DB, with in-memory cache as performance hint.
+
+    Always verifies against the DB so that logout on one Gunicorn worker
+    invalidates the session on all others (multi-worker safety).
+    """
     db = get_db()
     row = db.execute("SELECT user_id, expires FROM sessions WHERE token=?", (token,)).fetchone()
     db.close()
     if row:
         sess = {'user_id': row['user_id'], 'expires': row['expires']}
-        SESSIONS[token] = sess  # cache it
+        SESSIONS[token] = sess  # keep cache warm for non-auth paths
         return sess
+    # Token not in DB — remove stale in-memory entry if present
+    SESSIONS.pop(token, None)
     return None
 
 def session_delete(token):
@@ -765,6 +769,27 @@ def verify_pw(pw, stored):
     # Legacy SHA-256
     return hmac.compare_digest(hashlib.sha256(pw.encode()).hexdigest(), stored)
 
+_BLOB_MAX = 10 * 1024 * 1024  # 10 MB hard limit for all uploaded blobs
+
+def _check_blob_size(b64_or_bytes, field_name='Datei', max_bytes=_BLOB_MAX):
+    """Return an error string if the blob exceeds max_bytes, else None.
+
+    Accepts both a base64 string (from JSON payloads) or raw bytes.
+    For base64 strings, the decoded size is estimated as len(s) * 3 / 4
+    to avoid decoding the whole payload just for the check.
+    """
+    if not b64_or_bytes:
+        return None
+    if isinstance(b64_or_bytes, (bytes, bytearray)):
+        size = len(b64_or_bytes)
+    else:
+        # Rough upper-bound: base64 overhead is ~4/3
+        size = int(len(b64_or_bytes) * 3 / 4)
+    if size > max_bytes:
+        mb = max_bytes // (1024 * 1024)
+        return f'{field_name} zu groß (max. {mb} MB)'
+    return None
+
 def require_auth(perm=None):
     def decorator(fn):
         @wraps(fn)
@@ -1072,6 +1097,7 @@ def create_kunde():
         row = db.execute("SELECT * FROM kunden WHERE id=?", (kid,)).fetchone()
         db.close()
         _cache_del('kunden')
+        log_audit(request.user['username'], 'KUNDE_ERSTELLT', 'kunden', kid, data.get('firma'))
         return jsonify(dict(row)), 201
     except sqlite3.IntegrityError:
         db.close()
@@ -1102,16 +1128,19 @@ def update_kunde(kid):
     row = db.execute("SELECT * FROM kunden WHERE id=?", (kid,)).fetchone()
     db.close()
     _cache_del('kunden')
+    log_audit(request.user['username'], 'KUNDE_GEAENDERT', 'kunden', kid, data.get('firma'))
     return jsonify(dict(row))
 
 @app.route('/api/kunden/<int:kid>', methods=['DELETE'])
 @require_auth('delete')
 def delete_kunde(kid):
     db = get_db()
+    row = db.execute("SELECT firma FROM kunden WHERE id=?", (kid,)).fetchone()
     db.execute("DELETE FROM kunden WHERE id=?", (kid,))
     db.commit()
     db.close()
     _cache_del('kunden')
+    log_audit(request.user['username'], 'KUNDE_GELOESCHT', 'kunden', kid, row['firma'] if row else None)
     return jsonify({'ok': True})
 
 @app.route('/api/kunden/<int:kid>/history', methods=['GET'])
@@ -1136,6 +1165,9 @@ def get_vertrag_doc(kid):
 @require_auth('write')
 def neuer_vertrag(kid):
     data = request.json or {}
+    err = _check_blob_size(data.get('doc'), 'Vertragsdokument')
+    if err:
+        return jsonify({'error': err}), 413
     db = get_db()
     old = db.execute("SELECT * FROM kunden WHERE id=?", (kid,)).fetchone()
     if old and old['vertragsnr']:
@@ -1204,6 +1236,10 @@ def get_dt_bild(did):
 @require_auth('write')
 def create_dt():
     data = request.json or {}
+    for field in ('bild', 'eingang_doc'):
+        err = _check_blob_size(data.get(field), field)
+        if err:
+            return jsonify({'error': err}), 413
     db = get_db()
     db.execute(
         "INSERT INTO datentraeger(kunden_id,bezeichnung,serial,preis,einheit,preis_jahr,rabatt,einlagerungs_datum,beschreibung,bild,bild_type,eingang_doc,eingang_doc_type,eingang_doc_name,tresor_id,interne_nr,eigentuemer_id,neben_eigentuemer_id,rechnungsempfaenger_id,wartungsintervall_jahre,letzter_check_datum) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -1226,12 +1262,18 @@ def create_dt():
     d['hat_eingang_doc'] = bool(data.get('eingang_doc'))
     d.pop('bild', None)
     d.pop('eingang_doc', None)
+    log_audit(request.user['username'], 'DT_ERSTELLT', 'datentraeger', did,
+              f"{data.get('bezeichnung')} | SN:{data.get('serial')}")
     return jsonify(d), 201
 
 @app.route('/api/datentraeger/<int:did>', methods=['PUT'])
 @require_auth('write')
 def update_dt(did):
     data = request.json or {}
+    for field in ('bild', 'eingang_doc'):
+        err = _check_blob_size(data.get(field), field)
+        if err:
+            return jsonify({'error': err}), 413
     db = get_db()
     _wj = data.get('wartungsintervall_jahre') or 0
     _lcd = data.get('letzter_check_datum') or None
@@ -1279,15 +1321,20 @@ def update_dt(did):
     d = dict(row)
     d['hat_bild'] = bool(d.get('bild'))
     d.pop('bild', None)
+    log_audit(request.user['username'], 'DT_GEAENDERT', 'datentraeger', did,
+              f"{data.get('bezeichnung')} | SN:{data.get('serial')}")
     return jsonify(d)
 
 @app.route('/api/datentraeger/<int:did>', methods=['DELETE'])
 @require_auth('delete')
 def delete_dt(did):
     db = get_db()
+    row = db.execute("SELECT bezeichnung, serial FROM datentraeger WHERE id=?", (did,)).fetchone()
     db.execute("DELETE FROM datentraeger WHERE id=?", (did,))
     db.commit()
     db.close()
+    log_audit(request.user['username'], 'DT_GELOESCHT', 'datentraeger', did,
+              f"{row['bezeichnung']} | SN:{row['serial']}" if row else None)
     return jsonify({'ok': True})
 
 # ─── ÜBERGABEN ───────────────────────────────────────────────────────────────
@@ -1343,6 +1390,8 @@ def create_uebergabe():
         db.execute("INSERT INTO uebergabe_positionen(uebergabe_id,datentraeger_id) VALUES(?,?)", (uid, did))
     db.commit()
     db.close()
+    log_audit(request.user['username'], 'UEBERGABE_ERSTELLT', 'uebergaben', uid,
+              f"Nr:{pnr} | Kunde:{kunden_id} | DTs:{len(dt_ids)}")
     return jsonify({'id': uid, 'protokoll_nr': pnr}), 201
 
 @app.route('/api/uebergaben/<int:uid>/abschliessen', methods=['POST'])
@@ -1361,13 +1410,15 @@ def abschliesse_uebergabe(uid):
             db.execute("UPDATE datentraeger SET status='uebergeben' WHERE id=?", (p['datentraeger_id'],))
     db.commit()
     db.close()
+    mode = 'weiter_im_bestand' if weiter_im_bestand else 'uebergeben'
+    log_audit(request.user['username'], 'UEBERGABE_ABGESCHLOSSEN', 'uebergaben', uid, mode)
     return jsonify({'ok': True})
 
 @app.route('/api/uebergaben/<int:uid>', methods=['DELETE'])
 @require_auth('write')
 def delete_uebergabe(uid):
     db = get_db()
-    row = db.execute("SELECT id FROM uebergaben WHERE id=?", (uid,)).fetchone()
+    row = db.execute("SELECT id, protokoll_nr FROM uebergaben WHERE id=?", (uid,)).fetchone()
     if not row:
         db.close()
         return jsonify({'error': 'Nicht gefunden'}), 404
@@ -1375,6 +1426,8 @@ def delete_uebergabe(uid):
     db.execute("DELETE FROM uebergaben WHERE id=?", (uid,))
     db.commit()
     db.close()
+    log_audit(request.user['username'], 'UEBERGABE_GELOESCHT', 'uebergaben', uid,
+              row['protokoll_nr'] if row else None)
     return jsonify({'ok': True})
 
 
@@ -1801,6 +1854,7 @@ def create_tresor():
     d = dict(row)
     d['hat_wartungsvertrag'] = False
     d.pop('wartungsvertrag_doc', None)
+    log_audit(request.user['username'], 'TRESOR_ERSTELLT', 'tresore', tid, data.get('bezeichnung'))
     return jsonify(d), 201
 
 @app.route('/api/tresore/<int:tid>', methods=['GET'])
@@ -1820,6 +1874,9 @@ def get_tresor(tid):
 @require_auth('write')
 def update_tresor(tid):
     data = request.json or {}
+    err = _check_blob_size(data.get('wartungsvertrag_doc'), 'Wartungsvertrag')
+    if err:
+        return jsonify({'error': err}), 413
     db = get_db()
     if data.get('wartungsvertrag_doc'):
         db.execute(
@@ -1844,17 +1901,21 @@ def update_tresor(tid):
     d = dict(row)
     d['hat_wartungsvertrag'] = bool(d.get('wartungsvertrag_doc'))
     d.pop('wartungsvertrag_doc', None)
+    log_audit(request.user['username'], 'TRESOR_GEAENDERT', 'tresore', tid, data.get('bezeichnung'))
     return jsonify(d)
 
 @app.route('/api/tresore/<int:tid>', methods=['DELETE'])
 @require_auth('delete')
 def delete_tresor(tid):
     db = get_db()
+    row = db.execute("SELECT bezeichnung FROM tresore WHERE id=?", (tid,)).fetchone()
     # Unlink DTs from this tresor first
     db.execute("UPDATE datentraeger SET tresor_id=NULL WHERE tresor_id=?", (tid,))
     db.execute("DELETE FROM tresore WHERE id=?", (tid,))
     db.commit()
     db.close()
+    log_audit(request.user['username'], 'TRESOR_GELOESCHT', 'tresore', tid,
+              row['bezeichnung'] if row else None)
     return jsonify({'ok': True})
 
 # ─── TRESOR WARTUNGS-HISTORIE ────────────────────────────────────────────────
@@ -1984,6 +2045,8 @@ def post_rechnungen():
     row = db.execute("SELECT id FROM rechnungen WHERE nr=?", (data.get('nr'),)).fetchone()
     db.close()
     _cache_del('rechnungen')
+    log_audit(request.user['username'], 'RECHNUNG_ERSTELLT', 'rechnungen',
+              row['id'] if row else None, f"Nr:{data.get('nr')} | {data.get('firma')}")
     return jsonify({'id': row['id'] if row else None}), 201
 
 @app.route('/api/rechnungen/<int:rid>/bezahlt', methods=['PATCH'])
@@ -2011,10 +2074,13 @@ def rechnung_unbezahlt(rid):
 @require_auth('delete')
 def delete_rechnung(rid):
     db = get_db()
+    row = db.execute("SELECT nr, firma FROM rechnungen WHERE id=?", (rid,)).fetchone()
     db.execute("DELETE FROM rechnungen WHERE id=?", (rid,))
     db.commit()
     db.close()
     _cache_del('rechnungen')
+    log_audit(request.user['username'], 'RECHNUNG_GELOESCHT', 'rechnungen', rid,
+              f"Nr:{row['nr']} | {row['firma']}" if row else None)
     return jsonify({'ok': True})
 
 @app.route('/api/rechnungen', methods=['DELETE'])
@@ -2064,6 +2130,7 @@ def get_mahnungen(rechnung_nr):
         "SELECT id,rechnung_nr,dat,ts FROM mahnungen WHERE rechnung_nr=? ORDER BY ts ASC",
         (rechnung_nr,)
     ).fetchall()
+    db.close()
     return jsonify([dict(r) for r in rows])
 
 @app.route('/api/mahnungen', methods=['POST'])
@@ -2261,10 +2328,15 @@ def send_mahnung_email(mid):
 def totp_setup():
     if not PYOTP_AVAILABLE:
         return jsonify({'error': '2FA nicht verfügbar (pyotp fehlt)'}), 503
+    data = request.json or {}
+    current_pw = data.get('current_password', '')
     token = request.headers.get('X-Token','')
     sess = session_get(token)
     db = get_db()
-    user = db.execute("SELECT id,username,totp_secret,totp_enabled FROM benutzer WHERE id=?", (sess['user_id'],)).fetchone()
+    user = db.execute("SELECT id,username,totp_secret,totp_enabled,password_hash FROM benutzer WHERE id=?", (sess['user_id'],)).fetchone()
+    if not user or not verify_pw(current_pw, user['password_hash']):
+        db.close()
+        return jsonify({'error': 'Aktuelles Passwort ist falsch'}), 403
     # Generate new secret
     secret = pyotp.random_base32()
     db.execute("UPDATE benutzer SET totp_secret=? WHERE id=?", (secret, user['id']))
@@ -2301,14 +2373,19 @@ def totp_enable():
 @app.route('/api/me/totp', methods=['DELETE'])
 @require_auth()
 def totp_disable():
+    data = request.json or {}
+    current_pw = data.get('current_password', '')
     token = request.headers.get('X-Token','')
     sess = session_get(token)
     db = get_db()
-    user = db.execute("SELECT id,username FROM benutzer WHERE id=?", (sess['user_id'],)).fetchone()
+    user = db.execute("SELECT id,username,password_hash,totp_secret,totp_enabled FROM benutzer WHERE id=?", (sess['user_id'],)).fetchone()
+    if not user or not verify_pw(current_pw, user['password_hash']):
+        db.close()
+        return jsonify({'error': 'Aktuelles Passwort ist falsch'}), 403
     db.execute("UPDATE benutzer SET totp_enabled=0, totp_secret=NULL WHERE id=?", (sess['user_id'],))
     db.commit()
     db.close()
-    if user: log_audit(user['username'], '2FA_DEAKTIVIERT', 'benutzer', sess['user_id'])
+    log_audit(user['username'], '2FA_DEAKTIVIERT', 'benutzer', sess['user_id'])
     return jsonify({'ok': True})
 
 
@@ -2381,8 +2458,9 @@ def dt_wartung_faellig():
     return jsonify(result)
 
 @app.route('/api/health', methods=['GET'])
+@require_auth('read')
 def health():
-    return jsonify({'status': 'ok', 'db': DB_PATH})
+    return jsonify({'status': 'ok'})
 
 # ─── PHASE 1: DB-BACKUP ──────────────────────────────────────────────────────
 @app.route('/api/admin/backup', methods=['GET'])
