@@ -4,6 +4,24 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v1.8.1] – 2026-06-04
+
+### Changed
+- **Design overhaul** – Complete CSS redesign for a modern professional look:
+  - Font changed from Arial to Inter (Google Fonts, system-ui fallback) with anti-aliasing and font feature settings
+  - Color palette updated to Slate/Blue tokens: `--txt:#0f172a`, `--mut:#64748b`, `--surf:#f8fafc`, `--brd:#e2e8f0`
+  - Primary accent `--acc:#2563eb` replacing flat `--i-bg` tints
+  - Primary button `.btn-p` now solid with white text + drop shadow on hover
+  - Cards get `box-shadow` in addition to border — depth without heavy styling
+  - Input focus shows a `3px` color-ring instead of just border-color change
+  - Active tab uses accent underline (no blue-tinted background)
+  - Dashboard KPIs: larger number (30px), tabular-nums, shadow on KPI strip
+  - Quick-action buttons animate to solid accent on hover
+  - Login screen: accent icon + card drop shadow + better spacing
+  - Topbar: accent icon square next to app name
+  - `.toggle-slider` specificity fixed (perm-grid vs Automatik toggles)
+  - Dark mode uses deep Slate palette (`--bg:#0f172a`)
+
 ## [v1.8.0] – 2026-05-28
 
 ### Added
