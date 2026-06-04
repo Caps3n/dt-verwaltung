@@ -6771,8 +6771,6 @@ const _origDtHinzufuegen=typeof dtHinzufuegen!=='undefined'?dtHinzufuegen:null;
   }
 })();
 
-// Override doLogin to handle 2FA
-(function(){
 // ══════════════════════════════════════════════════════════════════════════════
 // ANIMATION ENGINE – v1.9.0
 // ══════════════════════════════════════════════════════════════════════════════
@@ -6783,10 +6781,11 @@ function _kpiCountUp(id, target){
   if(!el||isNaN(target))return;
   const dur=650, fps=60, steps=Math.ceil(dur/1000*fps);
   let step=0;
-  const prev=parseInt(el.textContent)||0;
-  if(prev===target){return;}
+  const rawPrev=parseInt(el.textContent);
+  const prev=isNaN(rawPrev)?0:rawPrev;
+  // Always animate, even for target=0 (replaces "—" with actual number)
   el.classList.remove('kpi-flash');
-  void el.offsetWidth; // reflow to restart animation
+  void el.offsetWidth;
   const iv=setInterval(()=>{
     step++;
     const t=step/steps;
@@ -6818,12 +6817,7 @@ function _triggerBars(){
     });
   });
 }
-// Patch renderDashboard to trigger bars
-const _origRenderDashboard=window.renderDashboard;
-if(typeof renderDashboard==='function'){
-  const _rd=renderDashboard;
-  window.renderDashboard=function(){_rd();setTimeout(_triggerBars,60);};
-}
+// _triggerBars is called directly inside renderDashboard — no extra patch needed
 
 // ── Login Animated Canvas ─────────────────────────────────────────────────────
 function _initLoginCanvas(){
@@ -6952,6 +6946,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(bar)document.body.style.paddingTop='3px';
 });
 
+// Override doLogin to handle 2FA
+(function(){
   const _orig=window.doLogin;
   window.doLogin=async function(){
     const user=document.getElementById('login-user').value;
