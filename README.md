@@ -1,244 +1,177 @@
-# DT-Verwaltung v1.8.0
+# DT-Verwaltung v1.9.1
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-caps3n-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/caps3n)
+[![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue?style=for-the-badge&logo=docker)](https://ghcr.io/caps3n/dt-verwaltung)
+[![Version](https://img.shields.io/badge/Version-1.9.1-2563eb?style=for-the-badge)](https://github.com/Caps3n/dt-verwaltung/releases)
 
-Web-based management solution for secure data-carrier storage and software escrow.
-Built for service providers who store, manage, and document the return of data carriers (HDDs, SSDs, tapes, USB drives, etc.) on behalf of their customers — including full support for 3-party software-escrow arrangements.
+Web-based management solution for secure data-carrier storage and software escrow. Built for service providers who store, manage, and document the return of data carriers (HDDs, SSDs, tapes, USB drives, etc.) on behalf of their customers — including full support for 3-party software-escrow arrangements.
 
 Available in 🇩🇪 German and 🇬🇧 English — switchable at runtime via the language toggle in the top bar.
+
+---
+
+## What's New in v1.9.x
+
+- **Animated login screen** — rotating concentric rings on a deep-navy canvas, glassmorphism login card with `backdrop-filter: blur`
+- **Gradient accent bar** — animated blue gradient stripe at the top of every page
+- **Page transitions** — smooth `fadeInUp` on every tab switch
+- **KPI count-up animation** — dashboard numbers count up from zero on load with eased interpolation
+- **Animated dashboard bars** — revenue bars slide in with a 900ms ease transition
+- **Card hover lift** — cards subtly raise on hover
+- **Modern design system** — Inter font, Slate-based colour palette, solid primary buttons, focus rings, subtle shadows (v1.8.1)
+- **Automatic notification engine** — background scheduler for overdue invoice reminders, maintenance warnings, and weekly digest emails (v1.8.0)
+- **Barcode scan → serial number** — 📷 button next to serial number field; supports Code128, Code39, EAN-13 in addition to QR (v1.8.0)
+- **Admin Automatik-Tab** — toggle switches for all automated notification types (v1.8.0)
 
 ---
 
 ## Features
 
 ### Dashboard
-- **6 KPI tiles** — stored media, active customers, annual revenue (net), active contracts, expiring contracts (< 60 days), open invoices
-- **Chart.js interactive charts** — monthly revenue bar chart (12 months), DT-status donut chart, vault utilisation horizontal bar chart
-- **Quick-action buttons** — one click to create a new media record, invoice, handover, or customer
-- **Upcoming appointments widget** — safe maintenance dates, contract expirations, and overdue invoices in the next 60 days, colour-coded by urgency
-- **Optimised mobile layout** — responsive KPI grid, compact chart heights, 2×2 quick-action grid on small screens
+- 6 KPI tiles with animated count-up — stored media, active customers, annual revenue, active contracts, expiring contracts (< 60 days), open invoices
+- Chart.js interactive charts — monthly revenue bar chart (12 months, animated), DT-status donut chart, vault utilisation horizontal bar chart
+- Quick-action buttons — one click to create a new media record, invoice, handover, or customer
+- Upcoming appointments widget — maintenance dates, contract expirations, and overdue invoices colour-coded by urgency
 
-### Customers & Contracts
-- Full customer CRUD with contact person, address, and salutation
-- Contract data: number, status, duration, notice period, notes
-- Contract document upload (PDF) per customer
-- Volume discounts: up to 5 customer-specific price tiers
-- Contract history / audit trail
+### Storage Media (Datenträger)
+- Registration with type, serial number, internal number, unit price, discount
+- **Barcode / QR scan** — 📷 button opens camera scanner; result written directly into the serial number field. Supports `code_128`, `code_39`, `ean_13`, `ean_8`, `qr_code` via BarcodeDetector API (+ jsQR fallback)
+- 3-party ownership per record: Auftraggeber, Haupt-Eigentümer, Neben-Eigentümer, Rechnungsempfänger
+- High-resolution photo, notes tab, maintenance history tab
+- Print-ready incoming inspection report
+- Safe / cabinet assignment, CSV export, batch actions
 
-### Media (Datenträger)
-- Registration with type, serial number, **internal number**, unit price, discount
-- **3-party ownership per media record:**
-  - **Auftraggeber** (commissioning party, required) — the customer who contracts the storage
-  - **Haupt-Eigentümer** (main owner, optional) — the party whose IP is on the media (e.g. software developer)
-  - **Neben-Eigentümer** (co-owner, optional) — usually the commissioning party in escrow scenarios
-  - **Rechnungsempfänger** (billing recipient, optional) — whoever pays; defaults to Auftraggeber
-- **High-resolution photo** per media record (separate from list thumbnail)
-- **Notes tab** — timestamped free-text notes with author tracking
-- **Maintenance history tab** — log entries with date, description, and technician
-- Print-ready incoming inspection report with letterhead
-- Status tracking: `stored` / `handed over`
-- Safe / cabinet assignment with location display
-- CSV export with all columns including safe location and internal number
-- **Batch actions** — multi-select with "Select All" checkbox; batch-set status or bulk-delete
-
-### Handover Workflow
-- Step 1: select company, pick media, generate and print the handover protocol
-- Step 2: upload the signed document (optional), close the handover
-- **"Keep in stock" mode:** close a handover without marking media as handed over
-- **Delete open handovers** with the 🗑 button
-- **Archive of all completed handovers** with protocol number, mode badge, and PDF download
-
-### Invoices
+### Invoices & Reminders
 - Automatic invoice creation with volume discount, flat discount, and VAT
-- Invoice history with per-invoice PDF regeneration
-- Reminder function: configurable number of reminders per customer (1st / 2nd / … / Final Notice) with print button
-- **Per-customer reminder settings:** maximum number of reminders and reminder fee negotiated per contract
-- Reminder counter shows `X/Y` progress; button is disabled once the limit is reached
-- Final reminder is automatically labelled "Final Notice / Letzte Mahnung"
-- **Send reminders by email** directly from the reminder history (📧 button per reminder)
-- **Payment status tracking** per invoice (paid / unpaid / overdue)
-- **Pagination** for large invoice lists
+- Configurable reminders per customer (1st / 2nd / … / Final Notice)
+- Send reminders by email directly from the history (📧 button)
+- Payment status tracking per invoice
 
-### UI & UX
-- **Dark / light mode toggle** (🌙/☀️ button in the top bar) — preference saved in `localStorage`; respects system preference (`prefers-color-scheme`) by default
-- **Mobile hamburger menu** — slide-in navigation drawer at ≤ 1024 px
-- **Swipe gestures** (mobile) — horizontal swipe to navigate between tabs
-- **Active tab highlight** — current tab visually emphasised with border and background
-- **Required field markers** — mandatory form fields labelled with `*`
-- **Sortable columns** — click any column header to sort ascending / descending (▲/▼)
-- **Safe media drill-down** — click the media count in the safe list to see all assigned media
-
-### Safe Management (🔒)
-- CRUD for physical safes and cabinets: name, manufacturer, model, serial number
-- Location: country / city / building / floor / room
-- Purchase date, purchase price, annual maintenance costs
-- Last and next maintenance date
-- Maintenance contract upload (PDF)
-- Safe detail view accessible by clicking the safe name
-
-### Templates & Letter Layouts
-- Logo upload and accent colour for all documents
-- **Zeichnungsberechtigter** — authorised signatory field (appears on signature lines of all documents)
-- Templates for: invoice, handover, incoming report, contract
-- Live preview while editing
-- Placeholder system (company, date, amounts, media list, etc.)
-
-### Software Escrow (3-Party Mode)
-- Toggle between **Szenario A** (2-party: operator + depositor) and **Szenario B** (3-party escrow)
-- In Szenario B each media record stores: Auftraggeber (commissioning party), Haupt-Eigentümer (software owner / depositor), Neben-Eigentümer (beneficiary / licensee), and Rechnungsempfänger (billing recipient)
-- Escrow use-case: software developer (Firma 2) deposits source code; licensee (Firma 3) receives it only if Firma 2 ceases to operate
-- Eingangsprotokoll and invoices display the relevant party names in Szenario B
-
-### Contract Printing
-- **2-party storage contract** — generated from Step 2 of the handover workflow
-- **3-party escrow contract** — covers all three parties with escrow-specific clauses
-- **Freigabebedingungen / Besondere Bedingungen** — optional free-text field printed verbatim in the contract
-- Button visibility is context-aware: the 2-party button appears in Szenario A, the 3-party button in Szenario B
-
-### Language / i18n
-- 🇩🇪 DE / 🇬🇧 EN toggle button in the top bar
-- All labels, tab names, headings, status badges, and button captions are translated
-- Dynamic content re-renders automatically on language switch
-- Preference is persisted in `localStorage`
-
-### Admin Panel
-- **Unternehmen tab** — company name, address, contact person (Bearbeiter), authorised signatory (Zeichnungsberechtigter), bank details, logo, accent colour
-- **Support contact** — separate name and email for the ❓ Help tab and footer (distinct from the Bearbeiter)
-- User management: create users, reset passwords, assign roles
-- Roles & permissions: fine-grained tab visibility per role
-- SAML 2.0 / SSO: Azure AD, Okta, Keycloak, and other IdPs
-- **SMTP configuration** (host, port, user, password, TLS/SSL) with test-email function
-- **Audit log** — who changed what and when, searchable with pagination; CSV export with BOM for Excel
-- **Database backup** — WAL-safe SQLite online backup download (`.db` file)
-
-### Email / SMTP
-- Send payment reminders directly by email from the reminder history
-- SMTP settings stored in the database, configurable per installation
-- Supports STARTTLS and SSL/TLS
-
-### Search
-- **Global search bar** in the top navigation — searches across media, customers, safes, and invoices simultaneously, including archived media
-
-### QR Codes
-- Each media record has a **QR code button** that generates a printable QR code overlay
-- QR code encodes a **deep-link URL** — scan with smartphone to open directly in the app
-- 📷 **QR scanner in search bar** — scan any QR code via the search field to navigate instantly
-
-### Maintenance Intervals
-- Each media record can store a **maintenance interval (years)** and a **last-check date**
-- Dashboard shows a warning panel for all media with overdue or upcoming maintenance
-
-### Progressive Web App (PWA)
-- Installable on iOS / Android / Desktop via "Add to Homescreen"
-- Service worker caches static assets for offline access to the UI
-- Browser **push notifications** for upcoming contract expirations (with permission)
-
-### 2FA / TOTP
-- Users can enable **two-factor authentication** (TOTP, compatible with Google Authenticator, Authy, etc.)
-- Setup via QR code in the user password modal; disable at any time
+### Automated Notifications (🤖 Automatik)
+- **Auto invoice reminders** — emails customers with overdue invoices; configurable threshold in days; deduplication prevents double-sends
+- **Maintenance warnings** — notifies when media service is due or overdue; configurable lead time
+- **Weekly digest** — summary email: open invoices, stored media count, contracts expiring within 30 days
+- Runs as a background daemon thread (hourly); requires SMTP to be configured
 
 ### Security
-- Passwords: PBKDF2-HMAC-SHA256 (600,000 iterations, random salt)
-- Sessions: 64-character cryptographically secure tokens, DB-backed, 8 h TTL
-- Optional SQLite encryption via SQLCipher AES-256 (`DB_KEY` env var)
-- Runs as a non-root container (UID 1000)
-- Optional TOTP second factor per user account
-- Rate limiting and security headers (XSS, CSRF, content-type sniffing protection)
-- **SMTP password encrypted at rest** with Fernet AES (key auto-generated in `/data/smtp.key`)
-- **SAML login uses one-time-code exchange** — session token never appears in browser history or URL
-- **XSS-hardened** — all user-supplied data in document templates escaped via `esc()`; `dl()` helpers escape internally
-- Set `ALLOWED_ORIGIN=https://your-domain.com` in production to restrict CORS
+- PBKDF2-HMAC-SHA256 (600k iterations) password hashing
+- Session tokens in `sessionStorage`; every request verifies against the DB (multi-worker safe)
+- Rate limiting via flask-limiter (brute-force protection on login)
+- Granular permission roles (`read`, `write`, `delete`, `editTemplate`, `manageUsers`)
+- All CRUD operations write to the audit log
+- Server-side field length validation on all text inputs
+- TOTP / 2FA via pyotp — setup and disable require current password
+- SAML / SSO via pysaml2 (optional)
+- Upload size limit: 10 MB per file; CSP + security headers
+
+### Admin
+- User management, role management with granular permission toggles
+- SMTP configuration with Fernet-encrypted password storage
+- Audit log viewer with CSV export
+- SAML / SSO configuration
+- **🤖 Automatik tab** — toggle switches for all notification types with configurable parameters
+- DB backup download
+
+### Design & UX
+- **Inter font** with system-ui fallback; antialiased rendering
+- **Slate-based colour palette** — `--txt: #0f172a`, `--mut: #64748b`, `--acc: #2563eb`
+- Dark / light mode toggle — respects `prefers-color-scheme` by default
+- Mobile-responsive with hamburger menu (≤ 1024px)
+- Animated login screen with canvas background (60fps)
+- Page transitions, card hover lift, KPI count-up, animated bar charts
+- `prefers-reduced-motion` — all animations disabled for users who prefer it
+- QR / barcode scanner (BarcodeDetector + jsQR fallback)
 
 ---
 
-## Deployment (Docker / Portainer)
+## Quick Start (Docker)
+
+```bash
+docker run -d \
+  --name dtv-verwaltung \
+  --restart unless-stopped \
+  -p 8123:5000 \
+  -v dtv-data:/data \
+  -e ADMIN_PASSWORD=your-secure-password \
+  ghcr.io/caps3n/dt-verwaltung:latest
+```
+
+Open `http://localhost:8123` and log in with `admin` / `your-secure-password`.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `ADMIN_PASSWORD` | `admin123` | Admin password (synced on every start) |
+| `ADMIN_PASSWORD_FILE` | — | Path to Docker secret file |
+| `RESET_ADMIN_PASSWORD` | — | One-time password reset on next start |
+| `DATA_DIR` | `/data` | SQLite database directory |
+| `PORT` | `5000` | Internal app port |
+| `ALLOWED_ORIGIN` | `*` | CORS allowed origin |
+| `DB_KEY` | — | SQLCipher encryption key (fresh installs only) |
 
 ### Portainer Stack (recommended)
 
 ```yaml
-version: "3.8"
 services:
-  dtv:
+  dtv-app:
     image: ghcr.io/caps3n/dt-verwaltung:latest
-    ports:
-      - "5000:5000"
-    volumes:
-      - dtv_data:/data
-    environment:
-      - ADMIN_PASSWORD=yourSecurePassword
-      # - DB_KEY=encryptionKey   # set only on first install
+    container_name: dtv-verwaltung
     restart: unless-stopped
-    deploy:
-      replicas: 1
-      resources:
-        limits:
-          cpus: "1"
-          memory: 512M
+    ports:
+      - "${PORT:-8123}:5000"
+    volumes:
+      - dtv-data:/data
+    environment:
+      - DATA_DIR=/data
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-ChangeMe!}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/ping')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
 volumes:
-  dtv_data:
+  dtv-data:
+    driver: local
 ```
 
-1. Portainer → Stacks → Add Stack
-2. Paste the stack, set `ADMIN_PASSWORD`
-3. Deploy the Stack
-4. Open: `http://<server-ip>:5000`
+> **Note:** Use `/api/ping` (not `/api/health`) in the healthcheck. `/api/health` requires authentication and will cause a restart loop.
 
-### Updating to a new version
-
-Portainer → Stack → **Pull and Redeploy**
-(GitHub Actions builds a new image automatically on every push to `main`)
-
----
-
-## Local Development
+### Updating
 
 ```bash
-git clone https://github.com/Caps3n/dt-verwaltung.git
-cd dt-verwaltung
-pip install flask flask-cors gunicorn pysaml2 cryptography
-python app/server.py
+docker pull ghcr.io/caps3n/dt-verwaltung:latest
+docker restart dtv-verwaltung
 ```
-
-Open: `http://localhost:5000`
-Default login: `admin` / value of `ADMIN_PASSWORD` (default: `admin`)
-
----
-
-## Database
-
-SQLite database at `/data/dtv.db` (persistent Docker volume).
-Migrations are applied automatically on start — no manual schema management required.
-
-**Backup:** Admin → Datenbank → "DB exportieren (.db)" downloads a WAL-safe online backup.
-
-Optional encryption: set `DB_KEY` in the environment **before** the first start.
-⚠️ Enabling encryption on an existing unencrypted database is not supported.
 
 ---
 
 ## Tech Stack
 
-| Component | Technology |
+| Layer | Technology |
 |---|---|
-| Backend | Python 3.12, Flask 3.x, Gunicorn, pyotp |
-| Database | SQLite (WAL mode), optional SQLCipher |
-| Frontend | Vanilla JS SPA (no framework), HTML5, CSS3 |
-| Charts | Chart.js 4.4.1 |
-| Auth | Token-based (`X-Token` header), optional SAML 2.0 |
-| Container | Docker, non-root (UID 1000), health check |
-| CI/CD | GitHub Actions → ghcr.io |
+| Backend | Python 3.12, Flask 3.x, Gunicorn |
+| Database | SQLite WAL — optional SQLCipher encryption |
+| Frontend | Vanilla JS, Chart.js, Inter font |
+| Auth | PBKDF2-HMAC-SHA256, pyotp (TOTP), pysaml2 (SAML) |
+| Container | Docker, GitHub Actions CI/CD → ghcr.io |
+| Config | `--workers 1 --threads 8` (optimal for SQLite WAL) |
 
 ---
 
-## Support
+## Architecture Notes
 
-If this project is useful to you, consider buying me a coffee ☕
-
-[![Buy Me a Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/caps3n)
+- **Single-file frontend** — all HTML, CSS, and JS in `app/static/index.html`. No build step.
+- **SQLite WAL mode** — concurrent reads, single writer. 1 Gunicorn worker + 8 threads is optimal.
+- **Session tokens** — `sessionStorage` on client; backed by `sessions` DB table. Logout invalidates the row; all workers verify on every request (multi-worker safe).
+- **Background scheduler** — daemon thread, runs hourly checks; deduplication via `auto_notif_log`.
 
 ---
 
 ## License
 
-MIT License — © 2025 Marcel Capelan · [capelan.de](https://capelan.de)
+MIT — see [LICENSE](LICENSE)
+
+Built by [Marcel Capelan](https://capelan.de) · [info@capelan.de](mailto:info@capelan.de)
