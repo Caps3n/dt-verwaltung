@@ -4,6 +4,15 @@ All notable changes to DT-Verwaltung are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Security
+- **Docker image hardened** – Trivy reported ~5,000 fixable CVEs in `ghcr.io/caps3n/dt-verwaltung:latest`:
+  - Multi-stage build: `gcc` and `-dev` headers (incl. `linux-libc-dev`, ~4,800 CVEs) now stay in the builder stage
+  - Runtime stage runs `apt-get upgrade` (openssl/libssl3t64, perl-base, zlib) and installs only `xmlsec1` + `sqlcipher`
+  - `certifi>=2026.10.18`, `gunicorn>=23.0`; pip removed from the final image
+  - CI: Trivy scan gates every build (fails on fixable CRITICAL/HIGH), PRs are built and scanned, weekly rebuild picks up new security fixes
+
 ## [v1.8.1] – 2026-06-04
 
 ### Changed
